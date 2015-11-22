@@ -45,7 +45,7 @@ gofmt:
 cover:
 	# gotestcover is needed to fetch coverage for multiple packages
 	go get github.com/pierrre/gotestcover
-	GOPATH=$(shell $(GODEP) path):$(GOPATH) $(GOPATH)/bin/gotestcover -coverprofile=profile.cov -covermode=count github.com/ingensi/httpbeat/...
+	GOPATH=$(shell $(GODEP) path):$(GOPATH) $(GOPATH)/bin/gotestcover -coverprofile=profile.cov -covermode=count github.com/christiangalsterer/httpbeat/...
 	mkdir -p cover
 	$(GODEP) go tool cover -html=profile.cov -o cover/coverage.html
 
