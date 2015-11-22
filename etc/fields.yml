@@ -1,0 +1,83 @@
+version: 1.0
+
+defaults:
+  type: string
+  required: false
+  index: not_analyzed
+  doc_values: true
+  ignore_above: 1024
+
+env:
+  type: group
+  description: >
+    Contains common fields available in all event types.
+  fields:
+    - name: timestamp
+      type: date
+      required: true
+      format: YYYY-MM-DDTHH:MM:SS.milliZ
+      example: 2015-01-24T14:06:05.071Z
+      description: >
+        The timestamp when the measurements were taken. The precision is in milliseconds.
+        The timezone is UTC.
+
+    - name: type
+      description: >
+        Always http
+      required: true
+
+    - name: count
+      type: int
+      description: >
+        For how many transactions is this event representative. This
+        is generally the inverse of the sampling rate. For example, for
+        a sample rate of 1/10, the count is 10. The count is used by the
+        UIs to return estimated values. Reserved for future usage.
+      required: true
+
+    - name: shipper
+      type: string
+      description: >
+        Name of the shipper sending the statistics.
+
+httpbeat:
+  type: group
+  description: >
+    Contains http request and response information
+  fields:
+    - name: request
+      type: group
+      fields:
+        - name: url
+          type: string
+          description: >
+            Url
+
+        - name: method
+          type: string
+          description: >
+            HTTP method used
+
+        - name: body
+          type: string
+          description: >
+            HTTP request body
+
+        - name: headers
+          type: group
+          description: >
+            HTTP headers send to the HTTP server
+          fields: []
+    - name: response
+      type: group
+      fields:
+        - name: code
+          type: string
+          description: >
+            HTTP status code
+        - name: body
+          type: string
+          description: >
+            HTTP response body
+
+

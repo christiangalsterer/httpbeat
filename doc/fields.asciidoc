@@ -1,0 +1,112 @@
+
+////
+This file is generated! See etc/fields.yml and scripts/generate_field_docs.py
+////
+
+[[exported-fields]]
+== Exported fields
+
+This document describes the fields that are exported by the
+httpbeat. They are grouped in the
+following categories:
+
+* <<exported-fields-env>>
+* <<exported-fields-httpbeat>>
+
+[[exported-fields-env]]
+=== Common fields fields
+
+Contains common fields available in all event types.
+
+
+
+==== timestamp
+
+type: date
+
+example: 2015-01-24 14:06:05.071000
+
+format: YYYY-MM-DDTHH:MM:SS.milliZ
+
+required: True
+
+The timestamp when the measurements were taken. The precision is in milliseconds. The timezone is UTC.
+
+
+==== type
+
+required: True
+
+Always http
+
+
+==== count
+
+type: int
+
+required: True
+
+For how many transactions is this event representative. This is generally the inverse of the sampling rate. For example, for a sample rate of 1/10, the count is 10. The count is used by the UIs to return estimated values. Reserved for future usage.
+
+
+==== shipper
+
+type: string
+
+Name of the shipper sending the statistics.
+
+
+[[exported-fields-httpbeat]]
+=== Httpbeat information fields
+
+Contains http request and response information
+
+
+
+=== request fields
+
+
+==== url
+
+type: string
+
+Url
+
+
+==== method
+
+type: string
+
+HTTP method used
+
+
+==== body
+
+type: string
+
+HTTP request body
+
+
+=== headers fields
+
+HTTP headers send to the HTTP server
+
+
+
+=== response fields
+
+
+==== code
+
+type: string
+
+HTTP status code
+
+
+==== body
+
+type: string
+
+HTTP response body
+
+
