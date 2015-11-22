@@ -38,10 +38,6 @@
 			"Rev": "531304787e67d86f958ca96e2e1516c4f1bc7c5c"
 		},
 		{
-			"ImportPath": "github.com/fsouza/go-dockerclient",
-			"Rev": "ef410296f87750305e1e1acf9ad2ba3833dcb004"
-		},
-		{
 			"ImportPath": "github.com/garyburd/redigo/internal",
 			"Rev": "6ece6e0a09f28cc399b21550cbf37ab39ba63cce"
 		},
@@ -50,8 +46,21 @@
 			"Rev": "6ece6e0a09f28cc399b21550cbf37ab39ba63cce"
 		},
 		{
+			"ImportPath": "github.com/moul/http2curl",
+			"Rev": "1c29be06762e43e04dd954a01c66991104ce4374"
+		},
+		{
 			"ImportPath": "github.com/nranchev/go-libGeoIP",
 			"Rev": "c78e8bd2dd3599feb21fd30886043979e82fe948"
+		},
+		{
+			"ImportPath": "github.com/parnurzeal/gorequest",
+			"Comment": "v0.2.13",
+			"Rev": "b64673b971a1742b8ba91f228f1c029632d4b686"
+		},
+		{
+			"ImportPath": "golang.org/x/net/publicsuffix",
+			"Rev": "4f2fc6c1e69d41baf187332ee08fbd2b296f21ed"
 		},
 		{
 			"ImportPath": "gopkg.in/yaml.v2",
