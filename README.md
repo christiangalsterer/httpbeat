@@ -1,5 +1,5 @@
-[![Build Status](https://travis-ci.org/Ingensi/dockerbeat.svg?branch=develop)](https://travis-ci.org/Ingensi/dockerbeat)
-[![codecov.io](http://codecov.io/github/Ingensi/dockerbeat/coverage.svg?branch=develop)](http://codecov.io/github/Ingensi/dockerbeat?branch=develop)
+[![Build Status](https://travis-ci.org/christiangalsterer/httpbeat.svg?branch=master)](https://travis-ci.org/christiangalsterer/httpbeat)
+[![codecov.io](http://codecov.io/github/christiangalsterer/httpbeat/coverage.svg?branch=master](http://codecov.io/github/christiangalsterer/httpbeat?branch=master)
 
 # Httpbeat
 
