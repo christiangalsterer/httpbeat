@@ -7,10 +7,12 @@ httpbeat:
      method: get
      username: foo1
      password: bar1
+     body: body
      proxyUsername: proxyUser
      proxyPassword: proxyPass
      proxyHost: proxy
      proxyPort: 3128
+     timeout: 120
      headers:
       Accept: application/json
       User-Agent: Go-http-client/1.1

@@ -74,6 +74,10 @@ httpbeat:
         - name: body
           type: string
           description: >
-            HTTP response body returned by the URL endpoint..
-
+            HTTP response body returned by the URL endpoint.
+        - name: headers
+          type: group
+          description: >
+            HTTP response headers send by the URL endpoint.
+          fields: []
 

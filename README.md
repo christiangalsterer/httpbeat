@@ -9,9 +9,9 @@ Httpbeat is the [Beat](https://www.elastic.co/products/beats) used to call HTTP 
 
 There is exactly one document type exported:
 
-- `type: http` for container attributes
+- `type: httpbeat` http request and response information
 
-### http type
+### httpbeat type
 
 <pre>
 {

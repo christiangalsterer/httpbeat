@@ -20,7 +20,17 @@ Contains common fields available in all event types.
 
 
 
-==== timestamp
+==== beat.name
+
+The name of the Beat sending the log messages. If the shipper name is set in the configuration file, then that value is used. If it is not set, the hostname is used.
+
+
+==== beat.hostname
+
+The hostname as returned by the operating system on which the Beat is running.
+
+
+==== @timestamp
 
 type: date
 
@@ -30,30 +40,12 @@ format: YYYY-MM-DDTHH:MM:SS.milliZ
 
 required: True
 
-The timestamp when the measurements were taken. The precision is in milliseconds. The timezone is UTC.
+The timestamp when the HTTP url was called. The precision is in milliseconds. The timezone is UTC.
 
 
 ==== type
 
-required: True
-
-Always http
-
-
-==== count
-
-type: int
-
-required: True
-
-For how many transactions is this event representative. This is generally the inverse of the sampling rate. For example, for a sample rate of 1/10, the count is 10. The count is used by the UIs to return estimated values. Reserved for future usage.
-
-
-==== shipper
-
-type: string
-
-Name of the shipper sending the statistics.
+Always httpbeat
 
 
 [[exported-fields-httpbeat]]
@@ -70,26 +62,26 @@ Contains http request and response information
 
 type: string
 
-Url
+URL endpoint called by by Httpbeat.
 
 
 ==== method
 
 type: string
 
-HTTP method used
+HTTP method used by Httpbeat to call the URL endpoint.
 
 
 ==== body
 
 type: string
 
-HTTP request body
+HTTP request body passed to the URL endpoint.
 
 
 === headers fields
 
-HTTP headers send to the HTTP server
+HTTP headers send to the URL endpoint.
 
 
 
@@ -100,13 +92,19 @@ HTTP headers send to the HTTP server
 
 type: string
 
-HTTP status code
+HTTP status code returned by the URL endpoint.
 
 
 ==== body
 
 type: string
 
-HTTP response body
+HTTP response body returned by the URL endpoint.
+
+
+=== headers fields
+
+HTTP response headers send by the URL endpoint.
+
 
 

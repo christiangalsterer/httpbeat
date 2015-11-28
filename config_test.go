@@ -25,12 +25,14 @@ func TestReadConfig(t *testing.T) {
 	assert.Equal(t, "http://example.org/1", urls[0].Url)
 	assert.Equal(t, "get", urls[0].Method)
 	assert.Equal(t, int64(5), *urls[0].Period)
+	assert.Equal(t, "body", urls[0].Body)
 	assert.Equal(t, "foo1", urls[0].Username)
 	assert.Equal(t, "bar1", urls[0].Password)
 	assert.Equal(t, "proxyUser", urls[0].ProxyUsername)
 	assert.Equal(t, "proxyPass", urls[0].ProxyPassword)
 	assert.Equal(t, "proxy", urls[0].ProxyHost)
 	assert.Equal(t, "3128", urls[0].ProxyPort)
+	assert.Equal(t, int64(120), *urls[0].Timeout)
 	assert.Equal(t, 2, len(urls[0].Headers))
 
 
