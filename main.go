@@ -8,7 +8,7 @@ import (
 )
 
 // You can overwrite these, e.g.: go build -ldflags "-X main.Version 1.0.0-beta3"
-var Version = "1.0.0-alpha1"
+var Version = "1.0.0-beta1"
 var Name = "httpbeat"
 
 func main() {

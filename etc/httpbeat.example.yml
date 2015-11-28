@@ -2,20 +2,27 @@
 
 ############################# Input ############################################
 httpbeat:
- # In seconds, defines how often to read server statistics
- period: 5
 
- url: http://www.google.de
+ urls:
+   -
+     # In seconds, defines how often to read server statistics
+     period: 5
 
- # HTTP method to use, one of get, delete, head, patch , post, put
- method: get
+     # The URL endpoint to call by Httpbeat
+     url: http://httpbin.org/headers
 
- username: foo
- password: bar
+     # HTTP method to use, one of get, delete, head, patch , post, put
+     method: get
 
- headers:
-  Accept: application/json
-  Foo: bar
+     # Basic authentication username
+     username: foo
+     # Basic authentication password
+     password: bar
+
+     # Additional headers to send to the endpoint
+     headers:
+      Accept: application/json
+      Foo: bar
 
 ############################# Shipper ############################################
 shipper:
@@ -63,4 +70,13 @@ output:
     filename: httpbeat
   #  rotate_every_kb: 1000
   #  number_of_files: 7
+
+logging:
+  level: debug
+  files:
+    path: /tmp/log
+    name: foo
+
+  # enable file rotation with default configuration
+  to_files: true
 

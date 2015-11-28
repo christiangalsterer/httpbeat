@@ -1,6 +1,10 @@
 package main
 
 type HttpbeatConfig struct {
+	Urls []UrlConfig
+}
+
+type UrlConfig struct {
 	Period *int64
 	Url string
 	Username string
