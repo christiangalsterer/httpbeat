@@ -1,0 +1,20 @@
+httpbeat:
+
+ urls:
+   -
+     period: 5
+     url: http://example.org/1
+     method: get
+     username: foo1
+     password: bar1
+     proxyUsername: proxyUser
+     proxyPassword: proxyPass
+     proxyHost: proxy
+     proxyPort: 3128
+     headers:
+      Accept: application/json
+      User-Agent: Go-http-client/1.1
+   -
+     period: 10
+     url: http://example.org/2
+     method: post
