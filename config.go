@@ -12,10 +12,10 @@ type UrlConfig struct {
 	Method string
 	Body string
 	Headers map[string]string
-	ProxyHost string
-	ProxyPort string
-	ProxyUsername string
-	ProxyPassword string
+	ProxyHost string `yaml:"proxyHost"`
+	ProxyPort string `yaml:"proxyPort"`
+	ProxyUsername string `yaml:"proxyUsername"`
+	ProxyPassword string `yaml:"proxyPassword"`
 	Timeout *int64
 }
 

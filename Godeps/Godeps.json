@@ -55,12 +55,12 @@
 		},
 		{
 			"ImportPath": "github.com/parnurzeal/gorequest",
-			"Comment": "v0.2.13",
-			"Rev": "b64673b971a1742b8ba91f228f1c029632d4b686"
+			"Comment": "v0.2.13-1-g84306c6",
+			"Rev": "84306c63ce811eb762444333ebd148c903b00dfc"
 		},
 		{
 			"ImportPath": "golang.org/x/net/publicsuffix",
-			"Rev": "4f2fc6c1e69d41baf187332ee08fbd2b296f21ed"
+			"Rev": "55cccaa02af1a99c69ba3213e33468628b61be4b"
 		},
 		{
 			"ImportPath": "gopkg.in/yaml.v2",
