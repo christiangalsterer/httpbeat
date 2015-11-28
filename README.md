@@ -1,5 +1,5 @@
 [![Build Status](https://travis-ci.org/christiangalsterer/httpbeat.svg?branch=master)](https://travis-ci.org/christiangalsterer/httpbeat)
-[![codecov.io](http://codecov.io/github/christiangalsterer/httpbeat/coverage.svg?branch=master](http://codecov.io/github/christiangalsterer/httpbeat?branch=master)
+[![codecov.io](http://codecov.io/github/christiangalsterer/httpbeat/coverage.svg?branch=master)](http://codecov.io/github/christiangalsterer/httpbeat?branch=master)
 
 # Httpbeat
 
