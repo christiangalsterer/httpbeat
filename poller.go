@@ -96,7 +96,11 @@ func (p *Poller) runOneTime() error {
 
 	// set body
 	if p.config.Body !="" {
-		request.SendString(p.config.Body)
+		switch method {
+		case "patch", "post", "put":
+			request.SendString(p.config.Body)
+		default:
+		}
 	}
 
 	// set headers
