@@ -25,11 +25,17 @@ func NewSpooler(httpbeat *Httpbeat, config UrlConfig) *Poller {
 }
 
 func (p *Poller) Run() {
+
+	// Setup DocumentType
+	if p.config.DocumentType == "" {
+		p.config.DocumentType = DefaultDocumentType
+	}
+
 	//init the period
 	if p.config.Period != nil {
 		p.period = time.Duration(*p.config.Period) * time.Second
 	} else {
-		p.period = 1 * time.Second
+		p.period = DefaultPeriod
 	}
 
 	ticker := time.NewTicker(p.period)
@@ -79,7 +85,7 @@ func (p *Poller) runOneTime() error {
 	if p.config.Timeout != nil {
 		request.Timeout(time.Duration(*p.config.Timeout) * time.Second)
 	} else {
-		request.Timeout(60 * time.Second)
+		request.Timeout(DefaultTimeout)
 	}
 
 	// set authentication
@@ -126,7 +132,8 @@ func (p *Poller) runOneTime() error {
 
 	event := HttpEvent{
 		ReadTime:     now,
-		DocumentType: "httpbeat",
+		DocumentType: p.config.DocumentType,
+		Fields:       p.config.Fields,
 		Request:      requestEvent,
 		Response:     responseEvent,
 	}

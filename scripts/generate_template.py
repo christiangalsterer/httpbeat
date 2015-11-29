@@ -14,7 +14,7 @@ import json
 
 import yaml
 
-index = "dockerbeat-*"
+index = "httpbeat-*"
 
 
 def fields_to_es_template(input, output):

@@ -3,26 +3,44 @@
 ############################# Input ############################################
 httpbeat:
 
- urls:
-   -
-     # In seconds, defines how often to read server statistics
-     period: 5
+  urls:
+    # Each - URL endpoints to poll. Below are the URL endpoint specific configurations
+    -
+      # In seconds, defines how often to poll the URL endpoint.
+      period: 5
 
-     # The URL endpoint to call by Httpbeat
-     url: http://httpbin.org/headers
+      # The URL endpoint to call by Httpbeat
+      url: http://httpbin.org/headers
 
-     # HTTP method to use, one of get, delete, head, patch , post, put
-     method: get
+      # HTTP method to use.
+      # Possible options are:
+      # * get
+      # * delete
+      # * head
+      # * patch
+      # * post
+      # * put
+      method: get
 
-     # Basic authentication username
-     username: foo
-     # Basic authentication password
-     password: bar
+      # Basic authentication username
+      username: foo
+      # Basic authentication password
+      password: bar
 
-     # Additional headers to send to the endpoint
-     headers:
-      Accept: application/json
-      Foo: bar
+      # Type to be published in the 'type' field. For Elasticsearch output,
+      # the type defines the document type these entries should be stored
+      # in. Default: httpbeat
+      document_type: jolokia
+
+      # Optional additional headers to send to the endpoint
+      headers:
+        Accept: application/json
+        Foo: bar
+      # Optional additional fields. These field can be freely picked
+      # to add additional information
+
+      fields:
+        host: test
 
 ############################# Shipper ############################################
 shipper:
@@ -79,4 +97,3 @@ logging:
 
   # enable file rotation with default configuration
   to_files: true
-

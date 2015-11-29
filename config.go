@@ -1,5 +1,14 @@
 package main
 
+import "time"
+
+// Defaults for config variables which are not set
+const (
+	DefaultPeriod              time.Duration = 1 * time.Second
+	DefaultTimeout             time.Duration = 60 * time.Second
+	DefaultDocumentType                      = "htpbeat"
+)
+
 type HttpbeatConfig struct {
 	Urls []UrlConfig
 }
@@ -12,11 +21,13 @@ type UrlConfig struct {
 	Method string
 	Body string
 	Headers map[string]string
-	ProxyHost string `yaml:"proxyHost"`
-	ProxyPort string `yaml:"proxyPort"`
-	ProxyUsername string `yaml:"proxyUsername"`
-	ProxyPassword string `yaml:"proxyPassword"`
+	ProxyHost string `yaml:"proxy_host"`
+	ProxyPort string `yaml:"proxy_port"`
+	ProxyUsername string `yaml:"proxy_username"`
+	ProxyPassword string `yaml:"proxy_password"`
 	Timeout *int64
+	DocumentType string `yaml:"document_type"`
+	Fields map[string]string `yaml:"fields"`
 }
 
 type ConfigSettings struct {

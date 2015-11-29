@@ -1,22 +1,26 @@
 httpbeat:
 
- urls:
-   -
-     period: 5
-     url: http://example.org/1
-     method: get
-     username: foo1
-     password: bar1
-     body: body
-     proxyUsername: proxyUser
-     proxyPassword: proxyPass
-     proxyHost: proxy
-     proxyPort: 3128
-     timeout: 120
-     headers:
-      Accept: application/json
-      User-Agent: Go-http-client/1.1
-   -
-     period: 10
-     url: http://example.org/2
-     method: post
+   urls:
+    -
+      period: 5
+      url: http://example.org/1
+      method: get
+      username: foo1
+      password: bar1
+      body: body
+      proxy_username: proxyUser
+      proxy_password: proxyPass
+      proxy_host: proxy
+      proxy_port: 3128
+      timeout: 120
+      headers:
+        Accept: application/json
+        User-Agent: Go-http-client/1.1
+      fields:
+        foo1: bar1
+        foo2: bar2
+      document_type: jolokia
+    -
+      period: 10
+      url: http://example.org/2
+      method: post

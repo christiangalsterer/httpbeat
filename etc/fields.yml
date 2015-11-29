@@ -33,8 +33,15 @@ env:
         milliseconds. The timezone is UTC.
 
     - name: type
+      required: true
       description: >
-        Always httpbeat
+        The name of the log event. This field is set to the value specified for the `document_type` option in the url section of the Httpbeat config file.
+
+    - name: fields
+      type: dict
+      required: false
+      description: >
+        Contains user configurable fields.
 
 httpbeat:
   type: group

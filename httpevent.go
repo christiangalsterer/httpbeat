@@ -8,7 +8,7 @@ import (
 type HttpEvent struct {
 	ReadTime     time.Time
 	DocumentType string
-	Fields       *map[string]string
+	Fields       map[string]string
 	Request    	 Request
 	Response     Response
 }
@@ -32,6 +32,10 @@ func (h *HttpEvent) ToMapStr() common.MapStr {
 		"type":       h.DocumentType,
 		"request":    h.Request,
 		"response":   h.Response,
+	}
+
+	if h.Fields != nil {
+		event["fields"] = h.Fields
 	}
 
 	return event

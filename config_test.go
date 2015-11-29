@@ -34,7 +34,8 @@ func TestReadConfig(t *testing.T) {
 	assert.Equal(t, "3128", urls[0].ProxyPort)
 	assert.Equal(t, int64(120), *urls[0].Timeout)
 	assert.Equal(t, 2, len(urls[0].Headers))
-
+	assert.Equal(t, 2, len(urls[0].Fields))
+	assert.Equal(t, "jolokia", urls[0].DocumentType)
 
 	assert.Equal(t, "http://example.org/2", urls[1].Url)
 	assert.Equal(t, "post", urls[1].Method)
@@ -46,5 +47,7 @@ func TestReadConfig(t *testing.T) {
 	assert.Equal(t, "", urls[1].ProxyHost)
 	assert.Equal(t, "", urls[1].ProxyPort)
 	assert.Equal(t, 0, len(urls[1].Headers))
+	assert.Equal(t, 0, len(urls[1].Fields))
+	assert.Equal(t, "", urls[1].DocumentType)
 }
 

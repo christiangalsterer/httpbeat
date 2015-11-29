@@ -45,7 +45,18 @@ The timestamp when the HTTP url was called. The precision is in milliseconds. Th
 
 ==== type
 
-Always httpbeat
+required: True
+
+The name of the log event. This field is set to the value specified for the `document_type` option in the url section of the Httpbeat config file.
+
+
+==== fields
+
+type: dict
+
+required: False
+
+Contains user configurable fields.
 
 
 [[exported-fields-httpbeat]]
