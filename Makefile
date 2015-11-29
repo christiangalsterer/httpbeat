@@ -19,15 +19,6 @@ test:
 updatedeps:
 	$(GODEP) update ...
 
-.PHONY: dockermake
-dockermake:
-	docker run --rm \
-		-v ${PWD}:/usr/src/httpbeat \
-		-w /usr/src/httpbeat \
-		-e http_proxy=${http_proxy} \
-		-e https_proxy=${https_proxy} \
-		golang:1.5.1 /bin/bash -c "make && chown $$(id -ru):$$(id -rg) httpbeat"
-
 .PHONY: install_cfg
 install_cfg:
 	cp etc/httpbeat.yml $(PREFIX)/httpbeat-linux.yml
