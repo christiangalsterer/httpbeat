@@ -41,7 +41,42 @@ httpbeat:
 
       fields:
         host: test
+    -
+      # In seconds, defines how often to poll the URL endpoint.
+      period: 10
 
+      # The URL endpoint to call by Httpbeat
+      url: http://httpbin.org/user-agent
+
+      # HTTP method to use.
+      # Possible options are:
+      # * get
+      # * delete
+      # * head
+      # * patch
+      # * post
+      # * put
+      method: get
+
+      # Basic authentication username
+      username: foo
+      # Basic authentication password
+      password: bar
+
+      # Type to be published in the 'type' field. For Elasticsearch output,
+      # the type defines the document type these entries should be stored
+      # in. Default: httpbeat
+      document_type: jolokia
+
+      # Optional additional headers to send to the endpoint
+      headers:
+        Accept: application/json
+        Foo: bar
+      # Optional additional fields. These field can be freely picked
+      # to add additional information
+
+      fields:
+        host: test2
 ############################# Shipper ############################################
 shipper:
 

@@ -6,7 +6,7 @@ import "time"
 const (
 	DefaultPeriod              time.Duration = 1 * time.Second
 	DefaultTimeout             time.Duration = 60 * time.Second
-	DefaultDocumentType                      = "htpbeat"
+	DefaultDocumentType                      = "httpbeat"
 )
 
 type HttpbeatConfig struct {

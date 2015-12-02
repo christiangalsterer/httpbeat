@@ -36,10 +36,14 @@ func (h *Httpbeat) Run(b *beat.Beat) error {
 	var err error
 
 	var poller *Poller
-	for _, urlConfig := range h.HbConfig.Httpbeat.Urls {
-		logp.Info("httpbeat", "Creating poller for URL: %v", urlConfig.Url)
+
+	for i, urlConfig := range h.HbConfig.Httpbeat.Urls {
+		logp.Debug("httpbeat", "Creating poller # %v with URL: %v", i, urlConfig.Url)
 		poller = NewSpooler(h, urlConfig)
-		poller.Run()
+		go poller.Run()
+	}
+
+	for {
 	}
 
 	return err
