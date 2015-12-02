@@ -3,7 +3,7 @@ package main
 import (
 	"time"
 	"strings"
-	"github.com/elastic/libbeat/logp"
+	"github.com/elastic/beats/libbeat/logp"
 	"github.com/parnurzeal/gorequest"
 	"fmt"
 )

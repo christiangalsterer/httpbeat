@@ -3,7 +3,7 @@ package main
 import (
 	"testing"
 	"time"
-	"github.com/elastic/libbeat/common"
+	"github.com/elastic/beats/libbeat/common"
 	"github.com/stretchr/testify/assert"
 )
 

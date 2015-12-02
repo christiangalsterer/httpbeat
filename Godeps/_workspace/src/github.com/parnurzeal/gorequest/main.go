@@ -222,7 +222,7 @@ var Types = map[string]string{
 //    gorequest.New().
 //      Post("/recipe").
 //      Type("form").
-//      Send(`{ name: "egg benedict", category: "brunch" }`).
+//      Send(`{ "name": "egg benedict", "category": "brunch" }`).
 //      End()
 //
 // This will POST the body "name=egg benedict&category=brunch" to url /recipe
@@ -677,6 +677,9 @@ func (s *SuperAgent) EndBytes(callback ...func(response Response, body []byte, e
 			s.Errors = append(s.Errors, err)
 			return nil, nil, s.Errors
 		}
+	default:
+		s.Errors = append(s.Errors, errors.New("No method specified"))
+		return nil, nil, s.Errors
 	}
 
 	for k, v := range s.Header {

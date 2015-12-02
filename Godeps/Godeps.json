@@ -3,39 +3,43 @@
 	"GoVersion": "go1.5.1",
 	"Deps": [
 		{
-			"ImportPath": "github.com/elastic/libbeat/beat",
-			"Comment": "v1.0.0-rc2-29-gee28f21",
-			"Rev": "ee28f21800efb8f1ffaa5388d32ab3f85dc77ee7"
+			"ImportPath": "github.com/davecgh/go-spew/spew",
+			"Rev": "5215b55f46b2b919f50a1df0eaa5886afe4e3b3d"
 		},
 		{
-			"ImportPath": "github.com/elastic/libbeat/cfgfile",
-			"Comment": "v1.0.0-rc2-29-gee28f21",
-			"Rev": "ee28f21800efb8f1ffaa5388d32ab3f85dc77ee7"
+			"ImportPath": "github.com/elastic/beats/libbeat/beat",
+			"Comment": "v1.0.0-1646-gae598cc",
+			"Rev": "ae598cca319c8bdf3cdbaf7f193b3d326652b4ee"
 		},
 		{
-			"ImportPath": "github.com/elastic/libbeat/common",
-			"Comment": "v1.0.0-rc2-29-gee28f21",
-			"Rev": "ee28f21800efb8f1ffaa5388d32ab3f85dc77ee7"
+			"ImportPath": "github.com/elastic/beats/libbeat/cfgfile",
+			"Comment": "v1.0.0-1646-gae598cc",
+			"Rev": "ae598cca319c8bdf3cdbaf7f193b3d326652b4ee"
 		},
 		{
-			"ImportPath": "github.com/elastic/libbeat/logp",
-			"Comment": "v1.0.0-rc2-29-gee28f21",
-			"Rev": "ee28f21800efb8f1ffaa5388d32ab3f85dc77ee7"
+			"ImportPath": "github.com/elastic/beats/libbeat/common",
+			"Comment": "v1.0.0-1646-gae598cc",
+			"Rev": "ae598cca319c8bdf3cdbaf7f193b3d326652b4ee"
 		},
 		{
-			"ImportPath": "github.com/elastic/libbeat/outputs",
-			"Comment": "v1.0.0-rc2-29-gee28f21",
-			"Rev": "ee28f21800efb8f1ffaa5388d32ab3f85dc77ee7"
+			"ImportPath": "github.com/elastic/beats/libbeat/logp",
+			"Comment": "v1.0.0-1646-gae598cc",
+			"Rev": "ae598cca319c8bdf3cdbaf7f193b3d326652b4ee"
 		},
 		{
-			"ImportPath": "github.com/elastic/libbeat/publisher",
-			"Comment": "v1.0.0-rc2-29-gee28f21",
-			"Rev": "ee28f21800efb8f1ffaa5388d32ab3f85dc77ee7"
+			"ImportPath": "github.com/elastic/beats/libbeat/outputs",
+			"Comment": "v1.0.0-1646-gae598cc",
+			"Rev": "ae598cca319c8bdf3cdbaf7f193b3d326652b4ee"
 		},
 		{
-			"ImportPath": "github.com/elastic/libbeat/service",
-			"Comment": "v1.0.0-rc2-29-gee28f21",
-			"Rev": "ee28f21800efb8f1ffaa5388d32ab3f85dc77ee7"
+			"ImportPath": "github.com/elastic/beats/libbeat/publisher",
+			"Comment": "v1.0.0-1646-gae598cc",
+			"Rev": "ae598cca319c8bdf3cdbaf7f193b3d326652b4ee"
+		},
+		{
+			"ImportPath": "github.com/elastic/beats/libbeat/service",
+			"Comment": "v1.0.0-1646-gae598cc",
+			"Rev": "ae598cca319c8bdf3cdbaf7f193b3d326652b4ee"
 		},
 		{
 			"ImportPath": "github.com/garyburd/redigo/internal",
@@ -55,16 +59,25 @@
 		},
 		{
 			"ImportPath": "github.com/parnurzeal/gorequest",
-			"Comment": "v0.2.13-1-g84306c6",
-			"Rev": "84306c63ce811eb762444333ebd148c903b00dfc"
+			"Comment": "v0.2.13-5-g318e82c",
+			"Rev": "318e82cd2aed13b81bf53a2286d007edc931c20c"
+		},
+		{
+			"ImportPath": "github.com/pmezard/go-difflib/difflib",
+			"Rev": "d8ed2627bdf02c080bf22230dbb337003b7aba2d"
+		},
+		{
+			"ImportPath": "github.com/stretchr/testify/assert",
+			"Comment": "v1.0-83-gd797d25",
+			"Rev": "d797d25e0fa6d53be3b1a216d24e868d6a1912ef"
 		},
 		{
 			"ImportPath": "golang.org/x/net/publicsuffix",
-			"Rev": "55cccaa02af1a99c69ba3213e33468628b61be4b"
+			"Rev": "195180cfebf7362bd243a52477697895128c8777"
 		},
 		{
 			"ImportPath": "gopkg.in/yaml.v2",
-			"Rev": "53feefa2559fb8dfa8d81baad31be332c97d6c77"
+			"Rev": "f7716cbe52baa25d2e9b0d0da546fcf909fc16b4"
 		}
 	]
 }
