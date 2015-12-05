@@ -24,48 +24,48 @@ There is exactly one document type exported:
 
 <pre>
 {
-  "_index": "httpbeat-2015.10.02",
-  "_type": "container",
-  "_id": "AVAow1NYKDyuAT4RG9KO",
-  "_score": null,
+  "_index": "httpbeat-2015.12.05",
+  "_type": "httpbeat",
   "_source": {
-    "container": {
-      "command": "/docker-entrypoint.sh kibana",
-      "created": "2015-08-10T13:33:10Z",
-      "id": "7e91fbb0c7885f55ef8bf9402bbe4b366f88224c8baf31d36265061aa5ba2735",
-      "image": "kibana",
-      "labels": {},
-      "names": [
-        "/kibana"
-      ],
-      "ports": [
-        {
-          "ip": "0.0.0.0",
-          "privatePort": 5601,
-          "publicPort": 5601,
-          "type": "tcp"
-        }
-      ],
-      "sizeRootFs": 0,
-      "sizeRw": 0,
-      "status": "Up 2 minutes"
+    "@timestamp": "2015-12-05T11:16:13.070Z",
+    "beat": {
+      "hostname": "mbp.box",
+      "name": "mbp.box"
     },
-    "containerID": "7e91fbb0c7885f55ef8bf9402bbe4b366f88224c8baf31d36265061aa5ba2735",
-    "containerNames": [
-      "/kibana"
-    ],
     "count": 1,
-    "shipper": "0b42b9dded44",
-    "timestamp": "2015-10-02T13:35:00.338Z",
-    "type": "http"
+    "fields": {
+      "host": "test"
+    },
+    "request": {
+      "url": "http://httpbin.org/headers",
+      "method": "get",
+      "headers": {
+        "Accept": "application/json",
+        "Foo": "bar"
+      }
+    },
+    "response": {
+      "statusCode": 200,
+      "headers": {
+        "Access-Control-Allow-Credentials": "true",
+        "Access-Control-Allow-Origin": "*",
+        "Connection": "keep-alive",
+        "Content-Length": "220",
+        "Content-Type": "application/json",
+        "Date": "Sat, 05 Dec 2015 11:16:13 GMT",
+        "Server": "nginx"
+      },
+      "body": "{\n  \"headers\": {\n    \"Accept\": \"application/json\", \n    \"Accept-Encoding\": \"gzip\", \n    \"Authorization\": \"Basic Zm9vOmJhcg==\", \n    \"Foo\": \"bar\", \n    \"Host\": \"httpbin.org\", \n    \"User-Agent\": \"Go-http-client/1.1\"\n  }\n}\n"
+    },
+    "type": "httpbeat"
   },
   "fields": {
     "timestamp": [
-      1443792900338
+      1449314173
     ]
   },
   "sort": [
-    1443792900338
+    1449314173
   ]
 }
 </pre>
@@ -76,11 +76,16 @@ There is exactly one document type exported:
 To apply Httpbeat template:
 
     curl -XPUT 'http://localhost:9200/_template/httpbeat' -d@etc/httpbeat.template.json
-    
-## Run Httpbeat
 
-To launch Httpbeat, run the following command:
- 
+## Build, Test, Run
+
 ```
-/etc/init.d/httpbeat -c /etc/httpbeat/httpbeat.yml
+# Build
+GOPATH=<your go path> make httpbeat
+
+# Test
+GOPATH=<your go path> make test
+
+# Run
+./httpbeat -c /etc/httpbeat/httpbeat.yml
 ```

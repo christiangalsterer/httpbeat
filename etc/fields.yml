@@ -61,16 +61,18 @@ httpbeat:
           description: >
             HTTP method used by Httpbeat to call the URL endpoint.
 
-        - name: body
-          type: string
-          description: >
-            HTTP request body passed to the URL endpoint.
-
         - name: headers
           type: group
           description: >
             HTTP headers send to the URL endpoint.
           fields: []
+
+        - name: body
+          type: string
+          description: >
+            HTTP request body passed to the URL endpoint.
+
+
     - name: response
       type: group
       fields:
@@ -78,13 +80,14 @@ httpbeat:
           type: string
           description: >
             HTTP status code returned by the URL endpoint.
-        - name: body
-          type: string
-          description: >
-            HTTP response body returned by the URL endpoint.
+
         - name: headers
           type: group
           description: >
             HTTP response headers send by the URL endpoint.
           fields: []
 
+        - name: body
+          type: string
+          description: >
+            HTTP response body returned by the URL endpoint.

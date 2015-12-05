@@ -83,17 +83,17 @@ type: string
 HTTP method used by Httpbeat to call the URL endpoint.
 
 
+=== headers fields
+
+HTTP headers send to the URL endpoint.
+
+
+
 ==== body
 
 type: string
 
 HTTP request body passed to the URL endpoint.
-
-
-=== headers fields
-
-HTTP headers send to the URL endpoint.
-
 
 
 === response fields
@@ -106,16 +106,16 @@ type: string
 HTTP status code returned by the URL endpoint.
 
 
+=== headers fields
+
+HTTP response headers send by the URL endpoint.
+
+
+
 ==== body
 
 type: string
 
 HTTP response body returned by the URL endpoint.
-
-
-=== headers fields
-
-HTTP response headers send by the URL endpoint.
-
 
 
