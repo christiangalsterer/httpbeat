@@ -1,4 +1,4 @@
-package main
+package beat
 
 import (
 	"github.com/elastic/beats/libbeat/beat"
@@ -11,6 +11,10 @@ type Httpbeat struct {
 	done                 chan struct{}
 	HbConfig             ConfigSettings
 	events               publisher.Client
+}
+
+func New() *Httpbeat {
+	return &Httpbeat{}
 }
 
 func (h *Httpbeat) Config(b *beat.Beat) error {
@@ -39,7 +43,7 @@ func (h *Httpbeat) Run(b *beat.Beat) error {
 
 	for i, urlConfig := range h.HbConfig.Httpbeat.Urls {
 		logp.Debug("httpbeat", "Creating poller # %v with URL: %v", i, urlConfig.Url)
-		poller = NewSpooler(h, urlConfig)
+		poller = NewPooler(h, urlConfig)
 		go poller.Run()
 	}
 

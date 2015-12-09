@@ -20,6 +20,15 @@ httpbeat:
         foo1: bar1
         foo2: bar2
       document_type: jolokia
+      tls:
+        certificate_authorities: ["/etc/pki/root/ca.pem"]
+        certificate: "/etc/pki/client/cert.pem"
+        certificate_key: "/etc/pki/client/cert.key"
+        insecure: false
+        cipher_suites: []
+        curve_types: []
+        min_version: 1.0
+        max_version: 1.2
     -
       period: 10
       url: http://example.org/2

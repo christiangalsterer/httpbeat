@@ -1,31 +1,13 @@
 package main
 
 import (
-	"os"
-
 	"github.com/elastic/beats/libbeat/beat"
-	"github.com/elastic/beats/libbeat/logp"
+	httpbeat "github.com/christiangalsterer/httpbeat/beat"
 )
 
-// You can overwrite these, e.g.: go build -ldflags "-X main.Version 1.0.0-beta3"
-var Version = "1.0.0-beta1"
+var Version = "1.0.0-beta2"
 var Name = "httpbeat"
 
 func main() {
-
-	hb := &Httpbeat{}
-
-	b := beat.NewBeat(Name, Version, hb)
-
-	b.CommandLineSetup()
-
-	b.LoadConfig()
-
-	err := hb.Config(b)
-	if err != nil {
-		logp.Critical("Config error: %v", err)
-		os.Exit(1)
-	}
-
-	b.Run()
+	beat.Run(Name, Version, httpbeat.New())
 }

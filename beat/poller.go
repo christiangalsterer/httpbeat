@@ -1,11 +1,13 @@
-package main
+package beat
 
 import (
-	"time"
-	"strings"
-	"github.com/elastic/beats/libbeat/logp"
-	"github.com/parnurzeal/gorequest"
+	"crypto/tls"
 	"fmt"
+	"strings"
+	"time"
+	"github.com/elastic/beats/libbeat/logp"
+	"github.com/elastic/beats/libbeat/outputs"
+	"github.com/parnurzeal/gorequest"
 )
 
 type Poller struct {
@@ -15,7 +17,7 @@ type Poller struct {
 	period        time.Duration
 }
 
-func NewSpooler(httpbeat *Httpbeat, config UrlConfig) *Poller {
+func NewPooler(httpbeat *Httpbeat, config UrlConfig) *Poller {
 	poller := &Poller{
 		httpbeat: httpbeat,
 		config:   config,
@@ -92,6 +94,18 @@ func (p *Poller) runOneTime() error {
 	if p.config.Username != "" && p.config.Password != "" {
 		request.BasicAuth.Username = p.config.Username
 		request.BasicAuth.Password = p.config.Password
+	}
+
+	// set tls config
+	useTLS := (p.config.TLS != nil)
+	if useTLS {
+		var err error
+		var tlsConfig *tls.Config
+		tlsConfig, err = outputs.LoadTLSConfig(p.config.TLS)
+		if err != nil {
+			return err
+		}
+		request.TLSClientConfig(tlsConfig)
 	}
 
 	// set body

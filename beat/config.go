@@ -1,6 +1,9 @@
-package main
+package beat
 
-import "time"
+import (
+	"time"
+	"github.com/elastic/beats/libbeat/outputs"
+)
 
 // Defaults for config variables which are not set
 const (
@@ -28,6 +31,7 @@ type UrlConfig struct {
 	Timeout *int64
 	DocumentType string `yaml:"document_type"`
 	Fields map[string]string `yaml:"fields"`
+	TLS *outputs.TLSConfig
 }
 
 type ConfigSettings struct {

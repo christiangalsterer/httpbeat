@@ -1,0 +1,34 @@
+== Command Line Options
+
+Httpbeat does not have any Httpbeat-specific command line options. Instead, you
+configure the behaviour of Httpbeat by specifying options in the configuration file.
+
+The following command line options from libbeat are also available for Httpbeat. For
+details about each option, see {libbeat}/command-line-options.html[Beats Command Line Options].
+
+To start Httpbeat, you must use the `-c config/path` option to specify the path to the
+configuration file.
+
+[source,shell]
+----------------------------------------------------------------------------
+$ ./httpbeat -h
+Usage of ./httpbeat:
+  -N  Disable actual publishing for testing
+  -c string
+      Configuration file (default "/etc/httpbeat/httpbeat.yml")
+  -configtest
+      Test configuration and exit.
+  -cpuprofile string
+      Write cpu profile to file
+  -d string
+      Enable certain debug selectors
+  -e  Log to stderr and disable syslog/file output
+  -memprofile string
+      Write memory profile to this file
+  -v  Log at INFO level
+  -version
+      Print version and exit
+-----------------------------------------------------------------------------
+
+
+
