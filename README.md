@@ -73,7 +73,7 @@ There is exactly one document type exported:
 
 ## Elasticsearch Template
 
-To apply Httpbeat template:
+To apply the Httpbeat template:
 
     curl -XPUT 'http://localhost:9200/_template/httpbeat' -d@etc/httpbeat.template.json
 
@@ -89,3 +89,5 @@ GOPATH=<your go path> make test
 # Run
 ./httpbeat -c /etc/httpbeat/httpbeat.yml
 ```
+# Contribution
+All sorts of contributions are welcome. Please create a pull request and/or issue.
