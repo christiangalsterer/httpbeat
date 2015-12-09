@@ -9,10 +9,10 @@ Multiple endpoints can be configured which are polled in a regular interval and 
 Httpbeat is inspired by the Logstash [http_poller](https://www.elastic.co/guide/en/logstash/current/plugins-inputs-http_poller.html) input filter but doesn't require that the endpoint is reachable by Logstash as Httpbeat pushes the data to Logstash or Elasticsearch.
 This is often necessary in security restricted network setups, where Logstash is not able to reach all servers. Instead the server to be monitored itself has Httpbeat installed and can send the data or a collector server has Httpbeat installed which is deployed in the secured network environment and can reach all servers to be monitored.
 
-Examples are:
-* [Apache Stats](https://httpd.apache.org/docs/2.4/mod/mod_status.html)
-* [Jolokia](https://jolokia.org)
-* [Spring Boot Actuator](http://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#production-ready)
+Examples use cases are:
+* Monitor [Apache Stats](https://httpd.apache.org/docs/2.4/mod/mod_status.html)
+* Monitor Java application with [Jolokia](https://jolokia.org)
+* Monitor [Spring Boot Actuators](http://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#production-ready)
 
 ## Exported Document Types
 
