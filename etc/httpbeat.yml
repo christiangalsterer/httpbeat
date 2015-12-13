@@ -6,8 +6,9 @@ httpbeat:
   urls:
     # Each - URL endpoints to poll. Below are the URL endpoint specific configurations
     -
-      # In seconds, defines how often to poll the URL endpoint.
-      period:
+      # Optional cron expression, defines when to poll the URL endpoint.
+      # Default is every 1 minute.
+      cron:
 
       # The URL endpoint to call by Httpbeat
       url: http://httpbin.org/headers
@@ -22,12 +23,17 @@ httpbeat:
       # * put
       method:
 
-      # Basic authentication username
-      #username:
-      # Basic authentication password
-      #password:
+      # Optional basic authentication
+      #basic_auth:
+        # Basic authentication username
+        #username:
+        # Basic authentication password
+        #password:
 
-      # tls configuration. By default is off.
+      # Optional proxy server URL
+      #proxy_url: http://proxy:3128
+
+      # Optional tls configuration. By default is off.
       #tls:
         # List of root certificates for HTTPS server verifications
         #certificate_authorities: ["/etc/pki/root/ca.pem"]

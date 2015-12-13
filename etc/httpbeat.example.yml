@@ -6,8 +6,9 @@ httpbeat:
   urls:
     # Each - URL endpoints to poll. Below are the URL endpoint specific configurations
     -
-      # In seconds, defines how often to poll the URL endpoint.
-      period: 5
+      # Optional cron expression, defines when to poll the URL endpoint.
+      # Default is every 1 minute.
+      cron: "@every 5s"
 
       # The URL endpoint to call by Httpbeat
       url: http://httpbin.org/headers
@@ -22,10 +23,12 @@ httpbeat:
       # * put
       method: get
 
-      # Basic authentication username
-      username: foo
-      # Basic authentication password
-      password: bar
+      # Optional basic authentication
+      #basic_auth:
+        # Basic authentication username
+        #username: admin
+        # Basic authentication password
+        #password: admin
 
       # Type to be published in the 'type' field. For Elasticsearch output,
       # the type defines the document type these entries should be stored
@@ -42,8 +45,9 @@ httpbeat:
       fields:
         host: test
     -
-      # In seconds, defines how often to poll the URL endpoint.
-      period: 10
+      # Optional cron expression, defines when to poll the URL endpoint.
+      # Default is every 1 minute.
+      cron: "@every 10s"
 
       # The URL endpoint to call by Httpbeat
       url: http://httpbin.org/user-agent
@@ -58,10 +62,15 @@ httpbeat:
       # * put
       method: get
 
-      # Basic authentication username
-      username: foo
-      # Basic authentication password
-      password: bar
+      # Optional basic authentication
+      basic_auth:
+        # Basic authentication username
+        username: admin
+        # Basic authentication password
+        password: admin
+
+      # Optional proxy server URL
+      # proxy_url: http://proxy:3128
 
       # Type to be published in the 'type' field. For Elasticsearch output,
       # the type defines the document type these entries should be stored

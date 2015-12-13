@@ -8,13 +8,13 @@ import (
 	"github.com/elastic/beats/libbeat/logp"
 	"github.com/elastic/beats/libbeat/outputs"
 	"github.com/parnurzeal/gorequest"
+	"github.com/robfig/cron"
 )
 
 type Poller struct {
-	done          chan struct{}
 	httpbeat      *Httpbeat
 	config        UrlConfig
-	period        time.Duration
+	cron          string
 }
 
 func NewPooler(httpbeat *Httpbeat, config UrlConfig) *Poller {
@@ -33,32 +33,16 @@ func (p *Poller) Run() {
 		p.config.DocumentType = DefaultDocumentType
 	}
 
-	//init the period
-	if p.config.Period != nil {
-		p.period = time.Duration(*p.config.Period) * time.Second
+	//init the cron schedule
+	if p.config.Cron != "" {
+		p.cron = p.config.Cron
 	} else {
-		p.period = DefaultPeriod
+		p.cron = DefaultCron
 	}
 
-	ticker := time.NewTicker(p.period)
-	defer ticker.Stop()
-
-	// Loops until running is set to false
-	for {
-		select {
-		case <-p.done:
-		case <-ticker.C:
-		}
-
-		timerStart := time.Now()
-		p.runOneTime()
-		timerEnd := time.Now()
-
-		duration := timerEnd.Sub(timerStart)
-		if duration.Nanoseconds() > p.period.Nanoseconds() {
-			logp.Warn("Ignoring tick(s) due to processing taking longer than one period")
-		}
-	}
+	cron := cron.New()
+	cron.AddFunc(p.config.Cron, func() { p.runOneTime() })
+	cron.Start()
 }
 
 func (p *Poller) runOneTime() error {
@@ -91,9 +75,9 @@ func (p *Poller) runOneTime() error {
 	}
 
 	// set authentication
-	if p.config.Username != "" && p.config.Password != "" {
-		request.BasicAuth.Username = p.config.Username
-		request.BasicAuth.Password = p.config.Password
+	if p.config.BasicAuth.Username != "" && p.config.BasicAuth.Password != "" {
+		request.BasicAuth.Username = p.config.BasicAuth.Username
+		request.BasicAuth.Password = p.config.BasicAuth.Password
 	}
 
 	// set tls config
@@ -121,12 +105,11 @@ func (p *Poller) runOneTime() error {
 	request.Header = p.config.Headers
 
 	// set proxy
-	proxyUrl := p.GetProxyUrl()
-	if proxyUrl != "" {
-		request.Proxy(proxyUrl)
+	if p.config.ProxyUrl != "" {
+		request.Proxy(p.config.ProxyUrl)
 	}
 
-	logp.Debug("Httpbeat", "Trying to make the following HTTP request: %v", request)
+	logp.Debug("Httpbeat", "Executing HTTP request: %v", request)
 	now := time.Now()
 	resp, body, errs:= request.End();
 
@@ -161,17 +144,7 @@ func (p *Poller) runOneTime() error {
 	return nil
 }
 
-func (p *Poller) GetProxyUrl() (string) {
-	proxyUrl := ""
-	if p.config.ProxyHost != "" && p.config.ProxyPort != "" {
-		proxyUrl = p.config.ProxyHost + p.config.ProxyPort
-	}
-
-	return proxyUrl;
-}
-
 func (p *Poller) Stop() {
-	close(p.done)
 }
 
 func (p *Poller) GetResponseHeader(response gorequest.Response) map[string]string {

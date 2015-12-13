@@ -2,16 +2,14 @@ httpbeat:
 
    urls:
     -
-      period: 5
+      cron: "@every 1m"
       url: http://example.org/1
       method: get
-      username: foo1
-      password: bar1
+      basic_auth:
+        username: foo1
+        password: bar1
       body: body
-      proxy_username: proxyUser
-      proxy_password: proxyPass
-      proxy_host: proxy
-      proxy_port: 3128
+      proxy_url: http://proxy:3128
       timeout: 120
       headers:
         Accept: application/json
@@ -30,6 +28,6 @@ httpbeat:
         min_version: 1.0
         max_version: 1.2
     -
-      period: 10
+      cron: "@every 2m"
       url: http://example.org/2
       method: post
