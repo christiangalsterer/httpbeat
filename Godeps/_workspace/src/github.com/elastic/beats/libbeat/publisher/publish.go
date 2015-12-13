@@ -27,8 +27,8 @@ var debug = logp.MakeDebug("publish")
 
 // EventPublisher provides the interface for beats to publish events.
 type eventPublisher interface {
-	PublishEvent(ctx *context, event common.MapStr) bool
-	PublishEvents(ctx *context, events []common.MapStr) bool
+	PublishEvent(ctx context, event common.MapStr) bool
+	PublishEvents(ctx context, events []common.MapStr) bool
 }
 
 type context struct {
@@ -80,8 +80,6 @@ type ShipperConfig struct {
 	Tags                  []string
 	Geoip                 common.Geoip
 }
-
-var Publisher PublisherType
 
 type Topology struct {
 	Name string `json:"name"`
@@ -165,7 +163,22 @@ func (publisher *PublisherType) PublishTopology(params ...string) error {
 	return nil
 }
 
-func (publisher *PublisherType) Init(
+// Create new PublisherType
+func New(
+	beatName string,
+	configs map[string]outputs.MothershipConfig,
+	shipper ShipperConfig,
+) (*PublisherType, error) {
+
+	publisher := PublisherType{}
+	err := publisher.init(beatName, configs, shipper)
+	if err != nil {
+		return nil, err
+	}
+	return &publisher, nil
+}
+
+func (publisher *PublisherType) init(
 	beatName string,
 	configs map[string]outputs.MothershipConfig,
 	shipper ShipperConfig,
@@ -221,8 +234,8 @@ func (publisher *PublisherType) Init(
 			logp.Info("Using %s to store the topology", plugin.Name)
 		}
 
-		Publisher.Output = outputers
-		Publisher.TopologyOutput = topoOutput
+		publisher.Output = outputers
+		publisher.TopologyOutput = topoOutput
 	}
 
 	if !publisher.disabled {

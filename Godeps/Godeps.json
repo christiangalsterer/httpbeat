@@ -8,38 +8,38 @@
 		},
 		{
 			"ImportPath": "github.com/elastic/beats/libbeat/beat",
-			"Comment": "v1.0.0-1646-gae598cc",
-			"Rev": "ae598cca319c8bdf3cdbaf7f193b3d326652b4ee"
+			"Comment": "v1.0.0-1758-g7917fdc",
+			"Rev": "7917fdc2814cb6c25a2fd97e9884489d0f78474e"
 		},
 		{
 			"ImportPath": "github.com/elastic/beats/libbeat/cfgfile",
-			"Comment": "v1.0.0-1646-gae598cc",
-			"Rev": "ae598cca319c8bdf3cdbaf7f193b3d326652b4ee"
+			"Comment": "v1.0.0-1758-g7917fdc",
+			"Rev": "7917fdc2814cb6c25a2fd97e9884489d0f78474e"
 		},
 		{
 			"ImportPath": "github.com/elastic/beats/libbeat/common",
-			"Comment": "v1.0.0-1646-gae598cc",
-			"Rev": "ae598cca319c8bdf3cdbaf7f193b3d326652b4ee"
+			"Comment": "v1.0.0-1758-g7917fdc",
+			"Rev": "7917fdc2814cb6c25a2fd97e9884489d0f78474e"
 		},
 		{
 			"ImportPath": "github.com/elastic/beats/libbeat/logp",
-			"Comment": "v1.0.0-1646-gae598cc",
-			"Rev": "ae598cca319c8bdf3cdbaf7f193b3d326652b4ee"
+			"Comment": "v1.0.0-1758-g7917fdc",
+			"Rev": "7917fdc2814cb6c25a2fd97e9884489d0f78474e"
 		},
 		{
 			"ImportPath": "github.com/elastic/beats/libbeat/outputs",
-			"Comment": "v1.0.0-1646-gae598cc",
-			"Rev": "ae598cca319c8bdf3cdbaf7f193b3d326652b4ee"
+			"Comment": "v1.0.0-1758-g7917fdc",
+			"Rev": "7917fdc2814cb6c25a2fd97e9884489d0f78474e"
 		},
 		{
 			"ImportPath": "github.com/elastic/beats/libbeat/publisher",
-			"Comment": "v1.0.0-1646-gae598cc",
-			"Rev": "ae598cca319c8bdf3cdbaf7f193b3d326652b4ee"
+			"Comment": "v1.0.0-1758-g7917fdc",
+			"Rev": "7917fdc2814cb6c25a2fd97e9884489d0f78474e"
 		},
 		{
 			"ImportPath": "github.com/elastic/beats/libbeat/service",
-			"Comment": "v1.0.0-1646-gae598cc",
-			"Rev": "ae598cca319c8bdf3cdbaf7f193b3d326652b4ee"
+			"Comment": "v1.0.0-1758-g7917fdc",
+			"Rev": "7917fdc2814cb6c25a2fd97e9884489d0f78474e"
 		},
 		{
 			"ImportPath": "github.com/garyburd/redigo/internal",
@@ -59,8 +59,8 @@
 		},
 		{
 			"ImportPath": "github.com/parnurzeal/gorequest",
-			"Comment": "v0.2.13-5-g318e82c",
-			"Rev": "318e82cd2aed13b81bf53a2286d007edc931c20c"
+			"Comment": "v0.2.13-7-g27bfb0d",
+			"Rev": "27bfb0dcbcc020d11b7839af416fb8dafc2ab01c"
 		},
 		{
 			"ImportPath": "github.com/pmezard/go-difflib/difflib",
@@ -73,7 +73,7 @@
 		},
 		{
 			"ImportPath": "golang.org/x/net/publicsuffix",
-			"Rev": "195180cfebf7362bd243a52477697895128c8777"
+			"Rev": "d75b1902409c457a51e4bd1895031872c370983a"
 		},
 		{
 			"ImportPath": "gopkg.in/yaml.v2",
