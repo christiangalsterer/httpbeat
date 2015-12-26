@@ -84,6 +84,7 @@ httpbeat:
 
 -------------------------------------------------------------------------------------
 
+A complete example can be found [../etc/httpbeat.yml](etc/httpbeat.yml)
 ==== Options
 
 ===== cron
