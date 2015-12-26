@@ -137,20 +137,20 @@ headers:
 
 Optional basic authentication information
 
-====== username
-
-Basic authentication username
-
-===== password
-
-Basic authentication password
-
 [source,yaml]
 -------------------------------------------------------------------------------------
 basic_auth:
     username: me
     password: mysecret
 -------------------------------------------------------------------------------------
+
+====== username
+
+Basic authentication username
+
+====== password
+
+Basic authentication password
 
 ===== proxy_url
 
