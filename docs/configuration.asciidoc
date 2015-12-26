@@ -50,6 +50,9 @@ httpbeat:
       # Optional proxy server URL
       #proxy_url: http://proxy:3128
 
+      Optional timeout in seconds. Default is 60 seconds.
+      #timeout
+
       # Optional tls configuration. By default is off.
       #tls:
         # List of root certificates for HTTPS server verifications
@@ -185,4 +188,7 @@ The event type to use for published lines read by harvesters. For Elasticsearch
 output, the value that you specify here is used to set the `type` field in the output
 document. The default value is `httpbeat`.
 
-
+[source,yaml]
+-------------------------------------------------------------------------------------
+document_type: httpbeat
+-------------------------------------------------------------------------------------
