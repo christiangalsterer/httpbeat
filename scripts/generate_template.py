@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 
 """
-This script generates the ES template file (topbeat.template.json) from
+This script generates the ES template file (httpbeat.template.json) from
 the etc/fields.yml file.
 
 Example usage:
 
-   python generate_template.py etc/fields.yml etc/topbeat.template.json
+   python generate_template.py etc/fields.yml etc/httpbeat.template.json
 """
 
 import sys

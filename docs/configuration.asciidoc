@@ -1,0 +1,188 @@
+== Configuration Options
+
+The Httpbeat configuration file uses http://yaml.org/[YAML] for its syntax.
+The file contains config options common to all Beats. These options are described
+in the following sections of the {libbeat}/configuration.html[Beats Platform Reference]:
+
+* {libbeat}/configuration.html#configuration-shipper[Shipper]
+* {libbeat}/configuration.html#configuration-output[Output]
+* {libbeat}/configuration.html#configuration-logging[Logging (Optional)]
+* {libbeat}/configuration.html#configuration-run-options[Run Options (Optional)]
+
+=== Httpbeat
+
+The `httpbeat` section specifies a list of `urls` that Httpbeat calls in a scheduled fashion.
+Each url item begins with a dash (-) and specifies url-specific configuration options.
+
+Here is a sample configuration:
+
+[source,yaml]
+-------------------------------------------------------------------------------------
+httpbeat:
+
+  urls:
+    # Each - URL endpoints to poll. Below are the URL endpoint specific configurations
+    -
+      # Optional cron expression, defines when to poll the URL endpoint.
+      # Default is every 1 minute.
+      cron:
+
+      # The URL endpoint to call by Httpbeat
+      url: http://httpbin.org/headers
+
+      # HTTP method to use.
+      # Possible options are:
+      # * get
+      # * delete
+      # * head
+      # * patch
+      # * post
+      # * put
+      method:
+
+      # Optional basic authentication
+      #basic_auth:
+        # Basic authentication username
+        #username:
+        # Basic authentication password
+        #password:
+
+      # Optional proxy server URL
+      #proxy_url: http://proxy:3128
+
+      # Optional tls configuration. By default is off.
+      #tls:
+        # List of root certificates for HTTPS server verifications
+        #certificate_authorities: ["/etc/pki/root/ca.pem"]
+
+        # Certificate for TLS client authentication
+        #certificate: "/etc/pki/client/cert.pem"
+
+        # Client Certificate Key
+        #certificate_key: "/etc/pki/client/cert.key"
+
+        # Controls whether the client verifies server certificates and host name.
+        # If insecure is set to true, all server host names and certificates will be
+        # accepted. In this mode TLS based connections are susceptible to
+        # man-in-the-middle attacks. Use only for testing.
+        #insecure: true
+
+        # Configure cipher suites to be used for TLS connections
+        #cipher_suites: []
+
+        # Configure curve types for ECDHE based cipher suites
+        #curve_types: []
+
+        # Configure minimum TLS version allowed for connection
+        #min_version: 1.0
+
+        # Configure maximum TLS version allowed for connection
+        #max_version: 1.2
+
+-------------------------------------------------------------------------------------
+
+==== Options
+
+===== cron
+
+Optional cron expression, defines when to poll the endpoint. Default is every 1 minute.
+
+[source,yaml]
+-------------------------------------------------------------------------------------
+cron: @every 1m
+-------------------------------------------------------------------------------------
+
+===== method
+
+HTTP method to use. Possible options are:
+    * get
+    * delete
+    * head
+    * patch
+    * post
+    * put
+
+[source,yaml]
+-------------------------------------------------------------------------------------
+method: get
+-------------------------------------------------------------------------------------
+
+===== body
+
+Optional payload information to send to the endpoint, e.g. JSON. Will only be send if one of the following method is used:
+    * patch
+    * post
+    * put
+
+[source,yaml]
+-------------------------------------------------------------------------------------
+body:
+-------------------------------------------------------------------------------------
+
+===== headers
+
+Optional additional headers to send to the endpoint
+
+[source,yaml]
+-------------------------------------------------------------------------------------
+headers:
+    Accept: application/json
+    User-Agent: Go-http-client/1.1
+-------------------------------------------------------------------------------------
+
+===== basic_auth:
+
+Optional basic authentication information
+
+====== username
+
+Basic authentication username
+
+===== password
+
+Basic authentication password
+
+[source,yaml]
+-------------------------------------------------------------------------------------
+basic_auth:
+    username: me
+    password: mysecret
+-------------------------------------------------------------------------------------
+
+===== proxy_url
+
+Optional proxy server URL
+
+[source,yaml]
+-------------------------------------------------------------------------------------
+proxy_url: http://proxy:3128
+-------------------------------------------------------------------------------------
+
+===== timeout
+
+Optional timeout in seconds. Default is 60 seconds.
+
+[source,yaml]
+-------------------------------------------------------------------------------------
+timeout: 60
+-------------------------------------------------------------------------------------
+
+===== fields
+
+Optional fields that you can specify to add additional information to the output. For
+example, you might add fields that you can use for filtering log data.
+
+[source,yaml]
+-------------------------------------------------------------------------------------
+fields:
+    level: debug
+    review: 1
+-------------------------------------------------------------------------------------
+
+===== document_type
+
+The event type to use for published lines read by harvesters. For Elasticsearch
+output, the value that you specify here is used to set the `type` field in the output
+document. The default value is `httpbeat`.
+
+

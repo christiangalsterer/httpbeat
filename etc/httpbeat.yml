@@ -23,6 +23,12 @@ httpbeat:
       # * put
       method:
 
+      # Optional payload information to send to the endpoint, e.g. JSON. Will only be send if one of the following method is used:
+      # * patch
+      # * post
+      # * put
+      #body:
+
       # Optional basic authentication
       #basic_auth:
         # Basic authentication username
@@ -32,6 +38,9 @@ httpbeat:
 
       # Optional proxy server URL
       #proxy_url: http://proxy:3128
+
+      Optional timeout in seconds. Default is 60 seconds.
+      #timeout
 
       # Optional tls configuration. By default is off.
       #tls:

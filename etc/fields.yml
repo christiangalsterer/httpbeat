@@ -54,7 +54,7 @@ httpbeat:
         - name: url
           type: string
           description: >
-            URL endpoint called by by Httpbeat.
+            URL endpoint called by Httpbeat.
 
         - name: method
           type: string

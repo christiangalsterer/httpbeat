@@ -1,7 +1,7 @@
 [![Build Status](https://travis-ci.org/christiangalsterer/httpbeat.svg?branch=master)](https://travis-ci.org/christiangalsterer/httpbeat)
 [![codecov.io](http://codecov.io/github/christiangalsterer/httpbeat/coverage.svg?branch=master)](http://codecov.io/github/christiangalsterer/httpbeat?branch=master)
 
-# Httpbeat
+# Overview
 
 Httpbeat is the [Beat](https://www.elastic.co/products/beats) used to call HTTP endpoints.
 Multiple endpoints can be configured which are polled in a regular interval and the result is shipped to the configured output channel.
@@ -14,11 +14,21 @@ Example use cases are:
 * Monitor Java application with [Jolokia](https://jolokia.org)
 * Monitor [Spring Boot Actuators](http://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#production-ready)
 
+# Configuration
+
+## Configuration Options
+
+See [here](docs/configuration.asciidoc) for more information.
+
 ## Exported Document Types
 
 There is exactly one document type exported:
 
 - `type: httpbeat` http request and response information
+
+## Exported Fields
+
+See [here](docs/fields.asciidoc) for a detailed description of all exported fields.
 
 ### httpbeat type
 
@@ -77,7 +87,7 @@ To apply the Httpbeat template:
 
     curl -XPUT 'http://localhost:9200/_template/httpbeat' -d@etc/httpbeat.template.json
 
-## Build, Test, Run
+# Build, Test, Run
 
 ```
 # Build
@@ -89,5 +99,5 @@ GOPATH=<your go path> make test
 # Run
 ./httpbeat -c /etc/httpbeat/httpbeat.yml
 ```
-## Contribution
+# Contribution
 All sorts of contributions are welcome. Please create a pull request and/or issue.
