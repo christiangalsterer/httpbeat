@@ -72,7 +72,6 @@ httpbeat:
           description: >
             HTTP request body passed to the URL endpoint.
 
-
     - name: response
       type: group
       fields:

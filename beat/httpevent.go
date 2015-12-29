@@ -14,14 +14,14 @@ type HttpEvent struct {
 }
 
 type Request struct {
-	Url         string `json:"url,omitempty"`
-	Method      string `json:"method,omitempty"`
+	Url         string `json:"url"`
+	Method      string `json:"method"`
 	Headers     map[string]string `json:"headers,omitempty"`
 	Body        string `json:"body,omitempty"`
 }
 
 type Response struct {
-	StatusCode    int `json:"statusCode,omitempty"`
+	StatusCode    int `json:"statusCode"`
 	Headers       map[string]string `json:"headers,omitempty"`
 	Body          string `json:"body,omitempty"`
 }
