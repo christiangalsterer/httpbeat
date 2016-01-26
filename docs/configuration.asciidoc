@@ -200,3 +200,14 @@ document. The default value is `httpbeat`.
 -------------------------------------------------------------------------------------
 document_type: httpbeat
 -------------------------------------------------------------------------------------
+
+===== json_dot_mode
+
+Optional convertion of dots in keys in JSON response body. By default is off. Possible options are:
+    * unflatten - converts {"foo.bar":false} to {"foo":{"bar":false}}
+    * replace - replaces dots with underscores
+
+[source,yaml]
+-------------------------------------------------------------------------------------
+json_dot_mode: unflatten
+-------------------------------------------------------------------------------------
