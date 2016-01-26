@@ -24,6 +24,7 @@ type Response struct {
 	StatusCode    int `json:"statusCode"`
 	Headers       map[string]string `json:"headers,omitempty"`
 	Body          string `json:"body,omitempty"`
+	JsonBody      map[string]interface{} `json:"jsonBody,omitempty"`
 }
 
 func (h *HttpEvent) ToMapStr() common.MapStr {
