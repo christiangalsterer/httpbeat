@@ -82,6 +82,12 @@ httpbeat:
         # Configure maximum TLS version allowed for connection
         #max_version: 1.2
 
+      # Optional convertion of dots in keys in JSON response body. By default is off.
+      # Possible options are:
+      # * unflatten - converts {"foo.bar":false} to {"foo":{"bar":false}}
+      # * replace - replaces dots with underscores
+      #json_dot_mode: unflatten
+
 -------------------------------------------------------------------------------------
 
 A complete example can be found in link:../etc/httpbeat.yml[etc/httpbeat.yml]

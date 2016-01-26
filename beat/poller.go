@@ -130,7 +130,11 @@ func (p *Poller) runOneTime() error {
 	if json.Unmarshal([]byte(body), &jsonBody) != nil {
 		jsonBody = nil
 	} else {
-		jsonBody = unflat(jsonBody).(map[string]interface{})
+		if p.config.JsonDotMode == "unflatten" {
+			jsonBody = unflat(jsonBody).(map[string]interface{})
+		} else if p.config.JsonDotMode == "replace" {
+			jsonBody = replaceDots(jsonBody).(map[string]interface{})
+		}
 	}
 
 	responseEvent := Response{
@@ -151,6 +155,19 @@ func (p *Poller) runOneTime() error {
 	p.httpbeat.events.PublishEvent(event.ToMapStr())
 
 	return nil
+}
+
+func replaceDots(data interface{}) interface{} {
+	switch data.(type) {
+	case map[string]interface{}:
+		result := map[string]interface{}{}
+		for key, value := range data.(map[string]interface{}) {
+			result[strings.Replace(key, ".", "_", -1)] = replaceDots(value)
+		}
+		return result
+	default:
+		return data
+	}
 }
 
 func unflat(data interface{}) interface{} {
