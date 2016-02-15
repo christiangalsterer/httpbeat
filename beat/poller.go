@@ -15,12 +15,14 @@ type Poller struct {
 	httpbeat      *Httpbeat
 	config        UrlConfig
 	cron          string
+	request       *gorequest.SuperAgent
 }
 
 func NewPooler(httpbeat *Httpbeat, config UrlConfig) *Poller {
 	poller := &Poller{
 		httpbeat: httpbeat,
 		config:   config,
+		//request:  gorequest.New(),
 	}
 
 	return poller
@@ -46,38 +48,41 @@ func (p *Poller) Run() {
 }
 
 func (p *Poller) runOneTime() error {
-	request := gorequest.New()
+	if  p.request == nil {
+		p.request = gorequest.New()
+	}
+
 	url := p.config.Url
 	method := p.config.Method
 
 	switch method {
 	case "get":
-		request.Get(url)
+		p.request.Get(url)
 	case "delete":
-		request.Delete(url)
+		p.request.Delete(url)
 	case "head":
-		request.Head(url)
+		p.request.Head(url)
 	case "patch":
-		request.Patch(url)
+		p.request.Patch(url)
 	case "post":
-		request.Post(url)
+		p.request.Post(url)
 	case "put":
-		request.Put(url)
+		p.request.Put(url)
 	default:
 		return fmt.Errorf("Unsupported HTTP method %g", method)
 	}
 
 	// set timeout
 	if p.config.Timeout != nil {
-		request.Timeout(time.Duration(*p.config.Timeout) * time.Second)
+		p.request.Timeout(time.Duration(*p.config.Timeout) * time.Second)
 	} else {
-		request.Timeout(DefaultTimeout)
+		p.request.Timeout(DefaultTimeout)
 	}
 
 	// set authentication
 	if p.config.BasicAuth.Username != "" && p.config.BasicAuth.Password != "" {
-		request.BasicAuth.Username = p.config.BasicAuth.Username
-		request.BasicAuth.Password = p.config.BasicAuth.Password
+		p.request.BasicAuth.Username = p.config.BasicAuth.Username
+		p.request.BasicAuth.Password = p.config.BasicAuth.Password
 	}
 
 	// set tls config
@@ -89,31 +94,32 @@ func (p *Poller) runOneTime() error {
 		if err != nil {
 			return err
 		}
-		request.TLSClientConfig(tlsConfig)
+		p.request.TLSClientConfig(tlsConfig)
 	}
 
 	// set body
-	if p.config.Body !="" {
+	if p.config.Body != "" {
 		switch method {
 		case "patch", "post", "put":
-			request.SendString(p.config.Body)
+			p.request.SendString(p.config.Body)
 		default:
 		}
 	}
 
 	// set headers
-	request.Header = p.config.Headers
+	p.request.Header = p.config.Headers
 
 	// set proxy
 	if p.config.ProxyUrl != "" {
-		request.Proxy(p.config.ProxyUrl)
+		p.request.Proxy(p.config.ProxyUrl)
 	}
 
-	logp.Debug("Httpbeat", "Executing HTTP request: %v", request)
+	logp.Debug("Httpbeat", "Executing HTTP request: %v", p.request)
 	now := time.Now()
-	resp, body, errs:= request.End();
+	resp, body, errs := p.request.End();
 
 	if errs != nil {
+		p.request = nil
 		logp.Err("An error occured while executing HTTP request: %v", errs)
 		return fmt.Errorf("An error occured while executing HTTP request: %v", errs)
 	}
