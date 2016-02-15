@@ -8,7 +8,7 @@ import (
 )
 
 type Httpbeat struct {
-	done                 chan struct{}
+	done                 chan bool
 	HbConfig             ConfigSettings
 	events               publisher.Client
 }
@@ -32,6 +32,7 @@ func (h *Httpbeat) Config(b *beat.Beat) error {
 
 func (h *Httpbeat) Setup(b *beat.Beat) error {
 	h.events = b.Events
+	h.done = make(chan bool)
 
 	return nil
 }
@@ -48,6 +49,10 @@ func (h *Httpbeat) Run(b *beat.Beat) error {
 	}
 
 	for {
+		select {
+		case <-h.done:
+			return nil
+		}
 	}
 
 	return err
