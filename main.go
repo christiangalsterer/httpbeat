@@ -5,7 +5,7 @@ import (
 	httpbeat "github.com/christiangalsterer/httpbeat/beat"
 )
 
-var Version = "1.0.1-SNAPSHOT"
+var Version = "1.0.1"
 var Name = "httpbeat"
 
 func main() {
