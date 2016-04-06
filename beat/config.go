@@ -28,6 +28,7 @@ type UrlConfig struct {
 	DocumentType string `yaml:"document_type"`
 	Fields map[string]string `yaml:"fields"`
 	TLS *outputs.TLSConfig
+	JsonDotMode string `yaml:"json_dot_mode"`
 }
 
 type BasicAuthenticationConfig struct {

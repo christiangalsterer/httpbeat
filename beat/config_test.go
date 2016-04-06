@@ -42,6 +42,7 @@ func TestReadConfig(t *testing.T) {
 	assert.Equal(t, 0, len(urls[0].TLS.CurveTypes))
 	assert.Equal(t, "1.0", urls[0].TLS.MinVersion)
 	assert.Equal(t, "1.2", urls[0].TLS.MaxVersion)
+	assert.Equal(t, "unflatten", urls[0].JsonDotMode)
 
 	assert.Equal(t, "http://example.org/2", urls[1].Url)
 	assert.Equal(t, "post", urls[1].Method)

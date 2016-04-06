@@ -90,3 +90,9 @@ httpbeat:
           type: string
           description: >
             HTTP response body returned by the URL endpoint.
+
+        - name: jsonBody
+          type: group
+          description: >
+            HTTP response body returned by the URL endpoint in JSON format.
+          fields: []

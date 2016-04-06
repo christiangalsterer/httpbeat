@@ -27,6 +27,7 @@ httpbeat:
         curve_types: []
         min_version: 1.0
         max_version: 1.2
+      json_dot_mode: unflatten
     -
       cron: "@every 2m"
       url: http://example.org/2

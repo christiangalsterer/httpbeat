@@ -9,6 +9,7 @@ import (
 	"github.com/elastic/beats/libbeat/outputs"
 	"github.com/parnurzeal/gorequest"
 	"github.com/robfig/cron"
+	"encoding/json"
 )
 
 type Poller struct {
@@ -131,10 +132,22 @@ func (p *Poller) runOneTime() error {
 		Body: p.config.Body,
 	}
 
+	var jsonBody map[string]interface{}
+	if json.Unmarshal([]byte(body), &jsonBody) != nil {
+		jsonBody = nil
+	} else {
+		if p.config.JsonDotMode == "unflatten" {
+			jsonBody = unflat(jsonBody).(map[string]interface{})
+		} else if p.config.JsonDotMode == "replace" {
+			jsonBody = replaceDots(jsonBody).(map[string]interface{})
+		}
+	}
+
 	responseEvent := Response{
 		StatusCode:    resp.StatusCode,
 		Headers:       p.GetResponseHeader(resp),
 		Body:          body,
+		JsonBody:      jsonBody,
 	}
 
 	event := HttpEvent{
@@ -148,6 +161,59 @@ func (p *Poller) runOneTime() error {
 	p.httpbeat.events.PublishEvent(event.ToMapStr())
 
 	return nil
+}
+
+func replaceDots(data interface{}) interface{} {
+	switch data.(type) {
+	case map[string]interface{}:
+		result := map[string]interface{}{}
+		for key, value := range data.(map[string]interface{}) {
+			result[strings.Replace(key, ".", "_", -1)] = replaceDots(value)
+		}
+		return result
+	default:
+		return data
+	}
+}
+
+func unflat(data interface{}) interface{} {
+	switch data.(type) {
+	case map[string]interface{}:
+		result := map[string]interface{}{}
+		for key, value := range data.(map[string]interface{}) {
+			parts := strings.SplitN(key, ".", 2)
+			if len(parts) < 2 {
+				result[key] = unflat(value)
+				continue
+			} else {
+				mergeMaps(result, unflat(map[string]interface{}{parts[1]: value}).(map[string]interface{}), parts[0])
+			}
+		}
+		return result
+	default:
+		return data
+	}
+}
+
+func mergeMaps(first map[string]interface{}, second map[string]interface{}, key string) {
+	existingValue, exists := first[key]
+	if !exists {
+		first[key] = second
+	} else {
+		switch existingValue.(type) {
+		case map[string]interface{}:
+			for k, v := range second {
+				switch v.(type) {
+				case map[string]interface{}:
+					mergeMaps(existingValue.(map[string]interface{}), v.(map[string]interface{}), k)
+				default:
+					existingValue.(map[string]interface{})[k] = v
+				}
+			}
+		default:
+			first[key] = second
+		}
+	}
 }
 
 func (p *Poller) Stop() {

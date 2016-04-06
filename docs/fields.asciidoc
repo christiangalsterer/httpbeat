@@ -18,13 +18,17 @@ following categories:
 
 Contains common fields available in all event types.
 
+
+
 ==== beat.name
 
 The name of the Beat sending the log messages. If the shipper name is set in the configuration file, then that value is used. If it is not set, the hostname is used.
 
+
 ==== beat.hostname
 
 The hostname as returned by the operating system on which the Beat is running.
+
 
 ==== @timestamp
 
@@ -38,11 +42,13 @@ required: True
 
 The timestamp when the HTTP url was called. The precision is in milliseconds. The timezone is UTC.
 
+
 ==== type
 
 required: True
 
 The name of the log event. This field is set to the value specified for the `document_type` option in the url section of the Httpbeat config file.
+
 
 ==== fields
 
@@ -58,13 +64,17 @@ Contains user configurable fields.
 
 Contains http request and response information
 
+
+
 === request fields
+
 
 ==== url
 
 type: string
 
-URL endpoint called by by Httpbeat.
+URL endpoint called by Httpbeat.
+
 
 ==== method
 
@@ -72,9 +82,12 @@ type: string
 
 HTTP method used by Httpbeat to call the URL endpoint.
 
+
 === headers fields
 
 HTTP headers send to the URL endpoint.
+
+
 
 ==== body
 
@@ -82,7 +95,9 @@ type: string
 
 HTTP request body passed to the URL endpoint.
 
+
 === response fields
+
 
 ==== code
 
@@ -90,12 +105,23 @@ type: string
 
 HTTP status code returned by the URL endpoint.
 
+
 === headers fields
 
 HTTP response headers send by the URL endpoint.
+
+
 
 ==== body
 
 type: string
 
 HTTP response body returned by the URL endpoint.
+
+
+=== jsonBody fields
+
+HTTP response body returned by the URL endpoint in JSON format.
+
+
+
