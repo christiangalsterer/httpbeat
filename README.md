@@ -14,6 +14,29 @@ Example use cases are:
 * Monitor Java application with [Jolokia](https://jolokia.org)
 * Monitor [Spring Boot Actuators](http://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#production-ready)
 
+# Releases
+
+1.2.0 (2016-07-19)
+
+Feature release containing the following changes:
+* Update to Go 1.6
+* Update to libbeat 1.2.3
+* Use [Glide](https://github.com/Masterminds/glide) for dependency management
+
+1.1.0 (2016-04-06)
+
+Feature release containing the following changes:
+* [Provide output directly as JSON](https://github.com/christiangalsterer/httpbeat/issues/2)
+
+1.0.1 (2016-02-17)
+
+Bugfix release containing the following changes:
+* Fix: [Infinite loop when using logstash output](https://github.com/christiangalsterer/httpbeat/issues/4)
+* Fix: [Hanging during shutdown](https://github.com/christiangalsterer/httpbeat/issues/5)
+
+1.0.0 (2015-12-29)
+* Initial release
+
 # Configuration
 
 ## Configuration Options

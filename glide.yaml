@@ -1,0 +1,20 @@
+package: github.com/christiangalsterer/httpbeat
+homepage: https://github.com/christiangalsterer/httpbeat
+license: Apache-2.0
+owners:
+- name: Christian Galsterer
+  homepage: https://github.com/christiangalsterer
+import:
+- package: github.com/elastic/beats
+  version: v1.2.3
+  subpackages:
+  - libbeat/beat
+  - libbeat/cfgfile
+  #- libbeat/common
+  - libbeat/logp
+  #- libbeat/outputs
+  - libbeat/publisher
+- package: github.com/parnurzeal/gorequest
+  version: v0.2.13
+- package: github.com/robfig/cron
+  version: v1

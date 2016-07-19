@@ -1,23 +1,17 @@
-GODEP=$(GOPATH)/bin/godep
-PREFIX?=/build
-
-GOFILES = $(shell find . -type f -name '*.go')
-httpbeat: $(GOFILES)
-	# first make sure we have godep
-	go get github.com/tools/godep
-	$(GODEP) go build
+httpbeat:
+	go build
 
 .PHONY: getdeps
 getdeps:
-	go get -t -u -f
+	glide up --strip-vcs --update-vendored
 
 .PHONY: test
 test:
-	$(GODEP) go test ./...
+	go test . ./beat/...
 
 .PHONY: updatedeps
 updatedeps:
-	$(GODEP) update ...
+	glide up --strip-vcs --update-vendored
 
 .PHONY: install_cfg
 install_cfg:
@@ -34,14 +28,11 @@ gofmt:
 
 .PHONY: cover
 cover:
-	# gotestcover is needed to fetch coverage for multiple packages
-	go get github.com/pierrre/gotestcover
-	GOPATH=$(shell $(GODEP) path):$(GOPATH) $(GOPATH)/bin/gotestcover -coverprofile=profile.cov -covermode=count github.com/christiangalsterer/httpbeat/...
-	mkdir -p cover
-	$(GODEP) go tool cover -html=profile.cov -o cover/coverage.html
+	echo 'mode: atomic' > coverage.txt && go list . ./beat | xargs -n1 -I{} sh -c 'go test -covermode=atomic -coverprofile=coverage.tmp {} && tail -n +2 coverage.tmp >> coverage.txt' && rm coverage.tmp
 
 .PHONY: clean
 clean:
 	rm -r cover || true
 	rm profile.cov || true
 	rm httpbeat || true
+	rm coverage.txt || true
