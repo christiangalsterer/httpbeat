@@ -1,11 +1,11 @@
-from pbtests.packetbeat import TestCase
+from packetbeat import BaseTest
 
 """
 Tests for the DNS protocol.
 """
 
 
-class Test(TestCase):
+class Test(BaseTest):
     def test_A(self):
         """
         Should correctly interpret an A query to google.com
@@ -22,7 +22,7 @@ class Test(TestCase):
         assert o["type"] == "dns"
         assert o["transport"] == "udp"
         assert o["method"] == "QUERY"
-        assert o["query"] == "class IN, type A, google.com"
+        assert o["query"] == "class IN, type A, google.com."
         assert o["dns.question.type"] == "A"
         assert o["status"] == "OK"
         assert len(o["dns.answers"]) == 16
@@ -44,7 +44,7 @@ class Test(TestCase):
         assert o["type"] == "dns"
         assert o["transport"] == "udp"
         assert o["method"] == "QUERY"
-        assert o["query"] == "class IN, type A, nothing.elastic.co"
+        assert o["query"] == "class IN, type A, nothing.elastic.co."
         assert o["dns.question.type"] == "A"
         assert o["status"] == "Error"
         assert o["dns.response_code"] == "NXDOMAIN"
@@ -68,7 +68,7 @@ class Test(TestCase):
         assert o["type"] == "dns"
         assert o["transport"] == "udp"
         assert o["method"] == "QUERY"
-        assert o["query"] == "class IN, type MX, elastic.co"
+        assert o["query"] == "class IN, type MX, elastic.co."
         assert o["dns.question.type"] == "MX"
         assert o["status"] == "OK"
 
@@ -88,7 +88,7 @@ class Test(TestCase):
         assert o["type"] == "dns"
         assert o["transport"] == "udp"
         assert o["method"] == "QUERY"
-        assert o["query"] == "class IN, type NS, elastic.co"
+        assert o["query"] == "class IN, type NS, elastic.co."
         assert o["dns.question.type"] == "NS"
         assert o["status"] == "OK"
 
@@ -109,7 +109,7 @@ class Test(TestCase):
         assert o["transport"] == "udp"
         assert o["method"] == "QUERY"
         assert o["ip"] == "8.8.8.8"
-        assert o["query"] == "class IN, type TXT, elastic.co"
+        assert o["query"] == "class IN, type TXT, elastic.co."
         assert o["dns.question.type"] == "TXT"
         assert o["status"] == "OK"
         assert len(o["dns.answers"]) == 2
@@ -198,8 +198,34 @@ class Test(TestCase):
         assert o["type"] == "dns"
         assert o["transport"] == "tcp"
         assert o["method"] == "QUERY"
-        assert o["query"] == "class IN, type AXFR, etas.com"
+        assert o["query"] == "class IN, type AXFR, etas.com."
         assert o["dns.question.type"] == "AXFR"
         assert o["status"] == "OK"
         assert len(o["dns.answers"]) == 4
         assert all("etas.com" in x["name"] for x in o["dns.answers"])
+
+    def test_edns_dnssec(self):
+        """
+        Should correctly interpret a UDP edns with a DNSSEC RR
+        """
+        self.render_config_template(
+            dns_ports=[53],
+        )
+        self.run_packetbeat(pcap="dns_udp_edns_ds.pcap")
+
+        objs = self.read_output()
+        assert len(objs) == 1
+        o = objs[0]
+
+        assert o["type"] == "dns"
+        assert o["transport"] == "udp"
+        assert o["method"] == "QUERY"
+        assert o["query"] == "class IN, type DS, ietf.org."
+        assert o["dns.question.type"] == "DS"
+        assert o["status"] == "OK"
+        assert o["dns.opt.do"] == True
+        assert o["dns.opt.version"] == "0"
+        assert o["dns.opt.udp_size"] == 4000
+        assert o["dns.opt.ext_rcode"] == "Unknown 15"
+        assert len(o["dns.answers"]) == 3
+        assert all("ietf.org" in x["name"] for x in o["dns.answers"])

@@ -1,0 +1,52 @@
+////
+This file is generated! See scripts/docs_collector.py
+////
+
+[[metricbeat-module-apache]]
+== Apache Module
+
+This module periodically fetches metrics from https://httpd.apache.org/[Apache
+HTTPD] servers.
+
+[float]
+=== Compatibility
+
+The apache MetricSets were tested with apache 2.4.20 and are expected to work with all version
+>= 2.2.31 and >= 2.4.16.
+
+
+[float]
+=== Dashboard
+
+The apache module comes with its predefined dashboard. An example is shown below.
+
+image::./images/apache_httpd_server_status.png[]
+
+
+[float]
+=== Example Configuration
+
+The Apache module supports the standard configuration options which can be found
+here <<configuration-metricbeat,here>>. Below is an example of a configuration option:
+
+[source,yaml]
+----
+metricbeat.modules:
+- module: apache
+  metricsets: ["status"]
+  enabled: true
+  period: 10s
+
+  # Apache hosts
+  hosts: ["http://127.0.0.1"]
+----
+
+[float]
+=== MetricSets
+
+The following MetricSets are available:
+
+* <<metricbeat-metricset-apache-status,status>>
+
+include::apache/status.asciidoc[]
+

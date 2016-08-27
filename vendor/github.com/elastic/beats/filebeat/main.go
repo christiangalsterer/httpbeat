@@ -1,11 +1,12 @@
 package main
 
 import (
-	filebeat "github.com/elastic/beats/filebeat/beat"
+	"os"
+
+	"github.com/elastic/beats/filebeat/beater"
 	"github.com/elastic/beats/libbeat/beat"
 )
 
-var Version = "1.2.3"
 var Name = "filebeat"
 
 // The basic model of execution:
@@ -18,5 +19,7 @@ var Name = "filebeat"
 // determine where in each file to restart a harvester.
 
 func main() {
-	beat.Run(Name, Version, filebeat.New())
+	if err := beat.Run(Name, "", beater.New()); err != nil {
+		os.Exit(1)
+	}
 }

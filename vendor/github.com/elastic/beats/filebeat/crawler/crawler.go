@@ -2,10 +2,12 @@ package crawler
 
 import (
 	"fmt"
-	"os"
+	"sync"
 
-	"github.com/elastic/beats/filebeat/config"
-	"github.com/elastic/beats/filebeat/input"
+	"github.com/elastic/beats/filebeat/input/file"
+	"github.com/elastic/beats/filebeat/prospector"
+	"github.com/elastic/beats/filebeat/spooler"
+	"github.com/elastic/beats/libbeat/common"
 	"github.com/elastic/beats/libbeat/logp"
 )
 
@@ -22,62 +24,72 @@ import (
 */
 
 type Crawler struct {
-	// Registrar object to persist the state
-	Registrar *Registrar
-	running   bool
+	prospectors       []*prospector.Prospector
+	wg                sync.WaitGroup
+	spooler           *spooler.Spooler
+	prospectorConfigs []*common.Config
 }
 
-func (crawler *Crawler) Start(files []config.ProspectorConfig, eventChan chan *input.FileEvent) {
+func New(spooler *spooler.Spooler, prospectorConfigs []*common.Config) (*Crawler, error) {
 
-	pendingProspectorCnt := 0
-	crawler.running = true
+	if len(prospectorConfigs) == 0 {
+		return nil, fmt.Errorf("No prospectors defined. You must have at least one prospector defined in the config file.")
+	}
+
+	return &Crawler{
+		spooler:           spooler,
+		prospectorConfigs: prospectorConfigs,
+	}, nil
+}
+
+func (c *Crawler) Start(states file.States) error {
+
+	logp.Info("Loading Prospectors: %v", len(c.prospectorConfigs))
 
 	// Prospect the globs/paths given on the command line and launch harvesters
-	for _, fileconfig := range files {
+	for _, prospectorConfig := range c.prospectorConfigs {
 
-		logp.Debug("prospector", "File Configs: %v", fileconfig.Paths)
-
-		prospector := &Prospector{
-			ProspectorConfig: fileconfig,
-			registrar:        crawler.Registrar,
-		}
-
-		err := prospector.Init()
+		prospector, err := prospector.NewProspector(prospectorConfig, states, c.spooler.Channel)
 		if err != nil {
-			logp.Critical("Error in initing prospector: %s", err)
-			fmt.Printf("Error in initing prospector: %s", err)
-			os.Exit(1)
+			return fmt.Errorf("Error in initing prospector: %s", err)
 		}
-
-		go prospector.Run(eventChan)
-		pendingProspectorCnt++
+		c.prospectors = append(c.prospectors, prospector)
 	}
 
-	// Now determine which states we need to persist by pulling the events from the prospectors
-	// When we hit a nil source a prospector had finished so we decrease the expected events
-	logp.Debug("prospector", "Waiting for %d prospectors to initialise", pendingProspectorCnt)
+	logp.Info("Loading Prospectors completed. Number of prospectors: %v", len(c.prospectors))
 
-	for event := range crawler.Registrar.Persist {
-		if event.Source == "" {
+	c.wg = sync.WaitGroup{}
+	for i, p := range c.prospectors {
+		c.wg.Add(1)
 
-			pendingProspectorCnt--
-			if pendingProspectorCnt == 0 {
-				logp.Debug("prospector", "No pending prospectors. Finishing setup")
-				break
-			}
-			continue
-		}
-		crawler.Registrar.state[event.Source] = event
-		logp.Debug("prospector", "Registrar will re-save state for %s", event.Source)
-
-		if !crawler.running {
-			break
-		}
+		go func(id int, prospector *prospector.Prospector) {
+			defer func() {
+				c.wg.Done()
+				logp.Debug("crawler", "Prospector %v stopped", id)
+			}()
+			logp.Debug("crawler", "Starting prospector %v", id)
+			prospector.Run()
+		}(i, p)
 	}
 
-	logp.Info("All prospectors initialised with %d states to persist", len(crawler.Registrar.getStateCopy()))
+	logp.Info("All prospectors are initialised and running with %d states to persist", states.Count())
+
+	return nil
 }
 
-func (crawler *Crawler) Stop() {
-	// TODO: Properly stop prospectors and harvesters
+func (c *Crawler) Stop() {
+	logp.Info("Stopping Crawler")
+	stopProspector := func(p *prospector.Prospector) {
+		defer c.wg.Done()
+		p.Stop()
+	}
+
+	logp.Info("Stopping %v prospectors", len(c.prospectors))
+	for _, p := range c.prospectors {
+		// Stop prospectors in parallel
+		c.wg.Add(1)
+		go stopProspector(p)
+	}
+	c.wg.Wait()
+	logp.Info("Crawler stopped")
 }

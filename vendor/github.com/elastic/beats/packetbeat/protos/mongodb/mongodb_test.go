@@ -1,3 +1,5 @@
+// +build !integration
+
 package mongodb
 
 import (
@@ -17,7 +19,8 @@ import (
 func MongodbModForTests() *Mongodb {
 	var mongodb Mongodb
 	results := &publish.ChanTransactions{make(chan common.MapStr, 10)}
-	mongodb.Init(true, results)
+	config := defaultConfig
+	mongodb.init(results, &config)
 	return &mongodb
 }
 

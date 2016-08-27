@@ -1,3 +1,5 @@
+// +build !integration
+
 package icmp
 
 import (
@@ -44,7 +46,7 @@ func BenchmarkIcmpProcessICMPv4(b *testing.B) {
 	}
 
 	results := &publish.ChanTransactions{make(chan common.MapStr, 10)}
-	icmp, err := NewIcmp(true, results)
+	icmp, err := New(true, results, common.NewConfig())
 	if err != nil {
 		b.Error("Failed to create ICMP processor")
 		return
@@ -59,8 +61,8 @@ func BenchmarkIcmpProcessICMPv4(b *testing.B) {
 	b.ResetTimer()
 
 	for n := 0; n < b.N; n++ {
-		icmp.ProcessICMPv4(icmpRequestData, packetRequestData)
-		icmp.ProcessICMPv4(icmpResponseData, packetResponseData)
+		icmp.ProcessICMPv4(nil, icmpRequestData, packetRequestData)
+		icmp.ProcessICMPv4(nil, icmpResponseData, packetResponseData)
 
 		client := icmp.results.(*publish.ChanTransactions)
 		<-client.Channel

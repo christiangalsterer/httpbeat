@@ -10,7 +10,6 @@ import (
 	"github.com/elastic/beats/libbeat/common"
 	"github.com/elastic/beats/libbeat/logp"
 
-	"github.com/elastic/beats/packetbeat/config"
 	"github.com/elastic/beats/packetbeat/protos"
 	"github.com/elastic/beats/packetbeat/protos/applayer"
 	"github.com/elastic/beats/packetbeat/publish"
@@ -100,33 +99,36 @@ type memcacheStat struct {
 
 var debug = logp.MakeDebug("memcache")
 
-// Called to initialize the Plugin
-func (mc *Memcache) Init(testMode bool, results publish.Transactions) error {
-	debug("init memcache plugin")
-	return mc.InitWithConfig(
-		config.ConfigSingleton.Protocols.Memcache,
-		testMode,
-		results,
-	)
+func init() {
+	protos.Register("memcache", New)
 }
 
-func (mc *Memcache) InitDefaults() {
-	if err := mc.Ports.Init(11211); err != nil {
-		logp.WTF("memcache default port number invalid")
-	}
-	mc.handler = mc
-}
-
-func (mc *Memcache) InitWithConfig(
-	config config.Memcache,
+func New(
 	testMode bool,
 	results publish.Transactions,
-) error {
-	mc.InitDefaults()
+	cfg *common.Config,
+) (protos.Plugin, error) {
+	p := &Memcache{}
+	config := defaultConfig
 	if !testMode {
-		if err := mc.setFromConfig(config); err != nil {
-			return err
+		if err := cfg.Unpack(&config); err != nil {
+			return nil, err
 		}
+	}
+
+	if err := p.init(results, &config); err != nil {
+		return nil, err
+	}
+	return p, nil
+}
+
+// Called to initialize the Plugin
+func (mc *Memcache) init(results publish.Transactions, config *memcacheConfig) error {
+	debug("init memcache plugin")
+
+	mc.handler = mc
+	if err := mc.setFromConfig(config); err != nil {
+		return err
 	}
 
 	mc.udpConnections = make(map[common.HashableIpPortTuple]*udpConnection)
@@ -134,7 +136,7 @@ func (mc *Memcache) InitWithConfig(
 	return nil
 }
 
-func (mc *Memcache) setFromConfig(config config.Memcache) error {
+func (mc *Memcache) setFromConfig(config *memcacheConfig) error {
 	if err := mc.Ports.Set(config.Ports); err != nil {
 		return err
 	}
@@ -148,13 +150,11 @@ func (mc *Memcache) setFromConfig(config config.Memcache) error {
 
 	mc.config.parseUnkown = config.ParseUnknown
 
-	mc.udpConfig.transTimeout = computeTransTimeout(
-		config.UdpTransactionTimeout,
-		protos.DefaultTransactionExpiration)
-	mc.tcpConfig.tcpTransTimeout = computeTransTimeout(
-		config.TransactionTimeout,
-		protos.DefaultTransactionExpiration)
+	mc.udpConfig.transTimeout = config.UdpTransactionTimeout
+	mc.tcpConfig.tcpTransTimeout = config.TransactionTimeout
 
+	debug("transaction timeout: %v", config.TransactionTimeout)
+	debug("udp transaction timeout: %v", config.UdpTransactionTimeout)
 	debug("maxValues = %v", mc.config.maxValues)
 	debug("maxBytesPerValue = %v", mc.config.maxBytesPerValue)
 
@@ -457,11 +457,4 @@ func (mc memcacheData) MarshalJSON() ([]byte, error) {
 
 func (mc memcacheData) IsSet() bool {
 	return mc.data != nil
-}
-
-func computeTransTimeout(to *int, defaultTo time.Duration) time.Duration {
-	if to == nil || *to <= 0 {
-		return defaultTo
-	}
-	return time.Duration(*to) * time.Millisecond
 }

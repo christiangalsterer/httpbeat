@@ -1,195 +1,325 @@
+/*
+Package beat provides the functions required to manage the life-cycle of a Beat.
+It provides the standard mechanism for launching a Beat. It manages
+configuration, logging, and publisher initialization and registers a signal
+handler to gracefully stop the process.
+
+Each Beat implementation must implement the Beater interface and may optionally
+implement the FlagsHandler interface. See the Beater interface documentation for
+more details.
+
+To use this package, create a simple main that invokes the Run() function.
+
+  func main() {
+  	if err := beat.Run("mybeat", myVersion, beater.New()); err != nil {
+  		os.Exit(1)
+  	}
+  }
+
+In the example above, the beater package contains the implementation of the
+Beater interface and the New() method returns a new instance of Beater. The
+Beater implementation is placed into its own package so that it can be reused
+or combined with other Beats.
+
+Recommendations
+
+  * Use the logp package for logging rather than writing to stdout or stderr.
+  * Do not call os.Exit in any of your code. Return an error instead. Or if your
+    code needs to exit without an error, return beat.GracefulExit.
+*/
 package beat
 
 import (
+	cryptRand "crypto/rand"
+	"errors"
 	"flag"
 	"fmt"
+	"math"
+	"math/big"
+	"math/rand"
 	"os"
 	"runtime"
+	"time"
 
 	"github.com/elastic/beats/libbeat/cfgfile"
+	"github.com/elastic/beats/libbeat/common"
+	"github.com/elastic/beats/libbeat/filter"
+	_ "github.com/elastic/beats/libbeat/filter/rules"
 	"github.com/elastic/beats/libbeat/logp"
-	"github.com/elastic/beats/libbeat/outputs"
+	"github.com/elastic/beats/libbeat/paths"
 	"github.com/elastic/beats/libbeat/publisher"
-	"github.com/elastic/beats/libbeat/service"
+	svc "github.com/elastic/beats/libbeat/service"
+	"github.com/satori/go.uuid"
 )
 
-// Beater interface that every beat must use
+var (
+	printVersion = flag.Bool("version", false, "Print the version and exit")
+)
+
+var debugf = logp.MakeDebug("beat")
+
+// GracefulExit is an error that signals to exit with a code of 0.
+var GracefulExit = errors.New("graceful exit")
+
+// Beater is the interface that must be implemented every Beat. The full
+// lifecycle of a Beat instance is managed through this interface.
+//
+// Life-cycle of Beater
+//
+// The four operational methods are always invoked serially in the following
+// order:
+//
+//   Config -> Setup -> Run -> Cleanup
+//
+// The Stop() method is invoked the first time (and only the first time) a
+// shutdown signal is received. The Stop() method is eligible to be invoked
+// at any point after Setup() completes (this ensures that the Beater
+// implementation is fully initialized before Stop() can be invoked).
+//
+// The Cleanup() method is guaranteed to be invoked upon shutdown iff the Beater
+// reaches the Setup stage. For example, if there is a failure in the
+// Config stage then Cleanup will not be invoked.
 type Beater interface {
-	Config(*Beat) error
-	Setup(*Beat) error
-	Run(*Beat) error
-	Cleanup(*Beat) error
-	Stop()
+	Config(*Beat) error  // Read and validate configuration.
+	Setup(*Beat) error   // Initialize the Beat.
+	Run(*Beat) error     // The main event loop. This method should block until signalled to stop by an invocation of the Stop() method.
+	Cleanup(*Beat) error // Cleanup is invoked to perform any final clean-up prior to exiting.
+	Stop()               // Stop is invoked to signal that the Run method should finish its execution. It will be invoked at most once.
 }
 
-// FlagsHandler (optional) Beater extension for
-// handling flags input on startup. The HandleFlags callback will
-// be called after parsing the command line arguments and handling
-// the '--help' or '--version' flags.
+// FlagsHandler is an interface that can optionally be implemented by a Beat
+// if it needs to process command line flags on startup. If implemented, the
+// HandleFlags method will be invoked after parsing the command line flags
+// and before any of the Beater interface methods are invoked. There will be
+// no callback when '-help' or '-version' are specified.
 type FlagsHandler interface {
-	HandleFlags(*Beat)
+	HandleFlags(*Beat) error // Handle any custom command line arguments.
 }
 
-// Basic beat information
+// Beat contains the basic beat data and the publisher client used to publish
+// events.
 type Beat struct {
-	Name      string
-	Version   string
-	Config    *BeatConfig
-	BT        Beater
-	Publisher *publisher.PublisherType
-	Events    publisher.Client
+	Name      string               // Beat name.
+	Version   string               // Beat version number. Defaults to the libbeat version when an implementation does not set a version.
+	UUID      uuid.UUID            // ID assigned to a Beat instance.
+	BT        Beater               // Beater implementation.
+	RawConfig *common.Config       // Raw config that can be unpacked to get Beat specific config data.
+	Config    BeatConfig           // Common Beat configuration data.
+	Publisher *publisher.Publisher // Publisher
+
+	filters *filter.Filters // Filters
 }
 
-// Basic configuration of every beat
+// BeatConfig struct contains the basic configuration of every beat
 type BeatConfig struct {
-	Output  map[string]outputs.MothershipConfig
-	Logging logp.Logging
-	Shipper publisher.ShipperConfig
+	Shipper publisher.ShipperConfig   `config:",inline"`
+	Output  map[string]*common.Config `config:"output"`
+	Logging logp.Logging              `config:"logging"`
+	Filters filter.FilterPluginConfig `config:"filters"`
+	Path    paths.Path                `config:"path"`
 }
 
-var printVersion *bool
+// Run initializes and runs a Beater implementation. name is the name of the
+// Beat (e.g. packetbeat or metricbeat). version is version number of the Beater
+// implementation. bt is Beater implementation to run.
+func Run(name, version string, bt Beater) error {
+	return newInstance(name, version, bt).launch()
+}
+
+// instance contains everything related to a single instance of a beat.
+type instance struct {
+	data   *Beat
+	beater Beater
+}
 
 func init() {
-	printVersion = flag.Bool("version", false, "Print version and exit")
-}
-
-// Initiates a new beat object
-func NewBeat(name string, version string, bt Beater) *Beat {
-	b := Beat{
-		Version: version,
-		Name:    name,
-		BT:      bt,
+	// Initialize runtime random number generator seed using global, shared
+	// cryptographically strong pseudo random number generator.
+	//
+	// On linux Reader might use getrandom(2) or /udev/random. On windows systems
+	// CryptGenRandom is used.
+	n, err := cryptRand.Int(cryptRand.Reader, big.NewInt(math.MaxInt64))
+	var seed int64
+	if err != nil {
+		// fallback to current timestamp on error
+		seed = time.Now().UnixNano()
+	} else {
+		seed = n.Int64()
 	}
 
-	return &b
+	rand.Seed(seed)
 }
 
-// Initiates and runs a new beat object
-func Run(name string, version string, bt Beater) *Beat {
-	b := NewBeat(name, version, bt)
-
-	// Additional command line args are used to overwrite config options
-	b.CommandLineSetup()
-
-	// Loads base config
-	b.LoadConfig()
-
-	// Configures beat
-	err := bt.Config(b)
-	if err != nil {
-		logp.Critical("Config error: %v", err)
-		os.Exit(1)
+// newInstance creates and initializes a new Beat instance.
+func newInstance(name string, version string, bt Beater) *instance {
+	if version == "" {
+		version = defaultBeatVersion
 	}
 
-	// Run beat. This calls first beater.Setup,
-	// then beater.Run and beater.Cleanup in the end
-	b.Run()
-
-	return b
+	return &instance{
+		data: &Beat{
+			Name:    name,
+			Version: version,
+			UUID:    uuid.NewV4(),
+			BT:      bt,
+		},
+		beater: bt,
+	}
 }
 
-// Reads and parses the default command line params
-// To set additional cmd line args use the beat.CmdLine type before calling the function
-func (beat *Beat) CommandLineSetup() {
-
-	// The -c flag is treated separately because it needs the Beat name
-	err := cfgfile.ChangeDefaultCfgfileFlag(beat.Name)
+// handleFlags parses the command line flags. It handles the '-version' flag
+// and invokes the HandleFlags callback if implemented by the Beat.
+func (bc *instance) handleFlags() error {
+	// Due to a dependence upon the beat name, the default config file path
+	// must be updated prior to CLI flag handling.
+	err := cfgfile.ChangeDefaultCfgfileFlag(bc.data.Name)
 	if err != nil {
-		fmt.Printf("Failed to fix the -c flag: %v\n", err)
-		os.Exit(1)
+		return fmt.Errorf("failed to set default config file path: %v", err)
 	}
 
 	flag.Parse()
 
 	if *printVersion {
-		fmt.Printf("%s version %s (%s)\n", beat.Name, beat.Version, runtime.GOARCH)
-		os.Exit(0)
+		fmt.Printf("%s version %s (%s), libbeat %s\n", bc.data.Name,
+			bc.data.Version, runtime.GOARCH, defaultBeatVersion)
+		return GracefulExit
 	}
 
-	// if beater implements CLIFlags for additional CLI handling, call it now
-	if flagsHandler, ok := beat.BT.(FlagsHandler); ok {
-		flagsHandler.HandleFlags(beat)
+	// Invoke HandleFlags if FlagsHandler is implemented.
+	if flagsHandler, ok := bc.beater.(FlagsHandler); ok {
+		err = flagsHandler.HandleFlags(bc.data)
 	}
+
+	return err
 }
 
-// LoadConfig inits the config file and reads the default config information
-// into Beat.Config. It exists the processes in case of errors.
-func (b *Beat) LoadConfig() {
-
-	err := cfgfile.Read(&b.Config, "")
+// config reads the configuration file from disk, parses the common options
+// defined in BeatConfig, initializes logging, and set GOMAXPROCS if defined
+// in the config. Lastly it invokes the Config method implemented by the beat.
+func (bc *instance) config() error {
+	var err error
+	bc.data.RawConfig, err = cfgfile.Load("")
 	if err != nil {
-		// logging not yet initialized, so using fmt.Printf
-		fmt.Printf("Loading config file error: %v\n", err)
-		os.Exit(1)
+		return fmt.Errorf("error loading config file: %v", err)
 	}
 
-	err = logp.Init(b.Name, &b.Config.Logging)
+	err = bc.data.RawConfig.Unpack(&bc.data.Config)
 	if err != nil {
-		fmt.Printf("Error initializing logging: %v\n", err)
-		os.Exit(1)
+		return fmt.Errorf("error unpacking config data: %v", err)
 	}
 
+	err = paths.InitPaths(&bc.data.Config.Path)
+	if err != nil {
+		return fmt.Errorf("error setting default paths: %v", err)
+	}
+
+	err = logp.Init(bc.data.Name, &bc.data.Config.Logging)
+	if err != nil {
+		return fmt.Errorf("error initializing logging: %v", err)
+	}
 	// Disable stderr logging if requested by cmdline flag
 	logp.SetStderr()
 
-	logp.Debug("beat", "Initializing output plugins")
+	// log paths values to help with troubleshooting
+	logp.Info(paths.Paths.String())
 
-	pub, err := publisher.New(b.Name, b.Config.Output, b.Config.Shipper)
+	bc.data.filters, err = filter.New(bc.data.Config.Filters)
 	if err != nil {
-		fmt.Printf("Error Initialising publisher: %v\n", err)
-		logp.Critical(err.Error())
-		os.Exit(1)
+		return fmt.Errorf("error initializing filters: %v", err)
 	}
 
-	b.Publisher = pub
-	b.Events = pub.Client()
+	if bc.data.Config.Shipper.MaxProcs != nil {
+		maxProcs := *bc.data.Config.Shipper.MaxProcs
+		if maxProcs > 0 {
+			runtime.GOMAXPROCS(maxProcs)
+		}
+	}
 
-	logp.Info("Init Beat: %s; Version: %s", b.Name, b.Version)
+	return bc.beater.Config(bc.data)
 }
 
-// Run calls the beater Setup and Run methods. In case of errors
-// during the setup phase, it exits the process.
-func (b *Beat) Run() {
+// setup initializes the Publisher and then invokes the Setup method of the
+// Beat.
+func (bc *instance) setup() error {
+	logp.Info("Setup Beat: %s; Version: %s", bc.data.Name, bc.data.Version)
 
-	// Setup beater object
-	err := b.BT.Setup(b)
+	debugf("Initializing output plugins")
+	var err error
+	bc.data.Publisher, err = publisher.New(bc.data.Name, bc.data.Config.Output,
+		bc.data.Config.Shipper)
 	if err != nil {
-		logp.Critical("Setup returned an error: %v", err)
-		os.Exit(1)
+		return fmt.Errorf("error initializing publisher: %v", err)
 	}
 
-	// Up to here was the initialization, now about running
+	bc.data.Publisher.RegisterFilter(bc.data.filters)
+	err = bc.beater.Setup(bc.data)
+	if err != nil {
+		return err
+	}
+
+	// If -configtest was specified, exit now prior to run.
 	if cfgfile.IsTestConfig() {
-		// all good, exit with 0
-		os.Exit(0)
-	}
-	service.BeforeRun()
-
-	// Callback is called if the processes is asked to stop.
-	// This needs to be called before the main loop is started so that
-	// it can register the signals that stop or query (on Windows) the loop.
-	service.HandleSignals(b.BT.Stop)
-
-	logp.Info("%s sucessfully setup. Start running.", b.Name)
-
-	// Run beater specific stuff
-	err = b.BT.Run(b)
-	if err != nil {
-		logp.Critical("Run returned an error: %v", err)
+		fmt.Println("Config OK")
+		return GracefulExit
 	}
 
-	service.Cleanup()
-
-	logp.Info("Cleaning up %s before shutting down.", b.Name)
-
-	// Call beater cleanup function
-	err = b.BT.Cleanup(b)
-	if err != nil {
-		logp.Err("Cleanup returned an error: %v", err)
-	}
+	return nil
 }
 
-// Stop calls the beater Stop action.
-func (beat *Beat) Stop() {
-	beat.BT.Stop()
+// run calls the beater Setup and Run methods. In case of errors
+// during the setup phase, it exits the process.
+func (bc *instance) run() error {
+	logp.Info("%s start running.", bc.data.Name)
+	return bc.beater.Run(bc.data)
+}
+
+// cleanup is invoked prior to exit for the purposes of performing any final
+// clean-up. This method is guaranteed to be invoked on shutdown if the beat
+// reaches the setup stage.
+func (bc *instance) cleanup() error {
+	logp.Info("%s cleanup", bc.data.Name)
+	defer svc.Cleanup()
+	return bc.beater.Cleanup(bc.data)
+}
+
+// launch manages the lifecycle of the beat and guarantees the order in which
+// the Beater methods are invoked. If an error occurs in the lifecycle of the
+// Beat it will be returned.
+func (bc *instance) launch() (err error) {
+	defer func() { err = handleError(err) }()
+
+	err = bc.handleFlags()
+	if err != nil {
+		return
+	}
+
+	err = bc.config()
+	if err != nil {
+		return
+	}
+
+	defer bc.cleanup()
+	err = bc.setup()
+	if err != nil {
+		return
+	}
+
+	svc.BeforeRun()
+	svc.HandleSignals(bc.beater.Stop)
+	err = bc.run()
+	return
+}
+
+// handleError handles the given error by logging it and then returning the
+// error. If the err is nil or is a GracefulExit error then the method will
+// return nil without logging anything.
+func handleError(err error) error {
+	if err == nil || err == GracefulExit {
+		return nil
+	}
+
+	// logp may not be initialized so log the err to stderr too.
+	logp.Critical("Exiting: %v", err)
+	fmt.Fprintf(os.Stderr, "Exiting: %v\n", err)
+	return err
 }

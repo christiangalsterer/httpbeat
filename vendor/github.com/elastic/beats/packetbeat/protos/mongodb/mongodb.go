@@ -7,7 +7,6 @@ import (
 
 	"github.com/elastic/beats/libbeat/common"
 	"github.com/elastic/beats/libbeat/logp"
-	"github.com/elastic/beats/packetbeat/config"
 	"github.com/elastic/beats/packetbeat/procs"
 	"github.com/elastic/beats/packetbeat/protos"
 	"github.com/elastic/beats/packetbeat/protos/tcp"
@@ -36,49 +35,32 @@ type transactionKey struct {
 	id  int
 }
 
-func (mongodb *Mongodb) InitDefaults() {
-	mongodb.SendRequest = false
-	mongodb.SendResponse = false
-	mongodb.MaxDocs = 10
-	mongodb.MaxDocLength = 5000
-	mongodb.transactionTimeout = protos.DefaultTransactionExpiration
+func init() {
+	protos.Register("mongodb", New)
 }
 
-func (mongodb *Mongodb) setFromConfig(config config.Mongodb) error {
-	mongodb.Ports = config.Ports
-
-	if config.SendRequest != nil {
-		mongodb.SendRequest = *config.SendRequest
-	}
-	if config.SendResponse != nil {
-		mongodb.SendResponse = *config.SendResponse
-	}
-	if config.Max_docs != nil {
-		mongodb.MaxDocs = *config.Max_docs
-	}
-	if config.Max_doc_length != nil {
-		mongodb.MaxDocLength = *config.Max_doc_length
-	}
-	if config.TransactionTimeout != nil && *config.TransactionTimeout > 0 {
-		mongodb.transactionTimeout = time.Duration(*config.TransactionTimeout) * time.Second
-	}
-	return nil
-}
-
-func (mongodb *Mongodb) GetPorts() []int {
-	return mongodb.Ports
-}
-
-func (mongodb *Mongodb) Init(test_mode bool, results publish.Transactions) error {
-	debugf("Init a MongoDB protocol parser")
-
-	mongodb.InitDefaults()
-	if !test_mode {
-		err := mongodb.setFromConfig(config.ConfigSingleton.Protocols.Mongodb)
-		if err != nil {
-			return err
+func New(
+	testMode bool,
+	results publish.Transactions,
+	cfg *common.Config,
+) (protos.Plugin, error) {
+	p := &Mongodb{}
+	config := defaultConfig
+	if !testMode {
+		if err := cfg.Unpack(&config); err != nil {
+			return nil, err
 		}
 	}
+
+	if err := p.init(results, &config); err != nil {
+		return nil, err
+	}
+	return p, nil
+}
+
+func (mongodb *Mongodb) init(results publish.Transactions, config *mongodbConfig) error {
+	debugf("Init a MongoDB protocol parser")
+	mongodb.setFromConfig(config)
 
 	mongodb.requests = common.NewCache(
 		mongodb.transactionTimeout,
@@ -91,6 +73,19 @@ func (mongodb *Mongodb) Init(test_mode bool, results publish.Transactions) error
 	mongodb.results = results
 
 	return nil
+}
+
+func (mongodb *Mongodb) setFromConfig(config *mongodbConfig) {
+	mongodb.Ports = config.Ports
+	mongodb.SendRequest = config.SendRequest
+	mongodb.SendResponse = config.SendResponse
+	mongodb.MaxDocs = config.MaxDocs
+	mongodb.MaxDocLength = config.MaxDocLength
+	mongodb.transactionTimeout = config.TransactionTimeout
+}
+
+func (mongodb *Mongodb) GetPorts() []int {
+	return mongodb.Ports
 }
 
 func (mongodb *Mongodb) ConnectionTimeout() time.Duration {
@@ -314,16 +309,11 @@ func newTransaction(requ, resp *mongodbMessage) *transaction {
 
 func (mongodb *Mongodb) GapInStream(tcptuple *common.TcpTuple, dir uint8,
 	nbytes int, private protos.ProtocolData) (priv protos.ProtocolData, drop bool) {
-
-	// TODO
-
 	return private, true
 }
 
 func (mongodb *Mongodb) ReceivedFin(tcptuple *common.TcpTuple, dir uint8,
 	private protos.ProtocolData) protos.ProtocolData {
-
-	// TODO
 	return private
 }
 

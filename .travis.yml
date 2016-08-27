@@ -1,7 +1,7 @@
 language: go
 
 go:
-  - 1.6.2
+  - 1.7
 
 sudo: false
 
@@ -16,9 +16,9 @@ install:
   - make
 
 script:
-  - make cover
+  - make testsuite
 
 after_success:
   # Copy profile.cov to coverage.txt because codecov.io requires this file
-  - cp profile.cov coverage.txt
+  - cp build/coverage/full.cov full.txt
   - bash <(curl -s https://codecov.io/bash)

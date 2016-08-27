@@ -4,30 +4,29 @@ mockbeat:
 
 
 
-############################# Shipper ############################################
-shipper:
+############################# General ############################################
 
- # The name of the shipper that publishes the network data. It can be used to group
- # all the transactions sent by a single shipper in the web interface.
- # If this options is not defined, the hostname is used.
- name:
+# The name of the shipper that publishes the network data. It can be used to group
+# all the transactions sent by a single shipper in the web interface.
+# If this options is not defined, the hostname is used.
+name:
 
- # The tags of the shipper are included in their own field with each
- # transaction published. Tags make it easy to group servers by different
- # logical properties.
- tags: [
-    {%- if agent_tags -%}
-        {%- for tag in agent_tags -%}
-            "{{ tag }}"
-            {%- if not loop.last %}, {% endif -%}
-        {%- endfor -%}
-    {%- endif -%}]
+# The tags of the shipper are included in their own field with each
+# transaction published. Tags make it easy to group servers by different
+# logical properties.
+tags: [
+{%- if agent_tags -%}
+	{%- for tag in agent_tags -%}
+		"{{ tag }}"
+		{%- if not loop.last %}, {% endif -%}
+	{%- endfor -%}
+{%- endif -%}]
 
 
- # Uncomment the following if you want to ignore transactions created
- # by the server on which the shipper is installed. This option is useful
- # to remove duplicates if shippers are installed on multiple servers.
- # ignore_outgoing: true
+# Uncomment the following if you want to ignore transactions created
+# by the server on which the shipper is installed. This option is useful
+# to remove duplicates if shippers are installed on multiple servers.
+# ignore_outgoing: true
 
 
 
@@ -36,6 +35,12 @@ shipper:
 # Configure what outputs to use when sending the data collected by packetbeat.
 # Multiple outputs may be enabled.
 output:
+  {% if console -%}
+  console:
+    {% for k, v in console.items() -%}
+    {{ k }}: {{ v }}
+    {% endfor -%}
+  {%- endif %}
 
   # Elasticsearch as output
   # Options:
@@ -62,7 +67,7 @@ output:
   # rotate_every_kb: maximum size of the files in path
   # number of files: maximum number of files in path
   file:
-    path: {{ output_file_path|default(fb.working_dir + "/output") }}
+    path: {{ output_file_path|default(beat.working_dir + "/output") }}
     filename: "{{ output_file_filename|default("mockbeat") }}"
     rotate_every_kb: 1000
     #number_of_files: 7

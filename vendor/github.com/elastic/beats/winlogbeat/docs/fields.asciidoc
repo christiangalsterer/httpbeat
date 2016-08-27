@@ -4,32 +4,40 @@ This file is generated! See etc/fields.yml and scripts/generate_field_docs.py
 ////
 
 [[exported-fields]]
-== Exported Fields
+= Exported Fields
 
+[partintro]
+
+--
 This document describes the fields that are exported by Winlogbeat. They are
 grouped in the following categories:
 
+* <<exported-fields-beat>>
 * <<exported-fields-common>>
 * <<exported-fields-eventlog>>
 
-[[exported-fields-common]]
-=== Common Beat Fields
+--
+[[exported-fields-beat]]
+== Beat Fields
 
-Contains common fields available in all event types.
+Contains common beat fields available in all event types.
 
 
 
-==== beat.name
+[float]
+=== beat.name
 
 The name of the Beat sending the log messages. If the shipper name is set in the configuration file, then that value is used. If it is not set, the hostname is used.
 
 
-==== beat.hostname
+[float]
+=== beat.hostname
 
 The hostname as returned by the operating system on which the Beat is running.
 
 
-==== @timestamp
+[float]
+=== @timestamp
 
 type: date
 
@@ -42,7 +50,29 @@ required: True
 The timestamp when the event log record was generated.
 
 
-==== type
+[float]
+=== tags
+
+Arbitrary tags that can be set per Beat and per transaction type.
+
+
+[float]
+=== fields
+
+type: dict
+
+Contains user configurable fields.
+
+
+[[exported-fields-common]]
+== Common Winlogbeat Fields
+
+Contains common fields available in all event types.
+
+
+
+[float]
+=== type
 
 required: True
 
@@ -50,41 +80,45 @@ The event log API type used to read the record. The possible values are "wineven
 The Event Logging API was designed for Windows Server 2003, Windows XP, or Windows 2000 operating systems. In Windows Vista, the event logging infrastructure was redesigned. On Windows Vista or later operating systems, the Windows Event Log API is used. Winlogbeat automatically detects which API to use for reading event logs.
 
 
-==== count
-
-type: int
-
-required: True
-
-The number of event log records represented in the event. This field is always set to 1.
-
-
 [[exported-fields-eventlog]]
-=== Event Log Record Fields
+== Event Log Record Fields
 
 Contains data from a Windows event log record.
 
 
 
-==== computer_name
+[float]
+=== activity_id
 
-type: string
+type: keyword
+
+required: False
+
+A globally unique identifier that identifies the current activity. The events that are published with this identifier are part of the same activity.
+
+
+[float]
+=== computer_name
+
+type: keyword
 
 required: True
 
 The name of the computer that generated the record. When using Windows event forwarding, this name can differ from the `beat.hostname`.
 
 
-==== category
+[float]
+=== event_data
 
-type: string
+type: dict
 
 required: False
 
-The category for this event. The meaning of this value depends on the source of the event.
+The event specific data. This field is mutually exclusive with `user_data`.
 
 
-==== event_id
+[float]
+=== event_id
 
 type: long
 
@@ -93,72 +127,150 @@ required: True
 The event identifier. The value is specific to the source of the event.
 
 
-==== log_name
+[float]
+=== keywords
 
-type: string
+type: keyword
+
+required: False
+
+The keywords are used to classify an event.
+
+
+[float]
+=== log_name
+
+type: keyword
 
 required: True
 
 The name of the event log from which this record was read. This value is one of the names from the `event_logs` collection in the configuration.
 
 
-==== level
+[float]
+=== level
 
-type: string
+type: keyword
 
-required: True
+required: False
 
 The level of the event. There are five levels of events that can be logged: Success, Information, Warning, Error, Audit Success, and Audit Failure.
 
 
-==== message
+[float]
+=== message
 
-type: string
+type: text
 
 required: False
 
 The message from the event log record.
 
 
-==== message_error
+[float]
+=== message_error
 
-type: string
-
-required: False
-
-The error that occurred while reading and formatting the message from the log. This field is mutually exclusive with `message`.
-
-
-==== message_inserts
-
-type: list
+type: keyword
 
 required: False
 
-The raw message data logged by an application. Normally this data is inserted into a parameterized string to create `message`, but in case of an error, Winlogbeat attempts to provide this raw data. This field is mutually exclusive with `message`.
+The error that occurred while reading and formatting the message from the log.
 
 
-==== record_number
+[float]
+=== record_number
 
-type: string
+type: keyword
 
 required: True
 
 The record number of the event log record. The first record written to an event log is record number 1, and other records are numbered sequentially. If the record number reaches the maximum value (2^32^ for the Event Logging API and 2^64^ for the Windows Event Log API), the next record number will be 0.
 
 
-==== source_name
+[float]
+=== related_activity_id
 
-type: string
+type: keyword
+
+required: False
+
+A globally unique identifier that identifies the activity to which control was transferred to. The related events would then have this identifier as their `activity_id` identifier.
+
+
+[float]
+=== opcode
+
+type: keyword
+
+required: False
+
+The opcode defined in the event. Task and opcode are typically used to identify the location in the application from where the event was logged.
+
+
+[float]
+=== provider_guid
+
+type: keyword
+
+required: False
+
+A globally unique identifier that identifies the provider that logged the event.
+
+
+[float]
+=== process_id
+
+type: long
+
+required: False
+
+The process_id identifies the process that generated the event.
+
+
+[float]
+=== source_name
+
+type: keyword
 
 required: True
 
 The source of the event log record (the application or service that logged the record).
 
 
-==== user.identifier
+[float]
+=== task
 
-type: string
+type: keyword
+
+required: False
+
+The task defined in the event. Task and opcode are typically used to identify the location in the application from where the event was logged. The category used by the Event Logging API (on pre Windows Vista operating systems) is written to this field.
+
+
+[float]
+=== thread_id
+
+type: long
+
+required: False
+
+The thread_id identifies the thread that generated the event.
+
+
+[float]
+=== user_data
+
+type: dict
+
+required: False
+
+The event specific data. This field is mutually exclusive with `event_data`.
+
+
+[float]
+=== user.identifier
+
+type: keyword
 
 example: S-1-5-21-3541430928-2051711210-1391384369-1001
 
@@ -169,30 +281,54 @@ The Windows security identifier (SID) of the account associated with this event.
 If Winlogbeat cannot resolve the SID to a name, then the `user.name`, `user.domain`, and `user.type` fields will be omitted from the event. If you discover Winlogbeat not resolving SIDs, review the log for clues as to what the problem may be.
 
 
-==== user.name
+[float]
+=== user.name
 
-type: string
+type: keyword
 
 required: False
 
 The name of the account associated with this event.
 
 
-==== user.domain
+[float]
+=== user.domain
 
-type: string
+type: keyword
 
 required: False
 
 The domain that the account associated with this event is a member of.
 
 
-==== user.type
+[float]
+=== user.type
 
-type: string
+type: keyword
 
 required: False
 
 The type of account associated with this event.
+
+
+[float]
+=== version
+
+type: integer
+
+required: False
+
+The version number of the event's definition.
+
+[float]
+=== xml
+
+type: text
+
+required: False
+
+The raw XML representation of the event obtained from Windows. This field is only available on operating systems supporting the Windows Event Log API (Microsoft Windows Vista and newer). This field is not included by default and must be enabled by setting `include_xml: true` as a configuration option for an individual event log.
+
+The XML representation of the event is useful for troubleshooting purposes. The data in the fields reported by Winlogbeat can be compared to the data in the XML to diagnose problems.
 
 

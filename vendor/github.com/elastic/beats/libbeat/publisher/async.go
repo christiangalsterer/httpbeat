@@ -1,86 +1,66 @@
 package publisher
 
 import (
-	"time"
-
-	"github.com/elastic/beats/libbeat/common"
+	"github.com/elastic/beats/libbeat/common/op"
 	"github.com/elastic/beats/libbeat/logp"
-	"github.com/elastic/beats/libbeat/outputs"
 )
 
-type asyncPublisher struct {
+type asyncPipeline struct {
 	outputs []worker
-	pub     *PublisherType
-	ws      workerSignal
+	pub     *Publisher
 }
 
 const (
-	defaultFlushInterval = 1000 * time.Millisecond // 1s
-	defaultBulkSize      = 2048
+	defaultBulkSize = 2048
 )
 
-func newAsyncPublisher(pub *PublisherType, hwm, bulkHWM int) *asyncPublisher {
-	p := &asyncPublisher{pub: pub}
-	p.ws.Init()
+func newAsyncPipeline(
+	pub *Publisher,
+	hwm, bulkHWM int,
+	ws *workerSignal,
+) *asyncPipeline {
+	p := &asyncPipeline{pub: pub}
 
 	var outputs []worker
 	for _, out := range pub.Output {
-		outputs = append(outputs, asyncOutputer(&p.ws, hwm, bulkHWM, out))
+		outputs = append(outputs, makeAsyncOutput(ws, hwm, bulkHWM, out))
 	}
 
 	p.outputs = outputs
 	return p
 }
 
-// onStop will send stop signal to message batching workers
-func (p *asyncPublisher) onStop() { p.ws.stop() }
-
-func (p *asyncPublisher) client() eventPublisher {
-	return p
-}
-
-func (p *asyncPublisher) PublishEvent(ctx Context, event common.MapStr) bool {
-	p.send(message{context: ctx, event: event})
-	return true
-}
-
-func (p *asyncPublisher) PublishEvents(ctx Context, events []common.MapStr) bool {
-	p.send(message{context: ctx, events: events})
-	return true
-}
-
-func (p *asyncPublisher) send(m message) {
+func (p *asyncPipeline) publish(m message) bool {
 	if p.pub.disabled {
 		debug("publisher disabled")
-		outputs.SignalCompleted(m.context.Signal)
-		return
+		op.SigCompleted(m.context.Signal)
+		return true
 	}
 
-	// m.signal is not set yet. But a async client type supporting signals might
-	// be implemented in the future.
-	// If m.Signal is nil, NewSplitSignaler will return nil -> signaler will
-	// only set if client did send one
-	if m.context.Signal != nil && len(p.outputs) > 1 {
-		m.context.Signal = outputs.NewSplitSignaler(m.context.Signal, len(p.outputs))
+	if m.context.Signal != nil {
+		s := op.CancelableSignaler(m.client.canceler, m.context.Signal)
+		if len(p.outputs) > 1 {
+			s = op.SplitSignaler(s, len(p.outputs))
+		}
+		m.context.Signal = s
 	}
+
 	for _, o := range p.outputs {
 		o.send(m)
 	}
+	return true
 }
 
-func asyncOutputer(ws *workerSignal, hwm, bulkHWM int, worker *outputWorker) worker {
+func makeAsyncOutput(
+	ws *workerSignal,
+	hwm, bulkHWM int,
+	worker *outputWorker,
+) worker {
 	config := worker.config
 
-	flushInterval := defaultFlushInterval
-	if config.FlushInterval != nil {
-		flushInterval = time.Duration(*config.FlushInterval) * time.Millisecond
-	}
+	flushInterval := config.FlushInterval
+	maxBulkSize := config.BulkMaxSize
 	logp.Info("Flush Interval set to: %v", flushInterval)
-
-	maxBulkSize := defaultBulkSize
-	if config.BulkMaxSize != nil {
-		maxBulkSize = *config.BulkMaxSize
-	}
 	logp.Info("Max Bulk Size set to: %v", maxBulkSize)
 
 	// batching disabled

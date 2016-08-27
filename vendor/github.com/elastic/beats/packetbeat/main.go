@@ -1,16 +1,29 @@
 package main
 
 import (
-	packetbeat "github.com/elastic/beats/packetbeat/beat"
+	"os"
 
 	"github.com/elastic/beats/libbeat/beat"
+	"github.com/elastic/beats/packetbeat/beater"
+
+	// import support protocol modules
+	_ "github.com/elastic/beats/packetbeat/protos/amqp"
+	_ "github.com/elastic/beats/packetbeat/protos/dns"
+	_ "github.com/elastic/beats/packetbeat/protos/http"
+	_ "github.com/elastic/beats/packetbeat/protos/memcache"
+	_ "github.com/elastic/beats/packetbeat/protos/mongodb"
+	_ "github.com/elastic/beats/packetbeat/protos/mysql"
+	_ "github.com/elastic/beats/packetbeat/protos/nfs"
+	_ "github.com/elastic/beats/packetbeat/protos/pgsql"
+	_ "github.com/elastic/beats/packetbeat/protos/redis"
+	_ "github.com/elastic/beats/packetbeat/protos/thrift"
 )
 
-// You can overwrite these, e.g.: go build -ldflags "-X main.Version 1.0.0-beta3"
-var Version = "1.2.3"
 var Name = "packetbeat"
 
 // Setups and Runs Packetbeat
 func main() {
-	beat.Run(Name, Version, packetbeat.New())
+	if err := beat.Run(Name, "", beater.New()); err != nil {
+		os.Exit(1)
+	}
 }

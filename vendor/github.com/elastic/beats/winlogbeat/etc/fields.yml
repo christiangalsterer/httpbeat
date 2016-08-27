@@ -1,36 +1,8 @@
-version: 1.0
-
-defaults:
-  type: string
-  required: false
-  index: not_analyzed
-  doc_values: true
-  ignore_above: 1024
-
-common:
-  type: group
+- key: common
+  title: "Common Winlogbeat"
   description: >
     Contains common fields available in all event types.
   fields:
-    - name: beat.name
-      description: >
-        The name of the Beat sending the log messages. If the shipper name is
-        set in the configuration file, then that value is used. If it is not
-        set, the hostname is used.
-
-    - name: beat.hostname
-      description: >
-        The hostname as returned by the operating system on which the Beat is
-        running.
-
-    - name: "@timestamp"
-      type: date
-      required: true
-      format: YYYY-MM-DDTHH:MM:SS.milliZ
-      example: 2015-01-24T14:06:05.071Z
-      description: >
-        The timestamp when the event log record was generated.
-
     - name: type
       required: true
       description: >
@@ -44,31 +16,34 @@ common:
         systems, the Windows Event Log API is used. Winlogbeat automatically
         detects which API to use for reading event logs.
 
-    - name: count
-      type: int
-      required: true
-      description: >
-        The number of event log records represented in the event. This field is
-        always set to 1.
 
-eventlog:
-  type: group
+- key: eventlog
+  title: Event Log Record
   description: >
     Contains data from a Windows event log record.
   fields:
+    - name: activity_id
+      type: keyword
+      required: false
+      description: >
+        A globally unique identifier that identifies the current activity. The
+        events that are published with this identifier are part of the same
+        activity.
+
     - name: computer_name
-      type: string
+      type: keyword
       required: true
       description: >
         The name of the computer that generated the record. When using Windows
         event forwarding, this name can differ from the `beat.hostname`.
 
-    - name: category
-      type: string
+    - name: event_data
+      type: dict
+      dict-type: keyword
       required: false
       description: >
-        The category for this event. The meaning of this value depends on the
-        source of the event.
+        The event specific data. This field is mutually exclusive with
+        `user_data`.
 
     - name: event_id
       type: long
@@ -76,44 +51,42 @@ eventlog:
       description: >
         The event identifier. The value is specific to the source of the event.
 
+    - name: keywords
+      type: keyword
+      required: false
+      description: >
+        The keywords are used to classify an event.
+
     - name: log_name
-      type: string
+      type: keyword
       required: true
       description: >
-        The name of the event log from which this record was read. This value is one
-        of the names from the `event_logs` collection in the configuration.
+        The name of the event log from which this record was read. This value is
+        one of the names from the `event_logs` collection in the configuration.
 
     - name: level
-      type: string
-      required: true
+      type: keyword
+      required: false
       description: >
-        The level of the event. There are five levels of events that can be logged:
-        Success, Information, Warning, Error, Audit Success, and Audit Failure.
+        The level of the event. There are five levels of events that can be
+        logged: Success, Information, Warning, Error, Audit Success, and Audit
+        Failure.
 
     - name: message
-      type: string
+      type: text
       required: false
       description: >
         The message from the event log record.
 
     - name: message_error
-      type: string
+      type: keyword
       required: false
       description: >
         The error that occurred while reading and formatting the message from
-        the log. This field is mutually exclusive with `message`.
-
-    - name: message_inserts
-      type: list
-      required: false
-      description: >
-        The raw message data logged by an application. Normally this data is
-        inserted into a parameterized string to create `message`, but in case of
-        an error, Winlogbeat attempts to provide this raw data. This field is
-        mutually exclusive with `message`.
+        the log.
 
     - name: record_number
-      type: string
+      type: keyword
       required: true
       description: >
         The record number of the event log record. The first record written
@@ -122,15 +95,67 @@ eventlog:
         for the Event Logging API and 2^64^ for the Windows Event Log API),
         the next record number will be 0.
 
+    - name: related_activity_id
+      type: keyword
+      required: false
+      description: >
+        A globally unique identifier that identifies the activity to which
+        control was transferred to. The related events would then have this
+        identifier as their `activity_id` identifier.
+
+    - name: opcode
+      type: keyword
+      required: false
+      description: >
+        The opcode defined in the event. Task and opcode are typically used to
+        identify the location in the application from where the event was
+        logged.
+
+    - name: provider_guid
+      type: keyword
+      required: false
+      description: >
+        A globally unique identifier that identifies the provider that logged
+        the event.
+
+    - name: process_id
+      type: long
+      required: false
+      description: >
+        The process_id identifies the process that generated the event.
+
     - name: source_name
-      type: string
+      type: keyword
       required: true
       description: >
         The source of the event log record (the application or service that
         logged the record).
 
+    - name: task
+      type: keyword
+      required: false
+      description: >
+        The task defined in the event. Task and opcode are typically used to
+        identify the location in the application from where the event was
+        logged. The category used by the Event Logging API (on pre Windows Vista
+        operating systems) is written to this field.
+
+    - name: thread_id
+      type: long
+      required: false
+      description: >
+        The thread_id identifies the thread that generated the event.
+
+    - name: user_data
+      type: dict
+      dict-type: keyword
+      required: false
+      description: >
+        The event specific data. This field is mutually exclusive with
+        `event_data`.
+
     - name: user.identifier
-      type: string
+      type: keyword
       required: false
       example: S-1-5-21-3541430928-2051711210-1391384369-1001
       description: >
@@ -144,19 +169,40 @@ eventlog:
         clues as to what the problem may be.
 
     - name: user.name
-      type: string
+      type: keyword
       required: false
       description: >
         The name of the account associated with this event.
 
     - name: user.domain
-      type: string
+      type: keyword
       required: false
       description: >
         The domain that the account associated with this event is a member of.
 
     - name: user.type
-      type: string
+      type: keyword
       required: false
       description: >
         The type of account associated with this event.
+
+    - name: version
+      type: integer
+      required: false
+      description: The version number of the event's definition.
+
+    - name: xml
+      type: keyword
+      type: text
+      required: false
+      description: >
+        The raw XML representation of the event obtained from Windows. This
+        field is only available on operating systems supporting the Windows
+        Event Log API (Microsoft Windows Vista and newer). This field is not
+        included by default and must be enabled by setting `include_xml: true`
+        as a configuration option for an individual event log.
+
+
+        The XML representation of the event is useful for troubleshooting
+        purposes. The data in the fields reported by Winlogbeat can be compared
+        to the data in the XML to diagnose problems.

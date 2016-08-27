@@ -77,10 +77,10 @@ httpbeat:
         #curve_types: []
 
         # Configure minimum TLS version allowed for connection
-        #min_version: 1.0
+        #min_version: "1.0"
 
         # Configure maximum TLS version allowed for connection
-        #max_version: 1.2
+        #max_version: "1.2"
 
       # Optional convertion of dots in keys in JSON response body. By default is off.
       # Possible options are:

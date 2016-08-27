@@ -1,3 +1,7 @@
+Please post all questions and issues first on
+[https://discuss.elastic.co/c/beats](https://discuss.elastic.co/c/beats)
+before opening a Github Issue.
+
 # Contributing to Beats
 
 The Beats are open source and we love to receive contributions from our
@@ -46,6 +50,10 @@ Beats](https://github.com/elastic/beats/blob/master/libbeat/docs/communitybeats.
 ## Setting up your dev environment
 
 The Beats are Go programs, so install the latest version of
+[golang](http://golang.org/) if you don't have it already. The current Go version
+used for development is Golang 1.6.2.
+
+The Beats are Go programs, so install the latest version of
 [golang](http://golang.org/) if you don't have it already.
 
 The location where you clone is important. Please clone under the source
@@ -65,16 +73,44 @@ Packetbeat:
 Some of the Beats might have extra development requirements, in which case a
 CONTRIBUTING.md file is find in the Beat directory.
 
+## Update scripts
+
+The beats use a variety of scripts based on python to generate configuration files
+and documentations. The command used for this is:
+
+    $ make update
+
+This command has the following dependencies:
+
+* Python >=2.7.9
+* [virtualenv](https://virtualenv.pypa.io/en/latest/) for Python
+
+Virtualenv can be installed with the command `easy_install virtualenv` or `pip install virtualenv`.
+More details can be [here](https://virtualenv.pypa.io/en/latest/installation.html).
+
+
+## Testing
+
 You can run the whole testsuite with the following command:
 
-    # make testsuite
+    $ make testsuite
+
+Running the testsuite has the following requirements:
+
+* Python >=2.7.9
+* Docker >=1.10.0
+* Docker-compose >= 1.7.0
+
+
+## Documentation
+
+The documentation for each beat can be found in {beatname}/docs and are based on asciidoc. After every change of the
+docs it should be verified that the docs are still building to not break the automated docs build. To build the docs
+run `make docs`. In case you want to preview the docs for a beat, run `make docs-preview` inside the beats folder.
+This will automatically open your browser with the docs for preview.
+
 
 ## Dependencies
-
-The Beats project is using the [Go 1.5 vendor
-experiment](https://docs.google.com/document/d/1Bz5-UB7g2uPBdOx-rw5t9MxJwkfpx90cqG9AFL0JAYo/edit)
-for its dependencies. This means the Go dependencies code is copied under the
-`vendor/` directory and committed into source control.
 
 To manage the `vendor/` folder we use
 [glide](https://github.com/Masterminds/glide), which uses

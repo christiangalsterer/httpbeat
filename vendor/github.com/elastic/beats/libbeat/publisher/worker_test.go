@@ -1,31 +1,37 @@
+// +build !integration
+
 package publisher
 
 import (
 	"sync/atomic"
 	"testing"
 
+	"github.com/elastic/beats/libbeat/common/op"
 	"github.com/stretchr/testify/assert"
 )
 
 // Test sending events through the messageWorker.
 func TestMessageWorkerSend(t *testing.T) {
+	enableLogging([]string{"*"})
+
+	client := &client{canceler: op.NewCanceler()}
+
 	// Setup
-	ws := &workerSignal{}
-	ws.Init()
+	ws := newWorkerSignal()
 	mh := &testMessageHandler{msgs: make(chan message, 10), response: true}
 	mw := newMessageWorker(ws, 10, 0, mh)
 
 	// Send an event.
 	s1 := newTestSignaler()
-	m1 := message{context: Context{Signal: s1}}
+	m1 := message{client: client, context: Context{Signal: s1}}
 	mw.send(m1)
 
 	// Send another event.
 	s2 := newTestSignaler()
-	m2 := message{context: Context{Signal: s2}}
+	m2 := message{client: client, context: Context{Signal: s2}}
 	mw.send(m2)
 
-	// Verify that the messageWorker pushed to two messages to the
+	// Verify that the messageWorker pushed the two messages to the
 	// messageHandler.
 	msgs, err := mh.waitForMessages(2)
 	if err != nil {
@@ -38,25 +44,6 @@ func TestMessageWorkerSend(t *testing.T) {
 	assert.Contains(t, msgs, m2)
 	assert.True(t, s2.wait())
 
-	// Verify that stopping workerSignal causes a onStop notification
-	// in the messageHandler.
 	ws.stop()
 	assert.True(t, atomic.LoadUint32(&mh.stopped) == 1)
-}
-
-// Test that stopQueue invokes the Failed callback on all events in the queue.
-func TestMessageWorkerStopQueue(t *testing.T) {
-	s1 := newTestSignaler()
-	m1 := message{context: Context{Signal: s1}}
-
-	s2 := newTestSignaler()
-	m2 := message{context: Context{Signal: s2}}
-
-	qu := make(chan message, 2)
-	qu <- m1
-	qu <- m2
-
-	stopQueue(qu)
-	assert.False(t, s1.wait())
-	assert.False(t, s2.wait())
 }

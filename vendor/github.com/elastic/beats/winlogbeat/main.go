@@ -1,16 +1,24 @@
+/*
+Package winlogbeat contains the entrypoint to Winlogbeat which is a lightweight
+data shipper for Windows event logs. It ships events directly to Elasticsearch
+or Logstash. The data can then be visualized in Kibana.
+
+Downloads: https://www.elastic.co/downloads/beats/winlogbeat
+*/
 package main
 
 import (
-	"github.com/elastic/beats/libbeat/beat"
-	winlogbeat "github.com/elastic/beats/winlogbeat/beat"
-)
+	"os"
 
-// Version of Winlogbeat.
-var Version = "1.2.3"
+	"github.com/elastic/beats/libbeat/beat"
+	"github.com/elastic/beats/winlogbeat/beater"
+)
 
 // Name of this beat.
 var Name = "winlogbeat"
 
 func main() {
-	beat.Run(Name, Version, winlogbeat.New())
+	if err := beat.Run(Name, "", beater.New()); err != nil {
+		os.Exit(1)
+	}
 }

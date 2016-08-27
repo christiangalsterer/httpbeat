@@ -1,8 +1,18 @@
-hash: 738140f80390ee60df2ea4bd5b8a852985d420092b48c76dffd18b95c3be385d
-updated: 2016-07-19T07:30:29.597242927+02:00
+hash: bf39293002f868ec4fe216d5cf10bc49ced8d7c4262c1711695d33b531117235
+updated: 2016-08-27T11:39:29.734878142+02:00
 imports:
+- name: github.com/davecgh/go-spew
+  version: 5215b55f46b2b919f50a1df0eaa5886afe4e3b3d
+  subpackages:
+  - spew
+- name: github.com/eapache/go-resiliency
+  version: b86b1ec0dd4209a588dc1285cdd471e73525c0b3
+  subpackages:
+  - breaker
+- name: github.com/eapache/queue
+  version: ded5959c0d4e360646dc9e9908cff48666781367
 - name: github.com/elastic/beats
-  version: e849e45f713a6112145ac8309fc23bd69bc41ef8
+  version: 391e8400da65848d98e1d050c39fa960529ddd3c
   subpackages:
   - libbeat/beat
   - libbeat/cfgfile
@@ -10,18 +20,52 @@ imports:
   - libbeat/publisher
   - libbeat/common
   - libbeat/outputs
+  - libbeat/filter
+  - libbeat/filter/rules
+  - libbeat/paths
   - libbeat/service
+  - libbeat/common/op
   - libbeat/outputs/console
   - libbeat/outputs/elasticsearch
   - libbeat/outputs/fileout
+  - libbeat/outputs/kafka
   - libbeat/outputs/logstash
   - libbeat/outputs/redis
+  - libbeat/common/streambuf
   - libbeat/outputs/mode
+  - libbeat/outputs/mode/modeutil
+  - libbeat/outputs/transport
+  - libbeat/outputs/mode/lb
+  - libbeat/outputs/mode/single
+- name: github.com/elastic/go-lumber
+  version: 616041e345fc33c97bc0eb0fa6b388aa07bca3e1
+  subpackages:
+  - lj
+  - log
+  - client/v2
+  - server/internal
+  - server/v2
+  - protocol/v2
+- name: github.com/elastic/go-ucfg
+  version: 2edcfd9add7b02513a1f44f4158560f353588d4c
+  subpackages:
+  - yaml
 - name: github.com/garyburd/redigo
-  version: b8dc90050f24c1a73a52f107f3f575be67b21b7c
+  version: 8873b2f1995f59d4bcdd2b0dc9858e2cb9bf0c13
   subpackages:
   - redis
   - internal
+- name: github.com/golang/snappy
+  version: d9eb7a3d35ec988b8585d4a0068e462c27d28380
+- name: github.com/klauspost/compress
+  version: 006acde2c5d283d2f8b8aa03d8f0cd2891c680cf
+  subpackages:
+  - zlib
+  - flate
+- name: github.com/klauspost/cpuid
+  version: 09cded8978dc9e80714c4d85b0322337b0a1e5e0
+- name: github.com/klauspost/crc32
+  version: 19b0b332c9e4516a6370a0456e6182c3b5036720
 - name: github.com/moul/http2curl
   version: b1479103caacaa39319f75e7f57fc545287fca0d
 - name: github.com/nranchev/go-libGeoIP
@@ -30,28 +74,29 @@ imports:
   version: b64673b971a1742b8ba91f228f1c029632d4b686
 - name: github.com/robfig/cron
   version: b024fc5ea0e34bc3f83d9941c8d60b0622bfaca4
+- name: github.com/satori/go.uuid
+  version: 879c5887cd475cd7864858769793b2ceb0d44feb
+- name: github.com/Shopify/sarama
+  version: 38d579a708d2f87dd4e35342241048e361d1e66a
 - name: golang.org/x/net
-  version: 3797cd8864994d713d909eda5e61ede8683fdc12
+  version: d58ca6618b994150e624f6888d871f4709db51a0
   subpackages:
+  - proxy
   - publicsuffix
 - name: golang.org/x/sys
-  version: a646d33e2ee3172a661fc09bca23bb4889a41bc8
+  version: 62bee037599929a6e9146f29d10dd5208c43507d
   subpackages:
   - windows/svc
   - windows/svc/debug
   - windows
 - name: gopkg.in/yaml.v2
-  version: e4d366fc3c7938e2958e662b4258c7a89e1f0e3e
+  version: a83829b6f1293c91addabc89d0571c246397bbf4
 testImports:
-- name: github.com/davecgh/go-spew
-  version: 5215b55f46b2b919f50a1df0eaa5886afe4e3b3d
-  subpackages:
-  - spew
 - name: github.com/pmezard/go-difflib
-  version: d8ed2627bdf02c080bf22230dbb337003b7aba2d
+  version: 792786c7400a136282c1664665ae0a8db921c6c2
   subpackages:
   - difflib
 - name: github.com/stretchr/testify
-  version: d77da356e56a7428ad25149ca77381849a6a5232
+  version: f390dcf405f7b83c997eac1b06768bb9f44dec18
   subpackages:
   - assert

@@ -1,331 +1,143 @@
 package redis
 
 import (
-	"encoding/json"
 	"errors"
+	"expvar"
 	"fmt"
-	"strings"
-	"sync/atomic"
 	"time"
 
 	"github.com/elastic/beats/libbeat/common"
+	"github.com/elastic/beats/libbeat/common/op"
 	"github.com/elastic/beats/libbeat/logp"
 	"github.com/elastic/beats/libbeat/outputs"
+	"github.com/elastic/beats/libbeat/outputs/mode"
+	"github.com/elastic/beats/libbeat/outputs/mode/modeutil"
+	"github.com/elastic/beats/libbeat/outputs/transport"
+)
 
-	"github.com/garyburd/redigo/redis"
+type redisOut struct {
+	mode mode.ConnectionMode
+	topology
+}
+
+var debugf = logp.MakeDebug("redis")
+
+// Metrics that can retrieved through the expvar web interface.
+var (
+	statReadBytes   = expvar.NewInt("libbeatRedisPublishReadBytes")
+	statWriteBytes  = expvar.NewInt("libbeatRedisPublishWriteBytes")
+	statReadErrors  = expvar.NewInt("libbeatRedisPublishReadErrors")
+	statWriteErrors = expvar.NewInt("libbeatRedisPublishWriteErrors")
+)
+
+const (
+	defaultWaitRetry    = 1 * time.Second
+	defaultMaxWaitRetry = 60 * time.Second
 )
 
 func init() {
-
-	outputs.RegisterOutputPlugin("redis", RedisOutputPlugin{})
+	outputs.RegisterOutputPlugin("redis", new)
 }
 
-type RedisOutputPlugin struct{}
-
-func (f RedisOutputPlugin) NewOutput(
-	config *outputs.MothershipConfig,
-	topology_expire int,
-) (outputs.Outputer, error) {
-	output := &redisOutput{}
-	err := output.Init(*config, topology_expire)
-	if err != nil {
+func new(cfg *common.Config, expireTopo int) (outputs.Outputer, error) {
+	r := &redisOut{}
+	if err := r.init(cfg, expireTopo); err != nil {
 		return nil, err
 	}
-	return output, nil
+	return r, nil
 }
 
-type redisDataType uint16
-
-const (
-	RedisListType redisDataType = iota
-	RedisChannelType
-)
-
-type redisOutput struct {
-	Index string
-	Conn  redis.Conn
-
-	TopologyExpire    time.Duration
-	ReconnectInterval time.Duration
-	Hostname          string
-	Password          string
-	Db                int
-	DbTopology        int
-	Timeout           time.Duration
-	DataType          redisDataType
-
-	TopologyMap atomic.Value // Value holds a map[string][string]
-	connected   bool
-}
-
-type message struct {
-	trans outputs.Signaler
-	index string
-	msg   string
-}
-
-func (out *redisOutput) Init(config outputs.MothershipConfig, topology_expire int) error {
-
-	out.Hostname = fmt.Sprintf("%s:%d", config.Host, config.Port)
-
-	if config.Password != "" {
-		out.Password = config.Password
+func (r *redisOut) init(cfg *common.Config, expireTopo int) error {
+	config := defaultConfig
+	if err := cfg.Unpack(&config); err != nil {
+		return err
 	}
 
-	if config.Db != 0 {
-		out.Db = config.Db
+	sendRetries := config.MaxRetries
+	maxAttempts := config.MaxRetries + 1
+	if sendRetries < 0 {
+		maxAttempts = 0
 	}
 
-	out.DbTopology = 1
-	if config.Db_topology != 0 {
-		out.DbTopology = config.Db_topology
-	}
-
-	out.Timeout = 5 * time.Second
-	if config.Timeout != 0 {
-		out.Timeout = time.Duration(config.Timeout) * time.Second
-	}
-
-	out.Index = config.Index
-
-	out.ReconnectInterval = time.Duration(1) * time.Second
-	if config.ReconnectInterval != 0 {
-		out.ReconnectInterval = time.Duration(config.ReconnectInterval) * time.Second
-	}
-	logp.Info("Reconnect Interval set to: %v", out.ReconnectInterval)
-
-	expSec := 15
-	if topology_expire != 0 {
-		expSec = topology_expire
-	}
-	out.TopologyExpire = time.Duration(expSec) * time.Second
-
+	var dataType redisDataType
 	switch config.DataType {
 	case "", "list":
-		out.DataType = RedisListType
+		dataType = redisListType
 	case "channel":
-		out.DataType = RedisChannelType
+		dataType = redisChannelType
 	default:
 		return errors.New("Bad Redis data type")
 	}
 
-	logp.Info("[RedisOutput] Using Redis server %s", out.Hostname)
-	if out.Password != "" {
-		logp.Info("[RedisOutput] Using password to connect to Redis")
+	index := []byte(config.Index)
+	if len(index) == 0 {
+		return fmt.Errorf("missing %v", cfg.PathOf("index"))
 	}
-	logp.Info("[RedisOutput] Redis connection timeout %s", out.Timeout)
-	logp.Info("[RedisOutput] Redis reconnect interval %s", out.ReconnectInterval)
-	logp.Info("[RedisOutput] Using index pattern %s", out.Index)
-	logp.Info("[RedisOutput] Topology expires after %s", out.TopologyExpire)
-	logp.Info("[RedisOutput] Using db %d for storing events", out.Db)
-	logp.Info("[RedisOutput] Using db %d for storing topology", out.DbTopology)
-	logp.Info("[RedisOutput] Using %d data type", out.DataType)
 
-	out.Reconnect()
-
-	return nil
-}
-
-func (out *redisOutput) RedisConnect(db int) (redis.Conn, error) {
-	conn, err := redis.DialTimeout(
-		"tcp",
-		out.Hostname,
-		out.Timeout, out.Timeout, out.Timeout)
+	tls, err := outputs.LoadTLSConfig(config.TLS)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	if len(out.Password) > 0 {
-		_, err = conn.Do("AUTH", out.Password)
+	transp := &transport.Config{
+		Timeout: config.Timeout,
+		Proxy:   &config.Proxy,
+		TLS:     tls,
+		Stats: &transport.IOStats{
+			Read:        statReadBytes,
+			Write:       statWriteBytes,
+			ReadErrors:  statReadErrors,
+			WriteErrors: statWriteErrors,
+		},
+	}
+
+	// configure topology support
+	r.topology.init(transp, topoConfig{
+		host:     config.HostTopology,
+		password: config.PasswordTopology,
+		db:       config.DbTopology,
+		expire:   time.Duration(expireTopo) * time.Second,
+	})
+
+	// configure publisher clients
+	clients, err := modeutil.MakeClients(cfg, func(host string) (mode.ProtocolClient, error) {
+		t, err := transport.NewClient(transp, "tcp", host, config.Port)
 		if err != nil {
 			return nil, err
 		}
-	}
-
-	_, err = conn.Do("PING")
-	if err != nil {
-		return nil, err
-	}
-
-	_, err = conn.Do("SELECT", db)
-	if err != nil {
-		return nil, err
-	}
-
-	return conn, nil
-}
-
-func (out *redisOutput) Connect() error {
-	var err error
-	out.Conn, err = out.RedisConnect(out.Db)
+		return newClient(t, config.Password, config.Db, index, dataType), nil
+	})
 	if err != nil {
 		return err
 	}
-	out.connected = true
 
+	logp.Info("Max Retries set to: %v", sendRetries)
+	m, err := modeutil.NewConnectionMode(clients, !config.LoadBalance,
+		maxAttempts, defaultWaitRetry, config.Timeout, defaultMaxWaitRetry)
+	if err != nil {
+		return err
+	}
+
+	r.mode = m
 	return nil
 }
 
-func (out *redisOutput) Close() {
-	_ = out.Conn.Close()
+func (r *redisOut) Close() error {
+	return r.mode.Close()
 }
 
-func (out *redisOutput) Reconnect() {
-
-	for {
-		err := out.Connect()
-		if err != nil {
-			logp.Warn("Error connecting to Redis (%s). Retrying in %s", err, out.ReconnectInterval)
-			time.Sleep(out.ReconnectInterval)
-		} else {
-			break
-		}
-	}
-}
-
-func (out *redisOutput) GetNameByIP(ip string) string {
-	topologyMap, ok := out.TopologyMap.Load().(map[string]string)
-	if ok {
-		name, exists := topologyMap[ip]
-		if exists {
-			return name
-		}
-	}
-	return ""
-}
-
-func (out *redisOutput) PublishIPs(name string, localAddrs []string) error {
-	logp.Debug("output_redis", "[%s] Publish the IPs %s", name, localAddrs)
-
-	// connect to db
-	conn, err := out.RedisConnect(out.DbTopology)
-	if err != nil {
-		return err
-	}
-	defer func() { _ = conn.Close() }()
-
-	_, err = conn.Do("HSET", name, "ipaddrs", strings.Join(localAddrs, ","))
-	if err != nil {
-		logp.Err("[%s] Fail to set the IP addresses: %s", name, err)
-		return err
-	}
-
-	_, err = conn.Do("EXPIRE", name, int(out.TopologyExpire.Seconds()))
-	if err != nil {
-		logp.Err("[%s] Fail to set the expiration time: %s", name, err)
-		return err
-	}
-
-	out.UpdateLocalTopologyMap(conn)
-
-	return nil
-}
-
-func (out *redisOutput) UpdateLocalTopologyMap(conn redis.Conn) {
-	topologyMapTmp := make(map[string]string)
-	hostnames, err := redis.Strings(conn.Do("KEYS", "*"))
-	if err != nil {
-		logp.Err("Fail to get the all shippers from the topology map %s", err)
-		return
-	}
-	for _, hostname := range hostnames {
-		res, err := redis.String(conn.Do("HGET", hostname, "ipaddrs"))
-		if err != nil {
-			logp.Err("[%s] Fail to get the IPs: %s", hostname, err)
-		} else {
-			ipaddrs := strings.Split(res, ",")
-			for _, addr := range ipaddrs {
-				topologyMapTmp[addr] = hostname
-			}
-		}
-	}
-
-	out.TopologyMap.Store(topologyMapTmp)
-
-	logp.Debug("output_redis", "Topology %s", topologyMapTmp)
-}
-
-func (out *redisOutput) PublishEvent(
-	signal outputs.Signaler,
+func (r *redisOut) PublishEvent(
+	signaler op.Signaler,
 	opts outputs.Options,
 	event common.MapStr,
 ) error {
-	return out.BulkPublish(signal, opts, []common.MapStr{event})
+	return r.mode.PublishEvent(signaler, opts, event)
 }
 
-func (out *redisOutput) BulkPublish(
-	signal outputs.Signaler,
+func (r *redisOut) BulkPublish(
+	signaler op.Signaler,
 	opts outputs.Options,
 	events []common.MapStr,
 ) error {
-	if !opts.Guaranteed {
-		err := out.doBulkPublish(events)
-		outputs.Signal(signal, err)
-		return err
-	}
-
-	for {
-		err := out.doBulkPublish(events)
-		if err == nil {
-			outputs.SignalCompleted(signal)
-			return nil
-		}
-
-		// TODO: add backoff
-		time.Sleep(1)
-	}
-}
-
-func (out *redisOutput) doBulkPublish(events []common.MapStr) error {
-	if !out.connected {
-		logp.Debug("output_redis", "Droping pkt ...")
-		return errors.New("Not connected")
-	}
-
-	command := "RPUSH"
-	if out.DataType == RedisChannelType {
-		command = "PUBLISH"
-	}
-
-	if len(events) == 1 { // single event
-		event := events[0]
-		jsonEvent, err := json.Marshal(event)
-		if err != nil {
-			logp.Err("Fail to convert the event to JSON: %s", err)
-			return err
-		}
-
-		_, err = out.Conn.Do(command, out.Index, string(jsonEvent))
-		out.onFail(err)
-		return err
-	}
-
-	for _, event := range events {
-		jsonEvent, err := json.Marshal(event)
-		if err != nil {
-			logp.Err("Fail to convert the event to JSON: %s", err)
-			continue
-		}
-		err = out.Conn.Send(command, out.Index, string(jsonEvent))
-		if err != nil {
-			out.onFail(err)
-			return err
-		}
-	}
-	if err := out.Conn.Flush(); err != nil {
-		out.onFail(err)
-		return err
-	}
-	_, err := out.Conn.Receive()
-	out.onFail(err)
-	return err
-
-}
-
-func (out *redisOutput) onFail(err error) {
-	if err != nil {
-		logp.Err("Fail to publish event to REDIS: %s", err)
-		out.connected = false
-		go out.Reconnect()
-	}
+	return r.mode.PublishEvents(signaler, opts, events)
 }

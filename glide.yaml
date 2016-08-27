@@ -6,7 +6,7 @@ owners:
   homepage: https://github.com/christiangalsterer
 import:
 - package: github.com/elastic/beats
-  version: v1.2.3
+  version: v5.0.0-alpha5
   subpackages:
   - libbeat/beat
   - libbeat/cfgfile

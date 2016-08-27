@@ -4,30 +4,20 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-	"regexp"
 	"time"
 
 	"github.com/elastic/beats/libbeat/cfgfile"
 	"github.com/elastic/beats/libbeat/common"
 	"github.com/elastic/beats/libbeat/logp"
+	"github.com/elastic/beats/libbeat/paths"
 )
 
 // Defaults for config variables which are not set
 const (
-	DefaultRegistryFile                      = ".filebeat"
-	DefaultIgnoreOlderDuration time.Duration = 0
-	DefaultCloseOlderDuration  time.Duration = 1 * time.Hour
-	DefaultScanFrequency       time.Duration = 10 * time.Second
-	DefaultSpoolSize           uint64        = 2048
-	DefaultIdleTimeout         time.Duration = 5 * time.Second
-	DefaultHarvesterBufferSize int           = 16 << 10 // 16384
-	DefaultInputType                         = "log"
-	DefaultDocumentType                      = "log"
-	DefaultTailFiles                         = false
-	DefaultBackoff                           = 1 * time.Second
-	DefaultBackoffFactor                     = 2
-	DefaultMaxBackoff                        = 10 * time.Second
-	DefaultForceCloseFiles                   = false
+	DefaultRegistryFile string        = "registry"
+	DefaultSpoolSize    uint64        = 2048
+	DefaultIdleTimeout  time.Duration = 5 * time.Second
+	DefaultInputType                  = "log"
 )
 
 type Config struct {
@@ -35,55 +25,12 @@ type Config struct {
 }
 
 type FilebeatConfig struct {
-	Prospectors         []ProspectorConfig
-	SpoolSize           uint64 `yaml:"spool_size"`
-	PublishAsync        bool   `yaml:"publish_async"`
-	IdleTimeout         string `yaml:"idle_timeout"`
-	IdleTimeoutDuration time.Duration
-	RegistryFile        string `yaml:"registry_file"`
-	ConfigDir           string `yaml:"config_dir"`
-}
-
-type ProspectorConfig struct {
-	Paths                 []string
-	Input                 string
-	IgnoreOlder           string `yaml:"ignore_older"`
-	IgnoreOlderDuration   time.Duration
-	CloseOlder            string `yaml:"close_older"`
-	CloseOlderDuration    time.Duration
-	ScanFrequency         string `yaml:"scan_frequency"`
-	ScanFrequencyDuration time.Duration
-	Harvester             HarvesterConfig `yaml:",inline"`
-	ExcludeFiles          []string        `yaml:"exclude_files"`
-	ExcludeFilesRegexp    []*regexp.Regexp
-}
-
-type HarvesterConfig struct {
-	InputType          string `yaml:"input_type"`
-	Fields             common.MapStr
-	FieldsUnderRoot    bool   `yaml:"fields_under_root"`
-	BufferSize         int    `yaml:"harvester_buffer_size"`
-	TailFiles          bool   `yaml:"tail_files"`
-	Encoding           string `yaml:"encoding"`
-	DocumentType       string `yaml:"document_type"`
-	Backoff            string `yaml:"backoff"`
-	BackoffDuration    time.Duration
-	BackoffFactor      int    `yaml:"backoff_factor"`
-	MaxBackoff         string `yaml:"max_backoff"`
-	MaxBackoffDuration time.Duration
-	ForceCloseFiles    bool             `yaml:"force_close_files"`
-	ExcludeLines       []string         `yaml:"exclude_lines"`
-	IncludeLines       []string         `yaml:"include_lines"`
-	MaxBytes           *int             `yaml:"max_bytes"`
-	Multiline          *MultilineConfig `yaml:"multiline"`
-}
-
-type MultilineConfig struct {
-	Pattern  string `yaml:"pattern"`
-	Negate   bool   `yaml:"negate"`
-	Match    string `yaml:"match"`
-	MaxLines *int   `yaml:"max_lines"`
-	Timeout  string `yaml:"timeout"`
+	Prospectors  []*common.Config `config:"prospectors"`
+	SpoolSize    uint64           `config:"spool_size"`
+	PublishAsync bool             `config:"publish_async"`
+	IdleTimeout  time.Duration    `config:"idle_timeout"`
+	RegistryFile string           `config:"registry_file"`
+	ConfigDir    string           `config:"config_dir"`
 }
 
 const (
@@ -153,6 +100,9 @@ func (config *Config) FetchConfigs() {
 		return
 	}
 
+	// If configDir is relative, consider it relative to the config path
+	configDir = paths.Resolve(paths.Config, configDir)
+
 	// Check if optional configDir is set to fetch additional config files
 	logp.Info("Additional config files are fetched from: %s", configDir)
 
@@ -163,7 +113,6 @@ func (config *Config) FetchConfigs() {
 	}
 
 	err = mergeConfigFiles(configFiles, config)
-
 	if err != nil {
 		log.Fatal("Error merging config files: ", err)
 	}

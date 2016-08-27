@@ -34,8 +34,8 @@ See our https://www.elastic.co/downloads/beats/packetbeat[download page] for oth
 ["source","sh",subs="attributes,callouts"]
 ----------------------------------------------------------------------
 sudo apt-get install libpcap0.8
-curl -L -O https://download.elastic.co/beats/packetbeat/packetbeat_{version}_amd64.deb
-sudo dpkg -i packetbeat_{version}_amd64.deb
+curl -L -O https://download.elastic.co/beats/packetbeat/packetbeat-{version}-amd64.deb
+sudo dpkg -i packetbeat-{version}-amd64.deb
 ----------------------------------------------------------------------
 
 [[rpm]]
@@ -53,8 +53,8 @@ sudo rpm -vi packetbeat-{version}-x86_64.rpm
 
 ["source","sh",subs="attributes,callouts"]
 ----------------------------------------------------------------------
-curl -L -O https://download.elastic.co/beats/packetbeat/packetbeat-{version}-darwin.tgz
-tar xzvf packetbeat-{version}-darwin.tgz
+curl -L -O https://download.elastic.co/beats/packetbeat/packetbeat-{version}-darwin-x64.tar.gz
+tar xzvf packetbeat-{version}-darwin-x64.tar.gz
 ----------------------------------------------------------------------
 
 [[win]]
@@ -104,10 +104,9 @@ server on which Packetbeat is installed. For this, use `any` as the device:
 +
 [source,yaml]
 ----------------------------------------------------------------------
-# Select the network interfaces to sniff the data. You can use the "any"
+# Select the network interface to sniff the data. You can use the "any"
 # keyword to sniff on all connected interfaces.
-interfaces:
-  device: any
+packetbeat.interfaces.device: any
 ----------------------------------------------------------------------
 
 * On OS X, capturing from the `any` device doesn't work. You would
@@ -131,8 +130,7 @@ Modify the `device` line to point to the index of the device:
 +
 [source,yml]
 ----------------------------------------------------------------------
-interfaces:
-  device: 0
+packetbeat.interfaces.device: 0
 ----------------------------------------------------------------------
 
 . In the protocols section, configure the ports on which Packetbeat can find each
@@ -141,33 +139,32 @@ default values should do just fine.
 +
 [source,yaml]
 ----------------------------------------------------------------------
-protocols:
-  dns:
-    ports: [53]
+packetbeat.protocols.dns:
+  ports: [53]
 
-    include_authorities: true
-    include_additionals: true
+  include_authorities: true
+  include_additionals: true
 
-  http:
-    ports: [80, 8080, 8081, 5000, 8002]
+packetbeat.protocols.http:
+  ports: [80, 8080, 8081, 5000, 8002]
 
-  memcache:
-    ports: [11211]
+packetbeat.protocols.memcache:
+  ports: [11211]
 
-  mysql:
-    ports: [3306]
+packetbeat.protocols.mysql:
+  ports: [3306]
 
-  pgsql:
-    ports: [5432]
+packetbeat.protocols.pgsql:
+  ports: [5432]
 
-  redis:
-    ports: [6379]
+packetbeat.protocols.redis:
+  ports: [6379]
 
-  thrift:
-    ports: [9090]
+packetbeat.protocols.thrift:
+  ports: [9090]
 
-  mongodb:
-    ports: [27017]
+packetbeat.protocols.mongodb:
+  ports: [27017]
 ----------------------------------------------------------------------
 +
 . Set the IP address and port where Packetbeat can find the Elasticsearch
@@ -177,14 +174,17 @@ installation:
 ----------------------------------------------------------------------
 # Configure what outputs to use when sending the data collected by the beat.
 # Multiple outputs may be used.
-output:
-  ### Elasticsearch as output
-  elasticsearch:
-    # Array of hosts to connect to.
-     hosts: ["192.168.1.42:9200"]
+
+#-------------------------- Elasticsearch output ------------------------------
+output.elasticsearch:
+  # Array of hosts to connect to.
+  hosts: ["192.168.1.42:9200"]
 ----------------------------------------------------------------------
 +
 If you are sending output to Logstash, see <<config-packetbeat-logstash>> instead.
+
+TIP: To test your configuration file, run Packetbeat in the foreground with the following options specified:
++sudo ./packetbeat -configtest -e+.
 
 [[packetbeat-template]]
 === Step 3: Loading the Index Template in Elasticsearch
@@ -255,8 +255,7 @@ an example. We recommend that you
 http://www.elastic.co/guide/en/kibana/current/dashboard.html[customize] it
 to meet your needs.
 
-For more information about loading and viewing the Beats dashboards, see
-{libbeat}/visualizing-data.html[Visualizing Your Data in Kibana].
+For more information, see
+{libbeat}/load-kibana-dashboards.html[Loading the Beats Dashboards].
 
 image:./images/packetbeat-statistics.png[Packetbeat statistics]
-

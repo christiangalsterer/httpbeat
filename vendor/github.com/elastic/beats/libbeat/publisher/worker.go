@@ -5,7 +5,7 @@ import (
 	"sync"
 
 	"github.com/elastic/beats/libbeat/common"
-	"github.com/elastic/beats/libbeat/outputs"
+	"github.com/elastic/beats/libbeat/common/op"
 )
 
 // Metrics that can retrieved through the expvar web interface.
@@ -24,15 +24,16 @@ type messageWorker struct {
 	handler   messageHandler
 }
 
-type message struct {
-	context Context
-	event   common.MapStr
-	events  []common.MapStr
-}
-
 type workerSignal struct {
 	done chan struct{}
 	wg   sync.WaitGroup
+}
+
+type message struct {
+	client  *client
+	context Context
+	event   common.MapStr
+	events  []common.MapStr
 }
 
 type messageHandler interface {
@@ -51,6 +52,7 @@ func (p *messageWorker) init(ws *workerSignal, hwm, bulkHWM int, h messageHandle
 	p.bulkQueue = make(chan message, bulkHWM)
 	p.ws = ws
 	p.handler = h
+
 	ws.wg.Add(1)
 	go p.run()
 }
@@ -62,11 +64,9 @@ func (p *messageWorker) run() {
 		case <-p.ws.done:
 			return
 		case m := <-p.queue:
-			messagesInWorkerQueues.Add(-1)
-			p.handler.onMessage(m)
+			p.onEvent(m)
 		case m := <-p.bulkQueue:
-			messagesInWorkerQueues.Add(-1)
-			p.handler.onMessage(m)
+			p.onEvent(m)
 		}
 	}
 }
@@ -78,13 +78,13 @@ func (p *messageWorker) shutdown() {
 	p.ws.wg.Done()
 }
 
+func (p *messageWorker) onEvent(m message) {
+	messagesInWorkerQueues.Add(-1)
+	p.handler.onMessage(m)
+}
+
 func (p *messageWorker) send(m message) {
-	if m.event != nil {
-		p.queue <- m
-	} else {
-		p.bulkQueue <- m
-	}
-	messagesInWorkerQueues.Add(1)
+	send(p.queue, p.bulkQueue, m)
 }
 
 func (ws *workerSignal) stop() {
@@ -105,6 +105,31 @@ func (ws *workerSignal) Init() {
 func stopQueue(qu chan message) {
 	close(qu)
 	for msg := range qu { // clear queue and send fail signal
-		outputs.SignalFailed(msg.context.Signal, nil)
+		op.SigFailed(msg.context.Signal, nil)
+	}
+
+}
+
+func send(qu, bulkQu chan message, m message) {
+	var ch chan message
+	if m.event != nil {
+		ch = qu
+	} else {
+		ch = bulkQu
+	}
+
+	var done <-chan struct{}
+	if m.client != nil {
+		done = m.client.canceler.Done()
+	}
+
+	select {
+	case <-done: // blocks if nil
+		// client closed -> signal drop
+		// XXX: send Cancel or Fail signal?
+		op.SigFailed(m.context.Signal, ErrClientClosed)
+
+	case ch <- m:
+		messagesInWorkerQueues.Add(1)
 	}
 }

@@ -16,6 +16,11 @@ Example use cases are:
 
 # Releases
 
+2.0.0-alpha.5 (2016-08-XX) Work in Progress
+
+Feature release containing the following changes:
+* Update to beats v5.0.0-alpha5
+
 1.2.0 (2016-07-19)
 
 Feature release containing the following changes:

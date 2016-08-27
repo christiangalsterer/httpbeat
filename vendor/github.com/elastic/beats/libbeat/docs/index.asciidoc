@@ -1,14 +1,14 @@
 [[beats-reference]]
 = Beats Platform Reference
-:packetbeat: http://www.elastic.co/guide/en/beats/packetbeat/1.2
-:topbeat: http://www.elastic.co/guide/en/beats/topbeat/1.2
-:filebeat: http://www.elastic.co/guide/en/beats/filebeat/1.2
-:winlogbeat: http://www.elastic.co/guide/en/beats/winlogbeat/1.2
-:ES-version: 2.3.3
-:LS-version: 2.3.2
-:Kibana-version: 4.5.1
-:Dashboards-version: 1.2.3
-
+:packetbeat: http://www.elastic.co/guide/en/beats/packetbeat/master
+:metricbeat: http://www.elastic.co/guide/en/beats/metricbeat/master
+:filebeat: http://www.elastic.co/guide/en/beats/filebeat/master
+:winlogbeat: http://www.elastic.co/guide/en/beats/winlogbeat/master
+:security: X-Pack Security
+:ES-version: 5.0.0-alpha3
+:LS-version: 5.0.0-alpha3
+:Kibana-version: 5.0.0-alpha3
+:Dashboards-version: 5.0.0-alpha3
 
 include::./overview.asciidoc[]
 
@@ -20,14 +20,16 @@ include::./installing-beats.asciidoc[]
 
 include::./repositories.asciidoc[]
 
-include::./command-line.asciidoc[]
-
 include::./visualizing-data.asciidoc[]
 
 include::./dashboards.asciidoc[]
 
+pass::[<?page_header <b>PLEASE NOTE:</b><br/>We are working on updating this section. Some content might be out of date. While you're waiting for updates, you might want to try out the Beat generator at https://github.com/elastic/beat-generator.?>]
+
 include::./newbeat.asciidoc[]
 
-include::./release.asciidoc[]
+pass::[<?page_header ?>]
 
-//include::./../../../beats/CHANGELOG.asciidoc[]
+include::./newdashboards.asciidoc[]
+
+include::./release.asciidoc[]

@@ -1,10 +1,11 @@
+// +build !integration
+
 package publisher
 
 import (
 	"testing"
 	"time"
 
-	"github.com/elastic/beats/libbeat/common"
 	"github.com/elastic/beats/libbeat/outputs"
 	"github.com/stretchr/testify/assert"
 )
@@ -34,17 +35,9 @@ func (topo testTopology) GetNameByIP(ip string) string {
 	return topo.hostname
 }
 
-// Smoke test PrintPublishEvent. The method has no observable outputs so this
-// is only verifying there are no panics.
-func TestPrintPublishEvent(t *testing.T) {
-	PrintPublishEvent(nil)
-	PrintPublishEvent(common.MapStr{})
-	PrintPublishEvent(testEvent())
-}
-
 // Test GetServerName.
 func TestPublisherTypeGetServerName(t *testing.T) {
-	pt := &PublisherType{name: shipperName}
+	pt := &Publisher{name: shipperName}
 	assert.Equal(t, shipperName, pt.GetServerName("127.0.0.1"))
 
 	// Unknown hosts return empty string.
@@ -64,7 +57,7 @@ func TestPublisherTypeUpdateTopologyPeriodically(t *testing.T) {
 		publishName:       make(chan string, 1),
 		publishLocalAddrs: make(chan []string, 1),
 	}
-	pt := &PublisherType{
+	pt := &Publisher{
 		name:                 shipperName,
 		RefreshTopologyTimer: c,
 		TopologyOutput:       topo,

@@ -14,95 +14,77 @@
 package harvester
 
 import (
-	"io"
-	"os"
+	"fmt"
 	"regexp"
 	"sync"
 
 	"github.com/elastic/beats/filebeat/config"
 	"github.com/elastic/beats/filebeat/harvester/encoding"
+	"github.com/elastic/beats/filebeat/harvester/source"
 	"github.com/elastic/beats/filebeat/input"
+	"github.com/elastic/beats/filebeat/input/file"
+	"github.com/elastic/beats/libbeat/common"
 )
 
 type Harvester struct {
 	Path               string /* the file path to harvest */
-	ProspectorConfig   config.ProspectorConfig
-	Config             *config.HarvesterConfig
+	Config             harvesterConfig
 	offset             int64
-	offsetLock         sync.Mutex
-	Stat               *FileStat
+	State              file.State
+	stateMutex         sync.Mutex
 	SpoolerChan        chan *input.FileEvent
 	encoding           encoding.EncodingFactory
-	file               FileSource /* the file being watched */
+	file               source.FileSource /* the file being watched */
 	ExcludeLinesRegexp []*regexp.Regexp
 	IncludeLinesRegexp []*regexp.Regexp
+	done               chan struct{}
 }
 
-// Contains statistic about file when it was last seend by the prospector
-type FileStat struct {
-	Fileinfo      os.FileInfo /* the file info */
-	Return        chan int64  /* the harvester will send an event with its offset when it closes */
-	LastIteration uint32      /* int number of the last iterations in which we saw this file */
-}
+func NewHarvester(
+	cfg *common.Config,
+	path string,
+	state file.State,
+	spooler chan *input.FileEvent,
+	offset int64,
+	done chan struct{},
+) (*Harvester, error) {
 
-type LogSource interface {
-	io.ReadCloser
-	Name() string
-}
-
-type FileSource interface {
-	LogSource
-	Stat() (os.FileInfo, error)
-	Continuable() bool // can we continue processing after EOF?
-}
-
-// Interface for the different harvester types
-type Typer interface {
-	open()
-	read()
-}
-
-// restrict file to minimal interface of FileSource to prevent possible casts
-// to additional interfaces supported by underlying file
-type pipeSource struct{ file *os.File }
-
-func (p pipeSource) Read(b []byte) (int, error) { return p.file.Read(b) }
-func (p pipeSource) Close() error               { return p.file.Close() }
-func (p pipeSource) Name() string               { return p.file.Name() }
-func (p pipeSource) Stat() (os.FileInfo, error) { return p.file.Stat() }
-func (p pipeSource) Continuable() bool          { return false }
-
-type fileSource struct{ *os.File }
-
-func (fileSource) Continuable() bool { return true }
-
-func (h *Harvester) Start() {
-	// Starts harvester and picks the right type. In case type is not set, set it to defeault (log)
-
-	go h.Harvest()
-}
-
-func NewFileStat(fi os.FileInfo, lastIteration uint32) *FileStat {
-	fs := &FileStat{
-		Fileinfo:      fi,
-		Return:        make(chan int64, 1),
-		LastIteration: lastIteration,
+	h := &Harvester{
+		Path:        path,
+		Config:      defaultConfig,
+		State:       state,
+		SpoolerChan: spooler,
+		offset:      offset,
+		done:        done,
 	}
-	return fs
+
+	if err := cfg.Unpack(&h.Config); err != nil {
+		return nil, err
+	}
+	if err := h.Config.Validate(); err != nil {
+		return nil, err
+	}
+
+	encoding, ok := encoding.FindEncoding(h.Config.Encoding)
+	if !ok || encoding == nil {
+		return nil, fmt.Errorf("unknown encoding('%v')", h.Config.Encoding)
+	}
+	h.encoding = encoding
+
+	h.ExcludeLinesRegexp = h.Config.ExcludeLines
+	h.IncludeLinesRegexp = h.Config.IncludeLines
+	return h, nil
 }
 
-func (fs *FileStat) Finished() bool {
-	return len(fs.Return) != 0
-}
+// open does open the file given under h.Path and assigns the file handler to h.file
+func (h *Harvester) open() (encoding.Encoding, error) {
 
-// Ignore forgets about the previous harvester results and let it continue on the old
-// file - start a new channel to use with the new harvester.
-func (fs *FileStat) Ignore() {
-	fs.Return = make(chan int64, 1)
-}
-
-func (fs *FileStat) Continue(old *FileStat) {
-	if old != nil {
-		fs.Return = old.Return
+	switch h.Config.InputType {
+	case config.StdinInputType:
+		return h.openStdin()
+	case config.LogInputType:
+		return h.openFile()
+	default:
+		return nil, fmt.Errorf("Invalid input type")
 	}
 }

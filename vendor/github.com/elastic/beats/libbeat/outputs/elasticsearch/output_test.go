@@ -1,3 +1,5 @@
+// +build integration
+
 package elasticsearch
 
 import (
@@ -23,27 +25,26 @@ func createElasticsearchConnection(flushInterval int, bulkSize int) elasticsearc
 		logp.Err("Invalid port. Cannot be converted to in: %s", GetEsPort())
 	}
 
-	var output elasticsearchOutput
-	output.init(outputs.MothershipConfig{
-		Save_topology: true,
-		Host:          GetEsHost(),
-		Port:          esPort,
-		Username:      os.Getenv("ES_USER"),
-		Password:      os.Getenv("ES_PASS"),
-		Path:          "",
-		Index:         index,
-		Protocol:      "http",
-		FlushInterval: &flushInterval,
-		BulkMaxSize:   &bulkSize,
-	}, 10)
+	config, _ := common.NewConfigFrom(map[string]interface{}{
+		"save_topology":  true,
+		"hosts":          []string{GetEsHost()},
+		"port":           esPort,
+		"username":       os.Getenv("ES_USER"),
+		"password":       os.Getenv("ES_PASS"),
+		"path":           "",
+		"index":          index,
+		"protocol":       "http",
+		"flush_interval": flushInterval,
+		"bulk_max_size":  bulkSize,
+	})
 
+	var output elasticsearchOutput
+	output.init(config, 10)
 	return output
 }
 
 func TestTopologyInES(t *testing.T) {
-	if testing.Short() {
-		t.Skip("Skipping topology tests in short mode, because they require Elasticsearch")
-	}
+
 	if testing.Verbose() {
 		logp.LogInit(logp.LOG_DEBUG, "", false, true, []string{"topology", "output_elasticsearch"})
 	}
@@ -83,9 +84,7 @@ func TestTopologyInES(t *testing.T) {
 }
 
 func TestOneEvent(t *testing.T) {
-	if testing.Short() {
-		t.Skip("Skipping events publish in short mode, because they require Elasticsearch")
-	}
+
 	if testing.Verbose() {
 		logp.LogInit(logp.LOG_DEBUG, "", false, true, []string{"elasticsearch", "output_elasticsearch"})
 	}
@@ -103,13 +102,13 @@ func TestOneEvent(t *testing.T) {
 	event["dst_port"] = 6379
 	event["src_ip"] = "192.168.22.2"
 	event["src_port"] = 6378
-	event["shipper"] = "appserver1"
+	event["name"] = "appserver1"
 	r := common.MapStr{}
 	r["request"] = "MGET key1"
 	r["response"] = "value1"
 
 	index := fmt.Sprintf("%s-%d.%02d.%02d", output.index, ts.Year(), ts.Month(), ts.Day())
-	logp.Debug("output_elasticsearch", "index = %s", index)
+	debugf("index = %s", index)
 
 	client := output.randomClient()
 	client.CreateIndex(index, common.MapStr{
@@ -141,7 +140,7 @@ func TestOneEvent(t *testing.T) {
 	}()
 
 	params := map[string]string{
-		"q": "shipper:appserver1",
+		"q": "name:appserver1",
 	}
 	_, resp, err := client.SearchURI(index, "", params)
 
@@ -149,7 +148,7 @@ func TestOneEvent(t *testing.T) {
 		t.Errorf("Failed to query elasticsearch for index(%s): %s", index, err)
 		return
 	}
-	logp.Debug("output_elasticsearch", "resp = %s", resp)
+	debugf("resp = %s", resp)
 	if resp.Hits.Total != 1 {
 		t.Errorf("Wrong number of results: %d", resp.Hits.Total)
 	}
@@ -157,9 +156,7 @@ func TestOneEvent(t *testing.T) {
 }
 
 func TestEvents(t *testing.T) {
-	if testing.Short() {
-		t.Skip("Skipping events publish in short mode, because they require Elasticsearch")
-	}
+
 	if testing.Verbose() {
 		logp.LogInit(logp.LOG_DEBUG, "", false, true, []string{"topology", "output_elasticsearch"})
 	}
@@ -177,7 +174,7 @@ func TestEvents(t *testing.T) {
 	event["dst_port"] = 6379
 	event["src_ip"] = "192.168.22.2"
 	event["src_port"] = 6378
-	event["shipper"] = "appserver1"
+	event["name"] = "appserver1"
 	r := common.MapStr{}
 	r["request"] = "MGET key1"
 	r["response"] = "value1"
@@ -213,7 +210,7 @@ func TestEvents(t *testing.T) {
 	output.randomClient().Refresh(index)
 
 	params := map[string]string{
-		"q": "shipper:appserver1",
+		"q": "name:appserver1",
 	}
 
 	defer func() {
@@ -297,9 +294,7 @@ func testBulkWithParams(t *testing.T, output elasticsearchOutput) {
 }
 
 func TestBulkEvents(t *testing.T) {
-	if testing.Short() {
-		t.Skip("Skipping events publish in short mode, because they require Elasticsearch")
-	}
+
 	if testing.Verbose() {
 		logp.LogInit(logp.LOG_DEBUG, "", false, true, []string{"topology", "output_elasticsearch", "elasticsearch"})
 	}
@@ -312,27 +307,4 @@ func TestBulkEvents(t *testing.T) {
 
 	output = createElasticsearchConnection(50, 5)
 	testBulkWithParams(t, output)
-}
-
-func TestEnableTTL(t *testing.T) {
-	if testing.Short() {
-		t.Skip("Skipping events publish in short mode, because they require Elasticsearch")
-	}
-	if testing.Verbose() {
-		logp.LogInit(logp.LOG_DEBUG, "", false, true, []string{"topology", "output_elasticsearch", "elasticsearch"})
-	}
-
-	output := createElasticsearchConnection(0, 0)
-	output.randomClient().Delete(".packetbeat-topology", "", "", nil)
-
-	err := output.EnableTTL()
-	if err != nil {
-		t.Errorf("Fail to enable TTL: %s", err)
-	}
-
-	// should succeed also when index already exists
-	err = output.EnableTTL()
-	if err != nil {
-		t.Errorf("Fail to enable TTL: %s", err)
-	}
 }

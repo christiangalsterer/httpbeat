@@ -1,3 +1,5 @@
+// +build !integration
+
 package harvester
 
 import (
@@ -17,5 +19,4 @@ func TestExampleTest(t *testing.T) {
 	}
 
 	assert.Equal(t, "/var/log/", h.Path)
-
 }

@@ -1,13 +1,23 @@
+// +build !integration
+
 package publisher
 
 import (
 	"fmt"
 	"sync/atomic"
+	"testing"
 	"time"
 
 	"github.com/elastic/beats/libbeat/common"
-	"github.com/elastic/beats/libbeat/outputs"
+	"github.com/elastic/beats/libbeat/common/op"
+	"github.com/elastic/beats/libbeat/logp"
 )
+
+func enableLogging(selectors []string) {
+	if testing.Verbose() {
+		logp.LogInit(logp.LOG_DEBUG, "", false, true, selectors)
+	}
+}
 
 // testMessageHandler receives messages and acknowledges them through
 // their Signaler.
@@ -36,9 +46,9 @@ func (mh *testMessageHandler) send(m message) {
 
 func (mh *testMessageHandler) acknowledgeMessage(m message) {
 	if mh.response == CompletedResponse {
-		outputs.SignalCompleted(m.context.Signal)
+		op.SigCompleted(m.context.Signal)
 	} else {
-		outputs.SignalFailed(m.context.Signal, nil)
+		op.SigFailed(m.context.Signal, nil)
 	}
 }
 
@@ -71,7 +81,7 @@ func newTestSignaler() *testSignaler {
 	}
 }
 
-var _ outputs.Signaler = &testSignaler{}
+var _ op.Signaler = &testSignaler{}
 
 // Returns true if a signal was received. Never blocks.
 func (s *testSignaler) isDone() bool {
@@ -103,6 +113,10 @@ func (s *testSignaler) Failed() {
 	s.status <- false
 }
 
+func (s *testSignaler) Canceled() {
+	s.status <- true
+}
+
 // testEvent returns a new common.MapStr with the required fields
 // populated.
 func testEvent() common.MapStr {
@@ -115,8 +129,9 @@ func testEvent() common.MapStr {
 }
 
 type testPublisher struct {
-	pub              *PublisherType
+	pub              *Publisher
 	outputMsgHandler *testMessageHandler
+	client           *client
 }
 
 const (
@@ -132,49 +147,59 @@ const (
 )
 
 func newTestPublisher(bulkSize int, response OutputResponse) *testPublisher {
+	pub := &Publisher{}
+	pub.wsOutput.Init()
+	pub.wsPublisher.Init()
+
 	mh := &testMessageHandler{
 		msgs:     make(chan message, 10),
 		response: response,
 	}
 
 	ow := &outputWorker{}
-	ow.config.BulkMaxSize = &bulkSize
+	ow.config.BulkMaxSize = bulkSize
 	ow.handler = mh
-	ws := workerSignal{}
-	ow.messageWorker.init(&ws, defaultChanSize, defaultBulkChanSize, mh)
+	ow.messageWorker.init(&pub.wsOutput, defaultChanSize, defaultBulkChanSize, mh)
 
-	pub := &PublisherType{
-		Output:   []*outputWorker{ow},
-		wsOutput: ws,
-	}
-	pub.wsOutput.Init()
-	pub.wsPublisher.Init()
-	pub.syncPublisher = newSyncPublisher(pub, defaultChanSize, defaultBulkChanSize)
-	pub.asyncPublisher = newAsyncPublisher(pub, defaultChanSize, defaultBulkChanSize)
+	pub.Output = []*outputWorker{ow}
+
+	pub.pipelines.sync = newSyncPipeline(pub, defaultChanSize, defaultBulkChanSize)
+	pub.pipelines.async = newAsyncPipeline(pub, defaultChanSize, defaultBulkChanSize, &pub.wsPublisher)
+
 	return &testPublisher{
 		pub:              pub,
 		outputMsgHandler: mh,
+		client:           pub.Connect().(*client),
 	}
+}
+
+func (t *testPublisher) Stop() {
+	t.client.Close()
+	t.pub.Stop()
 }
 
 func (t *testPublisher) asyncPublishEvent(event common.MapStr) bool {
 	ctx := Context{}
-	return t.pub.asyncPublisher.client().PublishEvent(ctx, event)
+	msg := message{client: t.client, context: ctx, event: event}
+	return t.pub.pipelines.async.publish(msg)
 }
 
 func (t *testPublisher) asyncPublishEvents(events []common.MapStr) bool {
 	ctx := Context{}
-	return t.pub.asyncPublisher.client().PublishEvents(ctx, events)
+	msg := message{client: t.client, context: ctx, events: events}
+	return t.pub.pipelines.async.publish(msg)
 }
 
 func (t *testPublisher) syncPublishEvent(event common.MapStr) bool {
 	ctx := Context{publishOptions: publishOptions{Guaranteed: true}}
-	return t.pub.syncPublisher.client().PublishEvent(ctx, event)
+	msg := message{client: t.client, context: ctx, event: event}
+	return t.pub.pipelines.sync.publish(msg)
 }
 
 func (t *testPublisher) syncPublishEvents(events []common.MapStr) bool {
 	ctx := Context{publishOptions: publishOptions{Guaranteed: true}}
-	return t.pub.syncPublisher.client().PublishEvents(ctx, events)
+	msg := message{client: t.client, context: ctx, events: events}
+	return t.pub.pipelines.sync.publish(msg)
 }
 
 // newTestPublisherWithBulk returns a new testPublisher with bulk message
