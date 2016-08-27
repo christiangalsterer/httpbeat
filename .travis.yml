@@ -13,10 +13,10 @@ before_install:
   - cd $HOME/gopath/src/github.com/christiangalsterer/httpbeat
 
 install:
-  - make check
+  - true
 
 script:
-  - make testsuite
+  - make ci
 
 after_success:
   - test -f build/coverage/full.cov && bash <(curl -s https://codecov.io/bash) -f build/coverage/full.cov
