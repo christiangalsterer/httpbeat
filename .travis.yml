@@ -1,9 +1,30 @@
+sudo: required
+dist: trusty
+services:
+  - docker
+
 language: go
 
 go:
   - 1.7
 
-sudo: false
+os:
+  - linux
+  - osx
+
+env:
+  matrix:
+    - TARGETS="check"
+    - TARGETS="-C httpbeat testsuite"
+
+  global:
+    # Cross-compile for amd64 only to speed up testing.
+    - GOX_FLAGS="-arch amd64"
+
+addons:
+  apt:
+    packages:
+      - python-virtualenv
 
 before_install:
   # Redo the travis setup but with the christiangalsterer/httpbeat path. This is needed so the package path is correct
