@@ -24,3 +24,7 @@ copy-vendor:
 # This is called by the beats packer before building starts
 .PHONY: before-build
 before-build:
+
+.PHONY: cover
+cover:
+	echo 'mode: atomic' > coverage.txt && go list . ./beater | xargs -n1 -I{} sh -c 'go test -covermode=atomic -coverprofile=coverage.tmp {} && tail -n +2 coverage.tmp >> coverage.txt' && rm coverage.tmp
