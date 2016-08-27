@@ -34,7 +34,6 @@ _testmain.go
 *.prof
 
 build
-coverage.txt
 .idea
 .DS_Store
 /docs/html_docs

@@ -19,6 +19,5 @@ script:
   - make testsuite
 
 after_success:
-  # Copy coverage report to coverage.txt because codecov.io requires this file
-  - cp build/coverage/full.cov coverage.txt
-  - bash <(curl -s https://codecov.io/bash)
+  - test -f build/coverage/full.cov && bash <(curl -s https://codecov.io/bash) -f build/coverage/full.cov
+
