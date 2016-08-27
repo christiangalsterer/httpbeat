@@ -39,7 +39,6 @@ func (h *Httpbeat) Setup(b *beat.Beat) error {
 }
 
 func (h *Httpbeat) Run(b *beat.Beat) error {
-	var err error
 	var poller *Poller
 
 	logp.Info("httpbeat is running! Hit CTRL-C to stop it.")
@@ -56,8 +55,6 @@ func (h *Httpbeat) Run(b *beat.Beat) error {
 			return nil
 		}
 	}
-
-	return err
 }
 
 func (h *Httpbeat) Cleanup(b *beat.Beat) error {

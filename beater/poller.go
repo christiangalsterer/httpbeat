@@ -1,23 +1,23 @@
 package beater
 
 import (
-	"github.com/christiangalsterer/httpbeat/config"
 	"crypto/tls"
+	"encoding/json"
 	"fmt"
-	"strings"
-	"time"
+	"github.com/christiangalsterer/httpbeat/config"
 	"github.com/elastic/beats/libbeat/logp"
 	"github.com/elastic/beats/libbeat/outputs"
 	"github.com/parnurzeal/gorequest"
 	"github.com/robfig/cron"
-	"encoding/json"
+	"strings"
+	"time"
 )
 
 type Poller struct {
-	httpbeat      *Httpbeat
-	config        config.UrlConfig
-	cron          string
-	request       *gorequest.SuperAgent
+	httpbeat *Httpbeat
+	config   config.UrlConfig
+	cron     string
+	request  *gorequest.SuperAgent
 }
 
 func NewPooler(httpbeat *Httpbeat, config config.UrlConfig) *Poller {
@@ -50,7 +50,7 @@ func (p *Poller) Run() {
 }
 
 func (p *Poller) runOneTime() error {
-	if  p.request == nil {
+	if p.request == nil {
 		p.request = gorequest.New()
 	}
 
@@ -118,7 +118,7 @@ func (p *Poller) runOneTime() error {
 
 	logp.Debug("Httpbeat", "Executing HTTP request: %v", p.request)
 	now := time.Now()
-	resp, body, errs := p.request.End();
+	resp, body, errs := p.request.End()
 
 	if errs != nil {
 		p.request = nil
@@ -127,10 +127,10 @@ func (p *Poller) runOneTime() error {
 	}
 
 	requestEvent := Request{
-		Url: url,
-		Method: method,
+		Url:     url,
+		Method:  method,
 		Headers: p.config.Headers,
-		Body: p.config.Body,
+		Body:    p.config.Body,
 	}
 
 	var jsonBody map[string]interface{}
@@ -145,10 +145,10 @@ func (p *Poller) runOneTime() error {
 	}
 
 	responseEvent := Response{
-		StatusCode:    resp.StatusCode,
-		Headers:       p.GetResponseHeader(resp),
-		Body:          body,
-		JsonBody:      jsonBody,
+		StatusCode: resp.StatusCode,
+		Headers:    p.GetResponseHeader(resp),
+		Body:       body,
+		JsonBody:   jsonBody,
 	}
 
 	event := HttpEvent{
@@ -223,10 +223,10 @@ func (p *Poller) Stop() {
 func (p *Poller) GetResponseHeader(response gorequest.Response) map[string]string {
 
 	responseHeader := make(map[string]string)
-	for k,v := range response.Header {
+	for k, v := range response.Header {
 		value := ""
-		for _,h := range v {
-			value+=h+" ,"
+		for _, h := range v {
+			value += h + " ,"
 		}
 		value = strings.TrimRight(value, " ,")
 		responseHeader[k] = value

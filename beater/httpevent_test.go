@@ -1,10 +1,10 @@
 package beater
 
 import (
-	"testing"
-	"time"
 	"github.com/elastic/beats/libbeat/common"
 	"github.com/stretchr/testify/assert"
+	"testing"
+	"time"
 )
 
 func TestHttpEventToMapStr(t *testing.T) {

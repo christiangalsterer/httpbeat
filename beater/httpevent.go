@@ -1,30 +1,30 @@
 package beater
 
 import (
-	"time"
 	"github.com/elastic/beats/libbeat/common"
+	"time"
 )
 
 type HttpEvent struct {
 	ReadTime     time.Time
 	DocumentType string
 	Fields       map[string]string
-	Request    	 Request
+	Request      Request
 	Response     Response
 }
 
 type Request struct {
-	Url         string `json:"url"`
-	Method      string `json:"method"`
-	Headers     map[string]string `json:"headers,omitempty"`
-	Body        string `json:"body,omitempty"`
+	Url     string            `json:"url"`
+	Method  string            `json:"method"`
+	Headers map[string]string `json:"headers,omitempty"`
+	Body    string            `json:"body,omitempty"`
 }
 
 type Response struct {
-	StatusCode    int `json:"statusCode"`
-	Headers       map[string]string `json:"headers,omitempty"`
-	Body          string `json:"body,omitempty"`
-	JsonBody      map[string]interface{} `json:"jsonBody,omitempty"`
+	StatusCode int                    `json:"statusCode"`
+	Headers    map[string]string      `json:"headers,omitempty"`
+	Body       string                 `json:"body,omitempty"`
+	JsonBody   map[string]interface{} `json:"jsonBody,omitempty"`
 }
 
 func (h *HttpEvent) ToMapStr() common.MapStr {

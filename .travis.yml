@@ -13,7 +13,7 @@ before_install:
   - cd $HOME/gopath/src/github.com/christiangalsterer/httpbeat
 
 install:
-  - make
+  - make check
 
 script:
   - make testsuite

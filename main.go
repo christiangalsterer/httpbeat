@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/elastic/beats/libbeat/beat"
 	httpbeat "github.com/christiangalsterer/httpbeat/beater"
+	"github.com/elastic/beats/libbeat/beat"
 )
 
 var Version = "2.0.0-alpha.5"

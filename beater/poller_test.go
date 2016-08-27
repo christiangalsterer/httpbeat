@@ -1,8 +1,8 @@
 package beater
 
 import (
-	"testing"
 	"github.com/stretchr/testify/assert"
+	"testing"
 )
 
 func TestMapsMerging(t *testing.T) {

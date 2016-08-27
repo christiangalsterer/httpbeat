@@ -54,4 +54,3 @@ func TestReadConfig(t *testing.T) {
 	assert.Equal(t, 0, len(urls[1].Fields))
 	assert.Equal(t, "", urls[1].DocumentType)
 }
-
