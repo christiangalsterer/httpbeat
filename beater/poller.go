@@ -24,7 +24,6 @@ func NewPooler(httpbeat *Httpbeat, config config.UrlConfig) *Poller {
 	poller := &Poller{
 		httpbeat: httpbeat,
 		config:   config,
-		//request:  gorequest.New(),
 	}
 
 	return poller

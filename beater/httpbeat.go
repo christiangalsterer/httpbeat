@@ -19,7 +19,6 @@ func New() *Httpbeat {
 }
 
 func (h *Httpbeat) Config(b *beat.Beat) error {
-
 	err := cfgfile.Read(&h.HbConfig, "")
 	if err != nil {
 		logp.Err("Error reading configuration file: %v", err)
