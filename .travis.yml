@@ -8,6 +8,9 @@ language: go
 go:
   - 1.7.1
 
+# Make sure project can also be built on travis for clones of the repo
+go_import_path: github.com/elastic/beats
+
 os:
   - linux
   - osx
@@ -51,7 +54,7 @@ install:
   - true
 
 script:
-  - make ci
+  - make $TARGETS
 
 after_success:
   - test -f build/coverage/full.cov && bash <(curl -s https://codecov.io/bash) -f build/coverage/full.cov
