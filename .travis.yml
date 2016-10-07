@@ -18,8 +18,8 @@ os:
 env:
   matrix:
     - TARGETS="check"
-    - TARGETS="-C httpbeat testsuite"
-    - TARGETS="-C httpbeat crosscompile"
+    - TARGETS="testsuite"
+    - TARGETS="crosscompile"
 
   global:
     # Cross-compile for amd64 only to speed up testing.
