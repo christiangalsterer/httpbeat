@@ -1,13 +1,13 @@
 package beater
 
 import (
+	"fmt"
 	"github.com/christiangalsterer/httpbeat/config"
 	"github.com/elastic/beats/libbeat/beat"
 	"github.com/elastic/beats/libbeat/cfgfile"
+	"github.com/elastic/beats/libbeat/common"
 	"github.com/elastic/beats/libbeat/logp"
 	"github.com/elastic/beats/libbeat/publisher"
-	"github.com/elastic/beats/libbeat/common"
-	"fmt"
 )
 
 type Httpbeat struct {

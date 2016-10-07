@@ -6,11 +6,11 @@ import (
 	"os"
 )
 
-var Version = "2.0.0-beta.1"
-var Name = "httpbeat"
+var version = "2.0.0-beta.1"
+var name = "httpbeat"
 
 func main() {
-	err := beat.Run(Name, Version, httpbeat.New)
+	err := beat.Run(name, version, httpbeat.New)
 	if err != nil {
 		os.Exit(1)
 	}

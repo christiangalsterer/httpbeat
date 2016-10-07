@@ -7,11 +7,11 @@ import (
 	"github.com/christiangalsterer/httpbeat/config"
 	"github.com/elastic/beats/libbeat/logp"
 	"github.com/elastic/beats/libbeat/outputs"
+	"github.com/elastic/beats/libbeat/outputs/transport"
 	"github.com/parnurzeal/gorequest"
 	"github.com/robfig/cron"
 	"strings"
 	"time"
-	"github.com/elastic/beats/libbeat/outputs/transport"
 )
 
 type Poller struct {
@@ -126,7 +126,7 @@ func (p *Poller) runOneTime() error {
 	if errs != nil {
 		p.request = nil
 		logp.Err("An error occurred while executing HTTP request: %v", errs)
-		return fmt.Errorf("An error occured while executing HTTP request: %v", errs)
+		return fmt.Errorf("An error occurred while executing HTTP request: %v", errs)
 	}
 
 	requestEvent := Request{
