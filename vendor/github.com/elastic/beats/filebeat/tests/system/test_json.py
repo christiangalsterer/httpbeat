@@ -263,9 +263,11 @@ class Test(BaseTest):
                 overwrite_keys=True,
                 add_error_key=True,
                 ),
-            drop_fields={
-                "fields": ["headers.request-id"],
-            },
+            processors=[{
+                "drop_fields": {
+                    "fields": ["headers.request-id"],
+                },
+            }]
         )
 
         os.mkdir(self.working_dir + "/log/")
@@ -287,7 +289,9 @@ class Test(BaseTest):
 
         assert "headers.content-type" in o
         assert "headers.request-id" not in o
-        assert o["res"] is None
+
+        # We drop null values during the generic event conversion.
+        assert "res" not in o
 
     def test_with_generic_filtering_remove_headers(self):
         """
@@ -303,9 +307,11 @@ class Test(BaseTest):
                 overwrite_keys=True,
                 add_error_key=True,
                 ),
-            drop_fields={
-                "fields": ["headers", "res"],
-            },
+            processors=[{
+                "drop_fields": {
+                    "fields": ["headers", "res"],
+                },
+            }]
         )
 
         os.mkdir(self.working_dir + "/log/")
@@ -330,3 +336,34 @@ class Test(BaseTest):
         assert "res" not in o
         assert o["method"] == "GET"
         assert o["message"] == "Sent response: "
+
+    def test_integer_condition(self):
+        """
+        It should work to drop JSON event based on an integer
+        value by using a simple `equal` condition. See #2038.
+        """
+        self.render_config_template(
+            path=os.path.abspath(self.working_dir) + "/log/*",
+            json=dict(
+                keys_under_root=True,
+                ),
+            processors=[{
+                "drop_event": {
+                    "when": "equals.status: 200",
+                },
+            }]
+        )
+        os.mkdir(self.working_dir + "/log/")
+        self.copy_files(["logs/json_int.log"],
+                        source_dir="../files",
+                        target_dir="log")
+
+        proc = self.start_beat()
+        self.wait_until(
+            lambda: self.output_has(lines=1),
+            max_timeout=10)
+        proc.check_kill_and_wait()
+
+        output = self.read_output()
+        assert len(output) == 1
+        assert output[0]["status"] == 404

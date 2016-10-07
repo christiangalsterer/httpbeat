@@ -12,16 +12,16 @@
     },
     "system": {
         "filesystem": {
-            "avail": 44886921216,
+            "available": 38688276480,
             "device_name": "none",
             "files": 3940352,
-            "free": 48129642496,
-            "free_files": 3399857,
+            "free": 41930997760,
+            "free_files": 3276976,
             "mount_point": "/",
             "total": 63371726848,
             "used": {
-                "bytes": 15242084352,
-                "pct": 0.2405
+                "bytes": 21440729088,
+                "pct": 0.3383
             }
         }
     },

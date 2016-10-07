@@ -6,6 +6,8 @@ import (
 	"github.com/elastic/beats/libbeat/cfgfile"
 	"github.com/elastic/beats/libbeat/logp"
 	"github.com/elastic/beats/libbeat/publisher"
+	"github.com/elastic/beats/libbeat/common"
+	"fmt"
 )
 
 type Httpbeat struct {
@@ -14,36 +16,28 @@ type Httpbeat struct {
 	client   publisher.Client
 }
 
-func New() *Httpbeat {
-	return &Httpbeat{}
-}
-
-func (h *Httpbeat) Config(b *beat.Beat) error {
-	err := cfgfile.Read(&h.HbConfig, "")
-	if err != nil {
-		logp.Err("Error reading configuration file: %v", err)
-		return err
+func New(b *beat.Beat, cfg *common.Config) (beat.Beater, error) {
+	bt := &Httpbeat{
+		done: make(chan bool),
 	}
 
-	logp.Info("httpbeat", "Init httpbeat")
+	err := cfgfile.Read(&bt.HbConfig, "")
+	if err != nil {
+		logp.Err("Error reading config file: %v", err)
+		return nil, fmt.Errorf("Error reading config file: %v", err)
+	}
 
-	return nil
-}
-
-func (h *Httpbeat) Setup(b *beat.Beat) error {
-	h.client = b.Publisher.Connect()
-	h.done = make(chan bool)
-
-	return nil
+	return bt, nil
 }
 
 func (h *Httpbeat) Run(b *beat.Beat) error {
 	var poller *Poller
 
 	logp.Info("httpbeat is running! Hit CTRL-C to stop it.")
+	h.client = b.Publisher.Connect()
 
 	for i, urlConfig := range h.HbConfig.Httpbeat.Urls {
-		logp.Debug("httpbeat", "Creating poller # %v with URL: %v", i, urlConfig.Url)
+		logp.Debug("httpbeat", "Creating poller #%v with URL: %v", i, urlConfig.Url)
 		poller = NewPooler(h, urlConfig)
 		go poller.Run()
 	}

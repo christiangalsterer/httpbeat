@@ -345,6 +345,23 @@ func TestUnpackArray(t *testing.T) {
 	}
 }
 
+func TestUnpackArrayDirect(t *testing.T) {
+	c, _ := NewFrom(node{"a": []int{1, 2, 3}})
+	a, _ := c.Child("a", -1)
+
+	var table []int
+	err := a.Unpack(&table)
+	assert.NoError(t, err)
+	assert.Equal(t, []int{1, 2, 3}, table)
+
+	tmp := struct {
+		Table []int `config:",inline"`
+	}{}
+	err = a.Unpack(&tmp)
+	assert.NoError(t, err)
+	assert.Equal(t, []int{1, 2, 3}, tmp.Table)
+}
+
 func TestUnpackInline(t *testing.T) {
 	type SubType struct{ B bool }
 	type SubInterface struct{ B interface{} }

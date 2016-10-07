@@ -11,6 +11,7 @@ func initOffsetManager(t *testing.T) (om OffsetManager,
 	config := NewConfig()
 	config.Metadata.Retry.Max = 1
 	config.Consumer.Offsets.CommitInterval = 1 * time.Millisecond
+	config.Version = V0_9_0_0
 
 	broker = NewMockBroker(t, 1)
 	coordinator = NewMockBroker(t, 2)
@@ -189,7 +190,7 @@ func TestPartitionOffsetManagerNextOffset(t *testing.T) {
 	pom := initPartitionOffsetManager(t, om, coordinator, 5, "test_meta")
 
 	offset, meta := pom.NextOffset()
-	if offset != 6 {
+	if offset != 5 {
 		t.Errorf("Expected offset 5. Actual: %v", offset)
 	}
 	if meta != "test_meta" {
@@ -214,7 +215,7 @@ func TestPartitionOffsetManagerMarkOffset(t *testing.T) {
 	pom.MarkOffset(100, "modified_meta")
 	offset, meta := pom.NextOffset()
 
-	if offset != 101 {
+	if offset != 100 {
 		t.Errorf("Expected offset 100. Actual: %v", offset)
 	}
 	if meta != "modified_meta" {
@@ -251,7 +252,7 @@ func TestPartitionOffsetManagerMarkOffsetWithRetention(t *testing.T) {
 	pom.MarkOffset(100, "modified_meta")
 	offset, meta := pom.NextOffset()
 
-	if offset != 101 {
+	if offset != 100 {
 		t.Errorf("Expected offset 100. Actual: %v", offset)
 	}
 	if meta != "modified_meta" {

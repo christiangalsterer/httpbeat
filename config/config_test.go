@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/elastic/beats/libbeat/cfgfile"
+	"github.com/elastic/beats/libbeat/outputs/transport"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -33,15 +34,14 @@ func TestReadConfig(t *testing.T) {
 	assert.Equal(t, 2, len(urls[0].Headers))
 	assert.Equal(t, 2, len(urls[0].Fields))
 	assert.Equal(t, "jolokia", urls[0].DocumentType)
-	assert.Equal(t, 1, len(urls[0].TLS.CAs))
-	assert.Equal(t, "/etc/pki/root/ca.pem", urls[0].TLS.CAs[0])
-	assert.Equal(t, "/etc/pki/client/cert.pem", urls[0].TLS.Certificate)
-	assert.Equal(t, "/etc/pki/client/cert.key", urls[0].TLS.CertificateKey)
-	assert.Equal(t, false, urls[0].TLS.Insecure)
-	assert.Equal(t, 0, len(urls[0].TLS.CipherSuites))
-	assert.Equal(t, 0, len(urls[0].TLS.CurveTypes))
-	assert.Equal(t, "1.0", urls[0].TLS.MinVersion)
-	assert.Equal(t, "1.2", urls[0].TLS.MaxVersion)
+	assert.Equal(t, 1, len(urls[0].SSL.CAs))
+	assert.Equal(t, "/etc/pki/root/ca.pem", urls[0].SSL.CAs[0])
+	assert.Equal(t, "/etc/pki/client/cert.pem", urls[0].SSL.Certificate.Certificate)
+	assert.Equal(t, "/etc/pki/client/cert.key", urls[0].SSL.Certificate.Key)
+	assert.Equal(t, transport.VerifyFull, urls[0].SSL.VerificationMode)
+	assert.Equal(t, 1, len(urls[0].SSL.CipherSuites))
+	assert.Equal(t, 0, len(urls[0].SSL.CurveTypes))
+	assert.Equal(t, transport.TLSVersionSSL30, urls[0].SSL.Versions[0])
 	assert.Equal(t, "unflatten", urls[0].JsonDotMode)
 
 	assert.Equal(t, "http://example.org/2", urls[1].Url)

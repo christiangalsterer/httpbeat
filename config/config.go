@@ -27,7 +27,7 @@ type UrlConfig struct {
 	Timeout      *int64
 	DocumentType string            `config:"document_type"`
 	Fields       map[string]string `config:"fields"`
-	TLS          *outputs.TLSConfig
+	SSL          *outputs.TLSConfig
 	JsonDotMode  string `config:"json_dot_mode"`
 }
 

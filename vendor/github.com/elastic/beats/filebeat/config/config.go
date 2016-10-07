@@ -1,6 +1,7 @@
 package config
 
 import (
+	"errors"
 	"log"
 	"os"
 	"path/filepath"
@@ -14,24 +15,27 @@ import (
 
 // Defaults for config variables which are not set
 const (
-	DefaultRegistryFile string        = "registry"
-	DefaultSpoolSize    uint64        = 2048
-	DefaultIdleTimeout  time.Duration = 5 * time.Second
-	DefaultInputType                  = "log"
+	DefaultInputType = "log"
 )
 
 type Config struct {
-	Filebeat FilebeatConfig
+	Prospectors     []*common.Config `config:"prospectors"`
+	SpoolSize       uint64           `config:"spool_size" validate:"min=1"`
+	PublishAsync    bool             `config:"publish_async"`
+	IdleTimeout     time.Duration    `config:"idle_timeout" validate:"nonzero,min=0s"`
+	RegistryFile    string           `config:"registry_file"`
+	ConfigDir       string           `config:"config_dir"`
+	ShutdownTimeout time.Duration    `config:"shutdown_timeout"`
 }
 
-type FilebeatConfig struct {
-	Prospectors  []*common.Config `config:"prospectors"`
-	SpoolSize    uint64           `config:"spool_size"`
-	PublishAsync bool             `config:"publish_async"`
-	IdleTimeout  time.Duration    `config:"idle_timeout"`
-	RegistryFile string           `config:"registry_file"`
-	ConfigDir    string           `config:"config_dir"`
-}
+var (
+	DefaultConfig = Config{
+		RegistryFile:    "registry",
+		SpoolSize:       2048,
+		IdleTimeout:     5 * time.Second,
+		ShutdownTimeout: 0,
+	}
+)
 
 const (
 	LogInputType   = "log"
@@ -81,23 +85,25 @@ func mergeConfigFiles(configFiles []string, config *Config) error {
 	for _, file := range configFiles {
 		logp.Info("Additional configs loaded from: %s", file)
 
-		tmpConfig := &Config{}
-		cfgfile.Read(tmpConfig, file)
+		tmpConfig := struct {
+			Filebeat Config
+		}{}
+		cfgfile.Read(&tmpConfig, file)
 
-		config.Filebeat.Prospectors = append(config.Filebeat.Prospectors, tmpConfig.Filebeat.Prospectors...)
+		config.Prospectors = append(config.Prospectors, tmpConfig.Filebeat.Prospectors...)
 	}
 
 	return nil
 }
 
 // Fetches and merges all config files given by configDir. All are put into one config object
-func (config *Config) FetchConfigs() {
+func (config *Config) FetchConfigs() error {
 
-	configDir := config.Filebeat.ConfigDir
+	configDir := config.ConfigDir
 
 	// If option not set, do nothing
 	if configDir == "" {
-		return
+		return nil
 	}
 
 	// If configDir is relative, consider it relative to the config path
@@ -110,14 +116,20 @@ func (config *Config) FetchConfigs() {
 
 	if err != nil {
 		log.Fatal("Could not use config_dir of: ", configDir, err)
+		return err
 	}
 
 	err = mergeConfigFiles(configFiles, config)
 	if err != nil {
 		log.Fatal("Error merging config files: ", err)
+		return err
 	}
 
-	if len(config.Filebeat.Prospectors) == 0 {
-		log.Fatalf("No paths given. What files do you want me to watch?")
+	if len(config.Prospectors) == 0 {
+		err := errors.New("No paths given. What files do you want me to watch?")
+		log.Fatalf("%v", err)
+		return err
 	}
+
+	return nil
 }

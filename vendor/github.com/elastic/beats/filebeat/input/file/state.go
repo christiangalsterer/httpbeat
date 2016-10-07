@@ -15,7 +15,8 @@ type State struct {
 	Finished    bool        `json:"-"` // harvester state
 	Fileinfo    os.FileInfo `json:"-"` // the file info
 	FileStateOS StateOS
-	LastSeen    time.Time `json:"last_seen"`
+	Timestamp   time.Time     `json:"timestamp"`
+	TTL         time.Duration `json:"ttl"`
 }
 
 // NewState creates a new file state
@@ -25,8 +26,14 @@ func NewState(fileInfo os.FileInfo, path string) State {
 		Source:      path,
 		Finished:    false,
 		FileStateOS: GetOSState(fileInfo),
-		LastSeen:    time.Now(),
+		Timestamp:   time.Now(),
+		TTL:         -1 * time.Second, // By default, state does have an infinit ttl
 	}
+}
+
+// IsEmpty returns true if the state is empty
+func (s *State) IsEmpty() bool {
+	return *s == State{}
 }
 
 // States handles list of FileState
@@ -47,7 +54,7 @@ func (s *States) Update(newState State) {
 	defer s.mutex.Unlock()
 
 	index, _ := s.findPrevious(newState)
-	newState.LastSeen = time.Now()
+	newState.Timestamp = time.Now()
 
 	if index >= 0 {
 		s.states[index] = newState
@@ -58,11 +65,12 @@ func (s *States) Update(newState State) {
 	}
 }
 
-func (s *States) FindPrevious(newState State) (int, State) {
+func (s *States) FindPrevious(newState State) State {
 	// TODO: This currently blocks writing updates every time state is fetched. Should be improved for performance
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
-	return s.findPrevious(newState)
+	_, state := s.findPrevious(newState)
+	return state
 }
 
 // findPreviousState returns the previous state fo the file
@@ -81,25 +89,42 @@ func (s *States) findPrevious(newState State) (int, State) {
 }
 
 // Cleanup cleans up the state array. All states which are older then `older` are removed
-func (s *States) Cleanup(older time.Duration) {
+// The number of states that were cleaned up is returned
+func (s *States) Cleanup() int {
+
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 
-	for i, state := range s.states {
+	statesBefore := len(s.states)
 
-		// File wasn't seen for longer then older -> remove state
-		if time.Since(state.LastSeen) > older {
-			logp.Debug("prospector", "State removed for %s because of older: %s", state.Source)
-			s.states = append(s.states[:i], s.states[i+1:]...)
+	currentTime := time.Now()
+	states := s.states[:0]
+
+	for _, state := range s.states {
+
+		ttl := state.TTL
+
+		if ttl == 0 || (ttl > 0 && currentTime.Sub(state.Timestamp) > ttl) {
+			if state.Finished {
+				logp.Debug("state", "State removed for %v because of older: %v", state.Source, ttl)
+				continue // drop state
+			} else {
+				logp.Err("State for %s should have been dropped, but couldn't as state is not finished.", state.Source)
+			}
 		}
-	}
 
+		states = append(states, state) // in-place copy old state
+	}
+	s.states = states
+
+	return statesBefore - len(s.states)
 }
 
 // Count returns number of states
 func (s *States) Count() int {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
+
 	return len(s.states)
 }
 

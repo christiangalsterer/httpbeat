@@ -6,7 +6,7 @@ owners:
   homepage: https://github.com/christiangalsterer
 import:
 - package: github.com/elastic/beats
-  version: v5.0.0-alpha5
+  version: v5.0.0-beta1
   subpackages:
   - libbeat/beat
   - libbeat/cfgfile
@@ -15,6 +15,6 @@ import:
   #- libbeat/outputs
   - libbeat/publisher
 - package: github.com/parnurzeal/gorequest
-  version: v0.2.13
+  version: v0.2.14
 - package: github.com/robfig/cron
   version: v1

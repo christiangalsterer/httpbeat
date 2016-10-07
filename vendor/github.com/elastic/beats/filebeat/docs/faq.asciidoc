@@ -4,14 +4,17 @@
 This section contains frequently asked questions about Filebeat. Also check out the
 https://discuss.elastic.co/c/beats/filebeat[Filebeat discussion forum].
 
+[float]
 [[filebeat-network-volumes]]
-=== Why can't I read log files from network volumes?
+=== Can't read log files from network volumes?
 
 We do not recommend reading log files from network volumes. Whenever possible, install Filebeat on the host machine and
 send the log files directly from there. Reading files from network volumes (especially on Windows) can have unexpected side
 effects. For example, changed file identifiers may result in Filebeat reading a log file from scratch again.
 
-=== Why isn’t Filebeat collecting lines from my file?
+[float]
+[[filebeat-not-collecting-lines]]
+=== Filebeat isn't collecting lines from a file?
 
 Filebeat might be incorrectly configured or unable to send events to the output. To resolve the issue:
 
@@ -28,17 +31,70 @@ it's publishing events successfully:
 ./filebeat -c config.yml -e -d "*"
 ----------------------------------------------------------------------
 
+[float]
+[[open-file-handlers]]
+== Too many open file handlers?
+
+Filebeat keeps the file handler open in case it reaches the end of a file to read new log lines in near real time. If filebeat is harvesting a large number of files, the number of open files can be become an issue. In most environments, the number of files which are actively updated is low. The configuration `close_inactive` should be set accordingly to close files which are not active any more.
+
+There are 4 more configuration options which can be used to close file handlers, but all of them should be used carefully as they can side affects. The options are:
+
+* close_renamed
+* close_removed
+* close_eof
+* close_timeout
+
+`close_renamed` and `close_removed` can be useful on Windows and issues related to file rotation, see <<windows-file-rotation>>. `close_eof` can be useful in environments with a large number of files with only very few entries. `close_timeout` in environments where it is more important to close file handlers then to send all log lines. More details can be found in config options, see <<configuration-filebeat-options>>.
+
+Before using any of these variables, make sure to study the documentation on each.
+
+[float]
+[[reduce-registry-size]]
+=== Registry file is too large?
+
+Filebeat keeps all states of the files and persists the states on disk in the `registry_file`. The states are used to continue file reading at a previous position in case filebeat is restarted. In case every day a large amount of new files is constantly produced, the registry file grows over time. To reduce the size of the registry file, there are two configuration variables: `clean_removed` and `close_inactive`.
+
+In case old files are not touched anymore and fall under `ignore_older`, it is recommended to use `clean_inactive`. If on the other size old files get removed from disk `clean_removed` can be used.
+
+[float]
+[[inode-reuse-issue]]
+=== Inode reuse causes Filebeat to skip lines?
+
+Filebeat uses under linux inode and device to identify files. In case a file is removed from disk, the inode can again be assigned to a new file. In the case of file rotation where and old file is removed and a new one is directly created afterwards, it can happen that the new files has the exact same inode. In this case, Filebeat assumes that the new file is the same as the old and tries to continue reading at the old position which is not correct.
+
+By default states are never removed from the registry file. In case of inode reuse issue it is recommended to use the `clean_*` options, especially `clean_inactive`. In case your files get rotated every 24 hours and the rotated files rotated files are not updated anymore, `ignore_older` could be set to 48 hours and `clean_inactive` 72 hours.
+
+`clean_removed` can be used for files that are removed from disk. Be aware that `clean_removed` also applies if during one scan a file cannot be found anymore. In case the file shows up at a later stage again, it will be sent again from scratch.
+
+[float]
+[[windows-file-rotation]]
+=== Open file handlers cause issues with Windows file rotation?
+
+Under Windows it can happen, that files cannot be renamed / removed as long as filebeat keeps the file handler open. This can lead to issues with the file rotating system. To reduce this issue, the options `close_removed` and `close_renamed` can be used together.
+
+It is important to understand, that these two options mean files are closed before the harvester finished reading the file. In case the file cannot be picked up again by the prospector and the harvester didn't finish reading the file, the missing lines will never be sent to elasticsearch.
+
+
+[float]
 [[filebeat-cpu]]
-=== Why is Filebeat using too much CPU?
+=== Filebeat is using too much CPU?
 
 Filebeat might be configured to scan for files too frequently. Check the setting for `scan_frequency` in the `filebeat.yml`
 config file. Setting `scan_frequency` to less than 1s may cause Filebeat to scan the disk in a tight loop.
 
-//=== Why is Filebeat keeping old files open?
-
+[float]
 [[dashboard-fields-incorrect-filebeat]]
-=== Why is the dashboard in Kibana breaking up my data fields incorrectly?
+=== Dashboard in Kibana is breaking up data fields incorrectly?
 
 The index template might not be loaded correctly. See <<filebeat-template>>.
 
+[float]
+[[newline-character-required-eof]]
+=== Filebeat isn't shipping the last line of a file?
+
+Filebeat uses a newline character to detect the end of an event. If lines are added incrementally to a file that's being
+harvested, a newline character is required after the last line, or Filebeat will not read the last line of
+the file.
+
+include::../../libbeat/docs/faq-limit-bandwidth.asciidoc[]
 include::../../libbeat/docs/shared-faq.asciidoc[]

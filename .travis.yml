@@ -16,10 +16,12 @@ env:
   matrix:
     - TARGETS="check"
     - TARGETS="-C httpbeat testsuite"
+    - TARGETS="-C httpbeat crosscompile"
 
   global:
     # Cross-compile for amd64 only to speed up testing.
     - GOX_FLAGS="-arch amd64"
+    - DOCKER_COMPOSE_VERSION: 1.7.0
 
 addons:
   apt:
@@ -32,6 +34,18 @@ before_install:
   - rsync -az ${TRAVIS_BUILD_DIR}/ $HOME/gopath/src/github.com/christiangalsterer/httpbeat/
   - export TRAVIS_BUILD_DIR=$HOME/gopath/src/github.com/christiangalsterer/httpbeat
   - cd $HOME/gopath/src/github.com/christiangalsterer/httpbeat
+
+  # Update to most recent docker version
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+      sudo apt-get update;
+      sudo apt-cache search docker;
+      sudo apt-get -o Dpkg::Options::="--force-confnew" install -y docker-engine;
+    fi
+  # Docker-compose installation
+  - sudo rm /usr/local/bin/docker-compose || true
+  - curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > docker-compose
+  - chmod +x docker-compose
+  - sudo mv docker-compose /usr/local/bin
 
 install:
   - true

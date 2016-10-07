@@ -13,21 +13,16 @@
     "system": {
         "cpu": {
             "idle": {
-                "pct": 0.9492,
-                "ticks": 337165
+                "pct": 0.852,
+                "ticks": 44421033
             },
             "iowait": {
                 "pct": 0,
-                "ticks": 1026
+                "ticks": 159735
             },
             "irq": {
                 "pct": 0,
                 "ticks": 0
-            },
-            "load": {
-                "1": 1.76,
-                "15": 0.56,
-                "5": 0.99
             },
             "nice": {
                 "pct": 0,
@@ -35,19 +30,19 @@
             },
             "softirq": {
                 "pct": 0,
-                "ticks": 78
+                "ticks": 14070
             },
             "steal": {
                 "pct": 0,
                 "ticks": 0
             },
             "system": {
-                "pct": 0.0051,
-                "ticks": 7665
+                "pct": 0.0408,
+                "ticks": 305704
             },
             "user": {
-                "pct": 0.0457,
-                "ticks": 37296
+                "pct": 0.1071,
+                "ticks": 841974
             }
         }
     },

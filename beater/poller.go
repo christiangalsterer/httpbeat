@@ -11,6 +11,7 @@ import (
 	"github.com/robfig/cron"
 	"strings"
 	"time"
+	"github.com/elastic/beats/libbeat/outputs/transport"
 )
 
 type Poller struct {
@@ -87,11 +88,14 @@ func (p *Poller) runOneTime() error {
 	}
 
 	// set tls config
-	useTLS := (p.config.TLS != nil)
+	useTLS := (p.config.SSL != nil)
 	if useTLS {
 		var err error
 		var tlsConfig *tls.Config
-		tlsConfig, err = outputs.LoadTLSConfig(p.config.TLS)
+		var tlsC *transport.TLSConfig
+		//tlsConfig, err = outputs.LoadTLSConfig(p.config.TLS)
+		tlsC, err = outputs.LoadTLSConfig(p.config.SSL)
+		tlsConfig = convertTLSConfig(tlsC)
 		if err != nil {
 			return err
 		}
@@ -121,7 +125,7 @@ func (p *Poller) runOneTime() error {
 
 	if errs != nil {
 		p.request = nil
-		logp.Err("An error occured while executing HTTP request: %v", errs)
+		logp.Err("An error occurred while executing HTTP request: %v", errs)
 		return fmt.Errorf("An error occured while executing HTTP request: %v", errs)
 	}
 
@@ -214,6 +218,16 @@ func mergeMaps(first map[string]interface{}, second map[string]interface{}, key 
 			first[key] = second
 		}
 	}
+}
+
+func convertTLSConfig(config *transport.TLSConfig) *tls.Config {
+	var tlsConfig *tls.Config
+	tlsConfig.Certificates = config.Certificates
+	tlsConfig.CipherSuites = config.CipherSuites
+	tlsConfig.RootCAs = config.RootCAs
+	tlsConfig.CurvePreferences = config.CurvePreferences
+	return tlsConfig
+
 }
 
 func (p *Poller) Stop() {

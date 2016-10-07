@@ -157,13 +157,24 @@ func TestMergeNestedPath(t *testing.T) {
 	tests := []interface{}{
 		map[string]interface{}{
 			"c.b": true,
-		},
-		map[string]bool{
-			"c.b": true,
+			"c.i": 42,
 		},
 		map[string]interface{}{
 			"c":   nil,
 			"c.b": true,
+			"c.i": 42,
+		},
+		map[string]interface{}{
+			"c": map[string]interface{}{
+				"b": true,
+				"i": 42,
+			},
+		},
+		map[string]interface{}{
+			"c": map[string]interface{}{
+				"b": true,
+			},
+			"c.i": 42,
 		},
 
 		node{
@@ -173,10 +184,23 @@ func TestMergeNestedPath(t *testing.T) {
 			"c":   nil,
 			"c.b": true,
 		},
+		node{
+			"c": node{
+				"b": true,
+				"i": 42,
+			},
+		},
+		node{
+			"c": node{
+				"b": true,
+			},
+			"c.i": 42,
+		},
 
 		struct {
 			B bool `config:"c.b"`
-		}{true},
+			I int  `config:"c.i"`
+		}{true, 42},
 	}
 
 	for i, in := range tests {

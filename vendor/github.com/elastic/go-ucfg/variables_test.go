@@ -22,6 +22,9 @@ func TestVarExpParserSuccess(t *testing.T) {
 		expected   varEvaler
 	}{
 		{"plain string", "string", str("string")},
+		{"string containing :", "just:a:string", str("just:a:string")},
+		{"string containing }", "abc } def", str("abc } def")},
+		{"string with escaped var", "escaped $${var}", str("escaped ${var}")},
 		{"reference", "${reference}", ref("reference")},
 		{"exp in middle", "test ${splice} this",
 			cat(str("test "), ref("splice"), str(" this"))},
@@ -43,6 +46,10 @@ func TestVarExpParserSuccess(t *testing.T) {
 			exp(opDefault,
 				str("test"),
 				cat(str("the "), ref("default"), str(" value")))},
+		{"exp with default containing }", "${test:abc$}def}",
+			exp(opDefault, str("test"), str("abc}def"))},
+		{"exp with default containing :", "${test:http://default:1234}",
+			exp(opDefault, str("test"), str("http://default:1234"))},
 	}
 
 	for _, test := range tests {

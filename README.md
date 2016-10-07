@@ -1,5 +1,6 @@
 [![Build Status](https://travis-ci.org/christiangalsterer/httpbeat.svg?branch=master)](https://travis-ci.org/christiangalsterer/httpbeat)
 [![codecov.io](http://codecov.io/github/christiangalsterer/httpbeat/coverage.svg?branch=master)](http://codecov.io/github/christiangalsterer/httpbeat?branch=master)
+[![Go Report Card](https://goreportcard.com/badge/github.com/christiangalsterer/httpbeat)](https://goreportcard.com/report/github.com/christiangalsterer/httpbeat)
 
 # Httpbeat
 
@@ -76,7 +77,7 @@ make update
 
 ### Cleanup
 
-To clean  httpbeat source code, run the following commands:
+To clean httpbeat source code, run the following commands:
 
 ```
 make fmt
@@ -116,10 +117,17 @@ This will fetch and create all images required for the build process. The hole p
 
 # Releases
 
-2.0.0-alpha.5 (2016-08-XX) Work in Progress
+2.0.0-beta.1 (2016-10-XX) Work in Progress
 
 Feature release containing the following changes:
-* Update to beats v5.0.0-alpha5
+* Update to beats v5.0.0-beta1
+
+Please note that this release contains the following breaking changes introduced by beats 5.0.X, see also (https://github.com/elastic/beats/blob/v5.0.0-beta1/CHANGELOG.asciidoc)
+* SSL Configuration
+    * rename tls configurations section to ssl
+    * rename certificate_key configuration to key. 2330
+    * replace tls.insecure with ssl.verification_mode setting. 2330
+    * replace tls.min/max_version with ssl.supported_protocols setting requiring full protocol name
 
 1.2.0 (2016-07-19)
 

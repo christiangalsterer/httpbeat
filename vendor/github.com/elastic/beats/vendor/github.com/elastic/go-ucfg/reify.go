@@ -17,7 +17,10 @@ func (c *Config) Unpack(to interface{}, options ...Option) error {
 	}
 
 	vTo := reflect.ValueOf(to)
-	if to == nil || (vTo.Kind() != reflect.Ptr && vTo.Kind() != reflect.Map) {
+
+	k := vTo.Kind()
+	isValid := to != nil && (k == reflect.Ptr || k == reflect.Map)
+	if !isValid {
 		return raisePointerRequired(vTo)
 	}
 
@@ -32,12 +35,21 @@ func reifyInto(opts *options, to reflect.Value, from *Config) Error {
 	}
 
 	tTo := chaseTypePointers(to.Type())
+	k := tTo.Kind()
 
-	switch tTo.Kind() {
+	switch k {
 	case reflect.Map:
 		return reifyMap(opts, to, from)
 	case reflect.Struct:
 		return reifyStruct(opts, to, from)
+	case reflect.Slice, reflect.Array:
+		fopts := fieldOptions{opts: opts, tag: tagOptions{}, validators: nil}
+		v, err := reifyMergeValue(fopts, to, cfgSub{from})
+		if err != nil {
+			return err
+		}
+		to.Set(v)
+		return nil
 	}
 
 	return raiseInvalidTopLevelType(to.Interface())
@@ -48,14 +60,15 @@ func reifyMap(opts *options, to reflect.Value, from *Config) Error {
 		return raiseKeyInvalidTypeUnpack(to.Type(), from)
 	}
 
-	if len(from.fields.fields) == 0 {
+	fields := from.fields.dict()
+	if len(fields) == 0 {
 		return nil
 	}
 
 	if to.IsNil() {
 		to.Set(reflect.MakeMap(to.Type()))
 	}
-	for k, value := range from.fields.fields {
+	for k, value := range fields {
 		key := reflect.ValueOf(k)
 
 		old := to.MapIndex(key)
@@ -88,11 +101,11 @@ func reifyStruct(opts *options, orig reflect.Value, cfg *Config) Error {
 	if v, ok := implementsUnpacker(to); ok {
 		reified, err := cfgSub{cfg}.reify(opts)
 		if err != nil {
-			raisePathErr(err, cfg.metadata, "", cfg.Path("."))
+			return raisePathErr(err, cfg.metadata, "", cfg.Path("."))
 		}
 
-		if err := unpackWith(v, reified); err != nil {
-			return raiseUnsupportedInputType(cfg.ctx, cfg.metadata, v)
+		if err := unpackWith(cfg.ctx, cfg.metadata, v, reified); err != nil {
+			return err
 		}
 	} else {
 		numField := to.NumField()
@@ -113,6 +126,14 @@ func reifyStruct(opts *options, orig reflect.Value, cfg *Config) Error {
 					if err := reifyInto(opts, vField, cfg); err != nil {
 						return err
 					}
+				case reflect.Slice, reflect.Array:
+					fopts := fieldOptions{opts: opts, tag: tagOpts, validators: validators}
+					v, err := reifyMergeValue(fopts, vField, cfgSub{cfg})
+					if err != nil {
+						return err
+					}
+					vField.Set(v)
+
 				default:
 					return raiseInlineNeedsObject(cfg, stField.Name, vField.Type())
 				}
@@ -149,7 +170,7 @@ func reifyGetField(
 		value = nil
 	}
 
-	if _, ok := value.(*cfgNil); value == nil || ok {
+	if isNil(value) {
 		if err := runValidators(nil, opts.validators); err != nil {
 			return raiseValidation(cfg.ctx, cfg.metadata, name, err)
 		}
@@ -314,9 +335,8 @@ func reifyMergeValue(
 			return reflect.Value{}, raisePathErr(err, val.meta(), "", ctx.path("."))
 		}
 
-		if err := unpackWith(v, reified); err != nil {
-			ctx := val.Context()
-			return reflect.Value{}, raiseUnsupportedInputType(ctx, val.meta(), v)
+		if err := unpackWith(val.Context(), val.meta(), v, reified); err != nil {
+			return reflect.Value{}, err
 		}
 		return old, nil
 	}
@@ -378,7 +398,7 @@ func reifyDoArray(
 
 func castArr(opts *options, v value) ([]value, Error) {
 	if sub, ok := v.(cfgSub); ok {
-		return sub.c.fields.arr, nil
+		return sub.c.fields.array(), nil
 	}
 	if ref, ok := v.(*cfgRef); ok {
 		unrefed, err := ref.resolve(opts)
@@ -387,7 +407,7 @@ func castArr(opts *options, v value) ([]value, Error) {
 		}
 
 		if sub, ok := unrefed.(cfgSub); ok {
-			return sub.c.fields.arr, nil
+			return sub.c.fields.array(), nil
 		}
 	}
 
@@ -410,7 +430,7 @@ func reifyPrimitive(
 	t, baseType reflect.Type,
 ) (reflect.Value, Error) {
 	// zero initialize value if val==nil
-	if _, ok := val.(*cfgNil); ok {
+	if isNil(val) {
 		return pointerize(t, baseType, reflect.Zero(baseType)), nil
 	}
 
@@ -425,10 +445,8 @@ func reifyPrimitive(
 			return reflect.Value{}, raisePathErr(err, val.meta(), "", ctx.path("."))
 		}
 
-		err = unpackWith(v, reified)
-		if err != nil {
-			ctx := val.Context()
-			return reflect.Value{}, raiseUnsupportedInputType(ctx, val.meta(), v)
+		if err := unpackWith(val.Context(), val.meta(), v, reified); err != nil {
+			return reflect.Value{}, err
 		}
 	} else {
 		v, err = doReifyPrimitive(opts, val, baseType)
