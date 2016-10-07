@@ -8,17 +8,14 @@ language: go
 go:
   - 1.7.1
 
-# Make sure project can also be built on travis for clones of the repo
-go_import_path: github.com/christiangalsterer/httpbeat
-
 os:
   - linux
   - osx
 
 env:
   matrix:
+    - TARGETS=""
     - TARGETS="check"
-    - TARGETS="testsuite"
     - TARGETS="crosscompile"
 
   global:
