@@ -24,7 +24,7 @@ Ensure that this folder is at the following location:
 
 ### Requirements
 
-* [Golang](https://golang.org/dl/) 1.7
+* [Golang](https://golang.org/dl/) 1.7.1
 * [Glide](https://github.com/Masterminds/glide) >= 0.11.0
 
 ### Build
@@ -122,11 +122,11 @@ This will fetch and create all images required for the build process. The hole p
 Feature release containing the following changes:
 * Update to beats v5.0.0-beta1
 
-Please note that this release contains the following breaking changes introduced by beats 5.0.X, see also (https://github.com/elastic/beats/blob/v5.0.0-beta1/CHANGELOG.asciidoc)
+Please note that this release contains the following breaking changes introduced by beats 5.0.X, see also [Beats Changelog](https://github.com/elastic/beats/blob/v5.0.0-beta1/CHANGELOG.asciidoc)
 * SSL Configuration
     * rename tls configurations section to ssl
-    * rename certificate_key configuration to key. 2330
-    * replace tls.insecure with ssl.verification_mode setting. 2330
+    * rename certificate_key configuration to key.
+    * replace tls.insecure with ssl.verification_mode setting.
     * replace tls.min/max_version with ssl.supported_protocols setting requiring full protocol name
 
 1.2.0 (2016-07-19)
