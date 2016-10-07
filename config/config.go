@@ -12,10 +12,16 @@ const (
 	DefaultDocumentType string        = "httpbeat"
 )
 
+/*
+ Configuration for Httpbeat
+ */
 type HttpbeatConfig struct {
 	Urls []UrlConfig
 }
 
+/*
+ Configuration for single URL
+ */
 type UrlConfig struct {
 	Cron         string
 	Url          string
@@ -31,6 +37,9 @@ type UrlConfig struct {
 	JsonDotMode  string `config:"json_dot_mode"`
 }
 
+/*
+ Configuration for Basic authentication
+ */
 type BasicAuthenticationConfig struct {
 	Username string
 	Password string
