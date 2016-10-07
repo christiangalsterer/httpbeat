@@ -23,6 +23,13 @@ env:
     - GOX_FLAGS="-arch amd64"
     - DOCKER_COMPOSE_VERSION: 1.7.0
 
+matrix:
+  exclude:
+    - os: osx
+      env: TARGETS="check"
+    - os: osx
+      env: TARGETS="crosscompile"
+
 addons:
   apt:
     packages:
