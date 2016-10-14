@@ -144,6 +144,98 @@ func TestUnpackPrimitiveValues(t *testing.T) {
 	}
 }
 
+func TestUnpackPrimitivesValuesResolve(t *testing.T) {
+	tests := []interface{}{
+		New(),
+		&map[string]interface{}{},
+		map[string]interface{}{},
+		node{},
+		&node{},
+		&struct {
+			B bool
+			I int
+			U uint
+			F float64
+			S string
+		}{},
+		&struct {
+			B interface{}
+			I interface{}
+			U interface{}
+			F interface{}
+			S interface{}
+		}{},
+		&struct {
+			B *bool
+			I *int
+			U *uint
+			F *float64
+			S *string
+		}{},
+	}
+
+	cfgOpts := []Option{
+		VarExp,
+		Resolve(func(name string) (string, error) {
+			return map[string]string{
+				"v_b": "true",
+				"v_i": "42",
+				"v_u": "23",
+				"v_f": "3.14",
+				"v_s": "string",
+			}[name], nil
+		}),
+	}
+
+	c, _ := NewFrom(node{
+		"b": "${v_b}",
+		"i": "${v_i}",
+		"u": "${v_u}",
+		"f": "${v_f}",
+		"s": "${v_s}",
+	}, cfgOpts...)
+
+	for i, out := range tests {
+		t.Logf("test unpack primitives(%v) into: %v", i, out)
+		err := c.Unpack(out, cfgOpts...)
+		if err != nil {
+			t.Fatalf("failed to unpack: %v", err)
+		}
+	}
+
+	// validate content by merging struct
+	for i, in := range tests {
+		t.Logf("test unpack primitives(%v) check: %v", i, in)
+
+		c, err := NewFrom(in, cfgOpts...)
+		if err != nil {
+			t.Errorf("failed")
+			continue
+		}
+
+		b, err := c.Bool("b", -1, cfgOpts...)
+		assert.NoError(t, err)
+
+		i, err := c.Int("i", -1, cfgOpts...)
+		assert.NoError(t, err)
+
+		u, err := c.Uint("u", -1, cfgOpts...)
+		assert.NoError(t, err)
+
+		f, err := c.Float("f", -1, cfgOpts...)
+		assert.NoError(t, err)
+
+		s, err := c.String("s", -1, cfgOpts...)
+		assert.NoError(t, err)
+
+		assert.Equal(t, true, b)
+		assert.Equal(t, 42, int(i))
+		assert.Equal(t, 23, int(u))
+		assert.Equal(t, 3.14, f)
+		assert.Equal(t, "string", s)
+	}
+}
+
 func TestUnpackNested(t *testing.T) {
 	var genSub = func(name string) *Config {
 		s := New()

@@ -53,8 +53,8 @@ httpbeat:
       Optional timeout in seconds. Default is 60 seconds.
       #timeout
 
-      # Optional tls configuration. By default is off.
-      #tls:
+      # Optional ssl configuration. By default is off.
+      #ssl:
         # List of root certificates for HTTPS server verifications
         #certificate_authorities: ["/etc/pki/root/ca.pem"]
 
@@ -62,13 +62,16 @@ httpbeat:
         #certificate: "/etc/pki/client/cert.pem"
 
         # Client Certificate Key
-        #certificate_key: "/etc/pki/client/cert.key"
+        #key: "/etc/pki/client/cert.key"
 
-        # Controls whether the client verifies server certificates and host name.
-        # If insecure is set to true, all server host names and certificates will be
-        # accepted. In this mode TLS based connections are susceptible to
-        # man-in-the-middle attacks. Use only for testing.
-        #insecure: true
+        # This option controls whether the client verifies server certificates and host
+        # names. The values `none` and `full` can be used. If `verification_mode` is set
+        # to `none`, all server host names and certificates are accepted. In this mode,
+        # TLS-based connections are susceptible to man-in-the-middle attacks. Use this
+        # option for testing only.
+        #
+        # The default is `full`.
+        #verification_mode: "full"
 
         # Configure cipher suites to be used for TLS connections
         #cipher_suites: []
@@ -76,11 +79,13 @@ httpbeat:
         # Configure curve types for ECDHE based cipher suites
         #curve_types: []
 
-        # Configure minimum TLS version allowed for connection
-        #min_version: "1.0"
-
-        # Configure maximum TLS version allowed for connection
-        #max_version: "1.2"
+        # List of allowed SSL/TLS versions. If SSL/TLS server decides for protocol versions
+        # not configured, the connection will be dropped during or after the handshake. The
+        # setting is a list of allowed protocol versions:
+        # `SSLv3`, `TLSv1` for TLS version 1.0, `TLSv1.0`, `TLSv1.1` and `TLSv1.2`.
+        #
+        # The default value is `[TLSv1.0, TLSv1.1, TLSv1.2]`.
+        #´versions: [TLSv1.0, TLSv1.1, TLSv1.2]
 
       # Optional convertion of dots in keys in JSON response body. By default is off.
       # Possible options are:

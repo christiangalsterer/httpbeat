@@ -1,5 +1,5 @@
-hash: 496a7212efb63fb3be763369865a486860338756dcb5958dd925c5e2b2e29637
-updated: 2016-10-04T22:37:40.180220397+02:00
+hash: b66d0ea96c57b6960b740e300396b828173decc0a8a59faee3cf6261436176e1
+updated: 2016-10-14T17:09:48.966590194+02:00
 imports:
 - name: github.com/davecgh/go-spew
   version: 5215b55f46b2b919f50a1df0eaa5886afe4e3b3d
@@ -14,7 +14,7 @@ imports:
 - name: github.com/eapache/queue
   version: ded5959c0d4e360646dc9e9908cff48666781367
 - name: github.com/elastic/beats
-  version: e8921faffe03859e709e8e03dccc83f473710462
+  version: 9e6358c80cc4f41400c752e3e3e2fb49846d9cec
   subpackages:
   - libbeat/beat
   - libbeat/cfgfile
@@ -22,12 +22,12 @@ imports:
   - libbeat/publisher
   - libbeat/common
   - libbeat/outputs
+  - libbeat/outputs/transport
   - libbeat/paths
   - libbeat/processors
   - libbeat/processors/actions
   - libbeat/service
   - libbeat/common/op
-  - libbeat/outputs/transport
   - libbeat/outputs/console
   - libbeat/outputs/elasticsearch
   - libbeat/outputs/fileout
@@ -52,7 +52,7 @@ imports:
   - server/v2
   - protocol/v2
 - name: github.com/elastic/go-ucfg
-  version: 57b87bb79c2890229f7509fc0bcc3819e0f460b3
+  version: 6baf3ba6c380865e8176e9418551444b25cbf8f2
   subpackages:
   - cfgutil
   - flag
