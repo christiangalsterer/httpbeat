@@ -112,6 +112,12 @@ func (r *Registrar) loadStates() error {
 		return err
 	}
 
+	// Set all states to finished on restart
+	for key, state := range states {
+		state.Finished = true
+		states[key] = state
+	}
+
 	r.states.SetStates(states)
 	logp.Info("States Loaded from registrar: %+v", len(states))
 
@@ -124,10 +130,19 @@ func (r *Registrar) loadAndConvertOldState(f *os.File) bool {
 	// Make sure file reader is reset afterwards
 	defer f.Seek(0, 0)
 
+	// Check if already new state format
 	decoder := json.NewDecoder(f)
-	oldStates := map[string]file.State{}
-	err := decoder.Decode(&oldStates)
+	newState := []file.State{}
+	err := decoder.Decode(&newState)
+	// No error means registry is already in new format
+	if err == nil {
+		return false
+	}
 
+	// Reset file offset
+	f.Seek(0, 0)
+	oldStates := map[string]file.State{}
+	err = decoder.Decode(&oldStates)
 	if err != nil {
 		logp.Debug("registrar", "Error decoding old state: %+v", err)
 		return false
@@ -139,16 +154,8 @@ func (r *Registrar) loadAndConvertOldState(f *os.File) bool {
 	}
 
 	// Convert old states to new states
-	states := make([]file.State, len(oldStates))
 	logp.Info("Old registry states found: %v", len(oldStates))
-	counter := 0
-	for _, state := range oldStates {
-		// Makes timestamp time of migration, as this is the best guess
-		state.Timestamp = time.Now()
-		states[counter] = state
-		counter++
-	}
-
+	states := convertOldStates(oldStates)
 	r.states.SetStates(states)
 
 	// Rewrite registry in new format
@@ -157,6 +164,32 @@ func (r *Registrar) loadAndConvertOldState(f *os.File) bool {
 	logp.Info("Old states converted to new states and written to registrar: %v", len(oldStates))
 
 	return true
+}
+
+func convertOldStates(oldStates map[string]file.State) []file.State {
+	// Convert old states to new states
+	states := []file.State{}
+	for _, state := range oldStates {
+		// Makes timestamp time of migration, as this is the best guess
+		state.Timestamp = time.Now()
+
+		// Check for duplicates
+		dupe := false
+		for i, other := range states {
+			if state.FileStateOS.IsSame(other.FileStateOS) {
+				dupe = true
+				if state.Offset > other.Offset {
+					// replace other
+					states[i] = state
+					break
+				}
+			}
+		}
+		if !dupe {
+			states = append(states, state)
+		}
+	}
+	return states
 }
 
 func (r *Registrar) Start() error {

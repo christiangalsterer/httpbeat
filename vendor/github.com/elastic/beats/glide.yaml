@@ -25,7 +25,7 @@ import:
   subpackages:
   - /difflib
 - package: github.com/elastic/gosigar
-  version: 2716c1fe855ee5c88eae707195e0688374458c92
+  version: 15322f7ed81bc3cfedb66b6716fd272ce042e9db
 - package: github.com/samuel/go-parser
   version: ca8abbf65d0e61dedf061f98bd3850f250e27539
 - package: github.com/samuel/go-thrift
@@ -59,7 +59,10 @@ import:
 - package: github.com/miekg/dns
   version: 5d001d020961ae1c184f9f8152fdc73810481677
 - package: github.com/Shopify/sarama
-  version: v1.10.0
+  version: fix/sasl-handshake
+  repo: https://github.com/urso/sarama
+- package: github.com/rcrowley/go-metrics
+  version: ab2277b1c5d15c3cba104e9cbddbdfc622df5ad8
 - package: github.com/klauspost/crc32
   version: v1.0
 - package: github.com/golang/snappy

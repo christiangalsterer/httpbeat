@@ -117,10 +117,10 @@ This will fetch and create all images required for the build process. The hole p
 
 # Releases
 
-2.0.0-beta.1 (2016-10-XX) Work in Progress
+2.0.0-rc.1 (2016-10-XX) Work in Progress
 
 Feature release containing the following changes:
-* Update to beats v5.0.0-beta1
+* Update to beats v5.0.0-rc1
 
 Please note that this release contains the following breaking changes introduced by beats 5.0.X, see also [Beats Changelog](https://github.com/elastic/beats/blob/v5.0.0-beta1/CHANGELOG.asciidoc)
 * SSL Configuration

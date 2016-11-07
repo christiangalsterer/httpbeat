@@ -1,19 +1,6 @@
 mode: atomic
 github.com/christiangalsterer/httpbeat/main.go:12.13,14.16 2 0
 github.com/christiangalsterer/httpbeat/main.go:14.16,16.3 1 0
-github.com/christiangalsterer/httpbeat/beater/httpbeat.go:19.65,25.16 3 0
-github.com/christiangalsterer/httpbeat/beater/httpbeat.go:30.2,30.16 1 0
-github.com/christiangalsterer/httpbeat/beater/httpbeat.go:25.16,28.3 2 0
-github.com/christiangalsterer/httpbeat/beater/httpbeat.go:33.44,39.53 4 0
-github.com/christiangalsterer/httpbeat/beater/httpbeat.go:45.2,45.6 1 0
-github.com/christiangalsterer/httpbeat/beater/httpbeat.go:39.53,43.3 3 0
-github.com/christiangalsterer/httpbeat/beater/httpbeat.go:45.6,46.10 1 0
-github.com/christiangalsterer/httpbeat/beater/httpbeat.go:47.3,48.14 1 0
-github.com/christiangalsterer/httpbeat/beater/httpbeat.go:53.48,55.2 1 0
-github.com/christiangalsterer/httpbeat/beater/httpbeat.go:57.27,60.2 2 0
-github.com/christiangalsterer/httpbeat/beater/httpevent.go:30.46,38.21 2 2
-github.com/christiangalsterer/httpbeat/beater/httpevent.go:42.2,42.14 1 2
-github.com/christiangalsterer/httpbeat/beater/httpevent.go:38.21,40.3 1 1
 github.com/christiangalsterer/httpbeat/beater/poller.go:24.69,31.2 2 0
 github.com/christiangalsterer/httpbeat/beater/poller.go:33.24,36.33 1 0
 github.com/christiangalsterer/httpbeat/beater/poller.go:41.2,41.25 1 0
@@ -84,3 +71,16 @@ github.com/christiangalsterer/httpbeat/beater/poller.go:247.2,247.23 1 0
 github.com/christiangalsterer/httpbeat/beater/poller.go:239.36,241.23 2 0
 github.com/christiangalsterer/httpbeat/beater/poller.go:244.3,245.28 2 0
 github.com/christiangalsterer/httpbeat/beater/poller.go:241.23,243.4 1 0
+github.com/christiangalsterer/httpbeat/beater/httpbeat.go:19.65,25.16 3 0
+github.com/christiangalsterer/httpbeat/beater/httpbeat.go:30.2,30.16 1 0
+github.com/christiangalsterer/httpbeat/beater/httpbeat.go:25.16,28.3 2 0
+github.com/christiangalsterer/httpbeat/beater/httpbeat.go:33.44,39.53 4 0
+github.com/christiangalsterer/httpbeat/beater/httpbeat.go:45.2,45.6 1 0
+github.com/christiangalsterer/httpbeat/beater/httpbeat.go:39.53,43.3 3 0
+github.com/christiangalsterer/httpbeat/beater/httpbeat.go:45.6,46.10 1 0
+github.com/christiangalsterer/httpbeat/beater/httpbeat.go:47.3,48.14 1 0
+github.com/christiangalsterer/httpbeat/beater/httpbeat.go:53.48,55.2 1 0
+github.com/christiangalsterer/httpbeat/beater/httpbeat.go:57.27,60.2 2 0
+github.com/christiangalsterer/httpbeat/beater/httpevent.go:30.46,38.21 2 2
+github.com/christiangalsterer/httpbeat/beater/httpevent.go:42.2,42.14 1 2
+github.com/christiangalsterer/httpbeat/beater/httpevent.go:38.21,40.3 1 1

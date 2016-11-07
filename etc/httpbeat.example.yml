@@ -11,7 +11,7 @@ httpbeat:
       cron: "@every 5s"
 
       # The URL endpoint to call by Httpbeat
-      url: http://httpbin.org/headers
+      url: https://httpbin.org/headers
 
       # HTTP method to use.
       # Possible options are:
