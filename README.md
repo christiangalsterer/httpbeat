@@ -18,7 +18,7 @@ Example use cases are:
 * Monitor [Spring Boot Actuators](http://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#production-ready)
 
 Ensure that this folder is at the following location:
-`${GOPATH}/github.com/christiangalsterer`
+`${GOPATH}/src/github.com/christiangalsterer`
 
 ## Getting Started with Httpbeat
 
