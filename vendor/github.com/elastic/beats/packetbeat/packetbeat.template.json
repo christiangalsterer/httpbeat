@@ -5,7 +5,7 @@
         "norms": false
       },
       "_meta": {
-        "version": "5.0.0"
+        "version": "5.0.1"
       },
       "dynamic_templates": [
         {
@@ -496,6 +496,13 @@
                   "type": "keyword"
                 }
               }
+            }
+          }
+        },
+        "client_geoip": {
+          "properties": {
+            "location": {
+              "type": "geo_point"
             }
           }
         },

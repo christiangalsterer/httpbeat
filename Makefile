@@ -10,7 +10,7 @@ PREFIX?=.
 # Path to the libbeat Makefile
 -include $(ES_BEATS)/libbeat/scripts/Makefile
 
-# Update dependencie
+# Update dependencies
 .PHONY: getdeps
 getdeps:
 	glide up --strip-vcs --update-vendored
