@@ -39,7 +39,7 @@ httpbeat:
       # Optional proxy server URL
       #proxy_url: http://proxy:3128
 
-      Optional timeout in seconds. Default is 60 seconds.
+      #Optional timeout in seconds. Default is 60 seconds.
       #timeout
 
       # Optional tls configuration. By default is off.
