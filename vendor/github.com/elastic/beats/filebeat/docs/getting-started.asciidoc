@@ -30,11 +30,9 @@ mac>> for OS X, and <<win, win>> for Windows).
 
 [NOTE]
 ==================================================
-If you use Apt or Yum, you can {libbeat}/setup-repositories.html[install Filebeat from our repositories] to update to
-the newest version more easily.
+If you use Apt or Yum, you can {libbeat}/setup-repositories.html[install Filebeat from our repositories] to update to the newest version more easily.
 
-See our https://www.elastic.co/downloads/beats/filebeat[download page] for other installation options, such as 32-bit
-images.
+See our https://www.elastic.co/downloads/beats/filebeat[download page] for other installation options, such as 32-bit images.
 
 ==================================================
 
@@ -214,3 +212,5 @@ After you've created the index pattern, you can select the `filebeat-*` index pa
 Filebeat data.
 
 image:./images/filebeat-discover-tab.png[]
+
+TIP: If you don't see `filebeat-*` in the list of available index patterns, try refreshing the page in your browser.

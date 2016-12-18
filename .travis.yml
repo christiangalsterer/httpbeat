@@ -15,8 +15,7 @@ os:
 env:
   matrix:
     - TARGETS=""
-    - TARGETS="check"
-    - TARGETS="testsuite"
+    - TARGETS="ci"
     - TARGETS="crosscompile"
 
   global:
@@ -26,10 +25,13 @@ env:
 
 matrix:
   exclude:
+    - os: linux
+      env: TARGETS=""
     - os: osx
       env: TARGETS="check"
     - os: osx
       env: TARGETS="crosscompile"
+
 
 addons:
   apt:

@@ -5,6 +5,7 @@ import platform
 import time
 import shutil
 import json
+import stat
 from nose.plugins.skip import Skip, SkipTest
 
 
@@ -762,7 +763,7 @@ class Test(BaseTest):
 
         # Wait until registry file is created
         self.wait_until(
-            lambda: self.log_contains("Registry file updated"),
+            lambda: self.log_contains_count("Registry file updated") > 1,
             max_timeout=15)
 
         if os.name == "nt":
@@ -834,7 +835,7 @@ class Test(BaseTest):
 
         # Wait until registry file is created
         self.wait_until(
-            lambda: self.log_contains("Registry file updated"),
+            lambda: self.log_contains_count("Registry file updated") > 1,
             max_timeout=15)
 
         if os.name == "nt":
@@ -903,7 +904,7 @@ class Test(BaseTest):
 
         # Wait until registry file is created
         self.wait_until(
-            lambda: self.log_contains_count("Registry file updated") > 0,
+            lambda: self.log_contains_count("Registry file updated") > 1,
             max_timeout=15)
 
         data = self.get_registry()
@@ -939,6 +940,93 @@ class Test(BaseTest):
         else:
             assert data[0]["offset"] == len("make sure registry is written\n" + "2\n")
 
+    def test_directory_failure(self):
+        """
+        Test that filebeat does not start if a directory is set as registry file
+        """
+
+        self.render_config_template(
+            path=os.path.abspath(self.working_dir) + "/log/*",
+            registryFile="registrar",
+        )
+        os.mkdir(self.working_dir + "/log/")
+        os.mkdir(self.working_dir + "/registrar/")
+
+        testfile = self.working_dir + "/log/test.log"
+        with open(testfile, 'w') as file:
+            file.write("Hello World\n")
+
+        filebeat = self.start_beat()
+
+        # Make sure states written appears one more time
+        self.wait_until(
+            lambda: self.log_contains("CRIT Exiting: Registry file path must be a file"),
+            max_timeout=10)
+
+        filebeat.check_kill_and_wait(exit_code=1)
+
+    def test_symlink_failure(self):
+        """
+        Test that filebeat does not start if a symlink is set as registry file
+        """
+        self.render_config_template(
+            path=os.path.abspath(self.working_dir) + "/log/*",
+            registryFile="registry_symlink",
+        )
+        os.mkdir(self.working_dir + "/log/")
+
+        testfile = self.working_dir + "/log/test.log"
+        with open(testfile, 'w') as file:
+            file.write("Hello World\n")
+
+        registryfile = self.working_dir + "/registry"
+        with open(registryfile, 'w') as file:
+            file.write("[]")
+
+        if os.name == "nt":
+            import win32file
+            win32file.CreateSymbolicLink(self.working_dir + "/registry_symlink", registryfile, 0)
+        else:
+            os.symlink(registryfile, self.working_dir + "/registry_symlink")
+
+        filebeat = self.start_beat()
+
+        # Make sure states written appears one more time
+        self.wait_until(
+            lambda: self.log_contains("CRIT Exiting: Registry file path is not a regular file"),
+            max_timeout=10)
+
+        filebeat.check_kill_and_wait(exit_code=1)
+
+    def test_invalid_state(self):
+        """
+        Test that filebeat fails starting if invalid state in registry
+        """
+
+        self.render_config_template(
+            path=os.path.abspath(self.working_dir) + "/log/*",
+        )
+        os.mkdir(self.working_dir + "/log/")
+        registry_file = self.working_dir + "/registry"
+
+        testfile = self.working_dir + "/log/test.log"
+        with open(testfile, 'w') as file:
+            file.write("Hello World\n")
+
+        registry_file = self.working_dir + "/registry"
+        with open(registry_file, 'w') as file:
+            # Write invalid state
+            file.write("Hello World")
+
+        filebeat = self.start_beat()
+
+        # Make sure states written appears one more time
+        self.wait_until(
+            lambda: self.log_contains("CRIT Exiting: Could not start registrar: Error loading state"),
+            max_timeout=10)
+
+        filebeat.check_kill_and_wait(exit_code=1)
+
     def test_restart_state(self):
         """
         Make sure that states are rewritten correctly on restart and cleaned
@@ -948,7 +1036,6 @@ class Test(BaseTest):
             path=os.path.abspath(self.working_dir) + "/log/*",
             close_inactive="1s",
             ignore_older="3s",
-            clean_inactive="5s",
         )
         os.mkdir(self.working_dir + "/log/")
 
@@ -973,6 +1060,13 @@ class Test(BaseTest):
 
         filebeat.check_kill_and_wait()
 
+        self.render_config_template(
+            path=os.path.abspath(self.working_dir) + "/log/*",
+            close_inactive="1s",
+            ignore_older="3s",
+            clean_inactive="5s",
+        )
+
         filebeat = self.start_beat(output="filebeat2.log")
 
         # Write additional file
@@ -981,12 +1075,313 @@ class Test(BaseTest):
 
         # Make sure all 4 states are persisted
         self.wait_until(
-            lambda: self.log_contains("Before: 4, After: 4", logfile="filebeat2.log"),
+            lambda: self.log_contains("Prospector states cleaned up. Before: 4, After: 4", logfile="filebeat2.log"),
             max_timeout=10)
 
         # Wait until registry file is cleaned
         self.wait_until(
-            lambda: self.log_contains("Before: 0, After: 0", logfile="filebeat2.log"),
+            lambda: self.log_contains("Prospector states cleaned up. Before: 0, After: 0", logfile="filebeat2.log"),
             max_timeout=10)
 
         filebeat.check_kill_and_wait()
+
+
+    def test_restart_state_reset(self):
+        """
+        Test that ttl is set to -1 after restart and no prospector covering it
+        """
+
+        self.render_config_template(
+            path=os.path.abspath(self.working_dir) + "/log/*",
+            clean_inactive="10s",
+            ignore_older="5s"
+        )
+        os.mkdir(self.working_dir + "/log/")
+
+        testfile = self.working_dir + "/log/test.log"
+
+        with open(testfile, 'w') as file:
+            file.write("Hello World\n")
+
+        filebeat = self.start_beat()
+
+        # Wait until state written
+        self.wait_until(
+            lambda: self.output_has(lines=1),
+            max_timeout=30)
+
+        filebeat.check_kill_and_wait()
+
+        # Check that ttl > 0 was set because of clean_inactive
+        data = self.get_registry()
+        assert len(data) == 1
+        assert data[0]["ttl"] > 0
+
+        # No config file which does not match the exisitng state
+        self.render_config_template(
+            path=os.path.abspath(self.working_dir) + "/log/test2.log",
+            clean_inactive="10s",
+            ignore_older="5s",
+        )
+
+        filebeat = self.start_beat(output="filebeat2.log")
+
+        # Wait until prospectors are started
+        self.wait_until(
+            lambda: self.log_contains_count("Starting prospector of type: log", logfile="filebeat2.log") >= 1,
+            max_timeout=10)
+
+        filebeat.check_kill_and_wait()
+
+        # Check that ttl was reset correctly
+        data = self.get_registry()
+        assert len(data) == 1
+        assert data[0]["ttl"] == -2
+
+    def test_restart_state_reset_ttl(self):
+        """
+        Test that ttl is reset after restart if clean_inactive changes
+        """
+
+        self.render_config_template(
+            path=os.path.abspath(self.working_dir) + "/log/test.log",
+            clean_inactive="20s",
+            ignore_older="5s"
+        )
+        os.mkdir(self.working_dir + "/log/")
+
+        testfile = self.working_dir + "/log/test.log"
+
+        with open(testfile, 'w') as file:
+            file.write("Hello World\n")
+
+        filebeat = self.start_beat()
+
+        # Wait until state written
+        self.wait_until(
+            lambda: self.output_has(lines=1),
+            max_timeout=30)
+
+        filebeat.check_kill_and_wait()
+
+        # Check that ttl > 0 was set because of clean_inactive
+        data = self.get_registry()
+        assert len(data) == 1
+        assert data[0]["ttl"] == 20 * 1000 * 1000 * 1000
+
+        # New config file which does not match the existing clean_inactive
+        self.render_config_template(
+            path=os.path.abspath(self.working_dir) + "/log/test.log",
+            clean_inactive="40s",
+            ignore_older="5s",
+        )
+
+        filebeat = self.start_beat(output="filebeat2.log")
+
+        # Wait until new state is written
+
+        self.wait_until(
+            lambda: self.log_contains("Flushing spooler because of timeout. Events flushed: ",
+            logfile="filebeat2.log"), max_timeout=10)
+
+        filebeat.check_kill_and_wait()
+
+        # Check that ttl was reset correctly
+        data = self.get_registry()
+        assert len(data) == 1
+        assert data[0]["ttl"] == 40 * 1000 * 1000 * 1000
+
+    def test_restart_state_reset_ttl_with_space(self):
+        """
+        Test that ttl is reset after restart if clean_inactive changes
+        This time it is tested with a space in the filename to see if everything is loaded as expected
+        """
+
+        self.render_config_template(
+            path=os.path.abspath(self.working_dir) + "/log/test file.log",
+            clean_inactive="20s",
+            ignore_older="5s"
+        )
+        os.mkdir(self.working_dir + "/log/")
+
+        testfile = self.working_dir + "/log/test file.log"
+
+        with open(testfile, 'w') as file:
+            file.write("Hello World\n")
+
+        filebeat = self.start_beat()
+
+        # Wait until state written
+        self.wait_until(
+            lambda: self.output_has(lines=1),
+            max_timeout=30)
+
+        filebeat.check_kill_and_wait()
+
+        # Check that ttl > 0 was set because of clean_inactive
+        data = self.get_registry()
+        assert len(data) == 1
+        assert data[0]["ttl"] == 20 * 1000 * 1000 * 1000
+
+        # new config file whith other clean_inactive
+        self.render_config_template(
+            path=os.path.abspath(self.working_dir) + "/log/test file.log",
+            clean_inactive="40s",
+            ignore_older="5s",
+        )
+
+        filebeat = self.start_beat(output="filebeat2.log")
+
+        # Wait until new state is written
+        self.wait_until(
+            lambda: self.log_contains("Flushing spooler because of timeout. Events flushed: ", logfile="filebeat2.log"),
+            max_timeout=10)
+
+        filebeat.check_kill_and_wait()
+
+        # Check that ttl was reset correctly
+        data = self.get_registry()
+        assert len(data) == 1
+        assert data[0]["ttl"] == 40 * 1000 * 1000 * 1000
+
+
+    def test_restart_state_reset_ttl_no_clean_inactive(self):
+        """
+        Test that ttl is reset after restart if clean_inactive is disabled
+        """
+
+        self.render_config_template(
+            path=os.path.abspath(self.working_dir) + "/log/test.log",
+            clean_inactive="10s",
+            ignore_older="5s"
+        )
+        os.mkdir(self.working_dir + "/log/")
+
+        testfile = self.working_dir + "/log/test.log"
+
+        with open(testfile, 'w') as file:
+            file.write("Hello World\n")
+
+        filebeat = self.start_beat()
+
+        # Wait until state written
+        self.wait_until(
+            lambda: self.output_has(lines=1),
+            max_timeout=30)
+
+        filebeat.check_kill_and_wait()
+
+        # Check that ttl > 0 was set because of clean_inactive
+        data = self.get_registry()
+        assert len(data) == 1
+        assert data[0]["ttl"] == 10 * 1000 * 1000 * 1000
+
+        # New config without clean_inactive
+        self.render_config_template(
+            path=os.path.abspath(self.working_dir) + "/log/test.log",
+        )
+
+        filebeat = self.start_beat(output="filebeat2.log")
+
+        # Wait until prospectors are started
+        self.wait_until(
+            lambda: self.log_contains("Flushing spooler because of timeout. Events flushed: ", logfile="filebeat2.log"),
+            max_timeout=10)
+
+        filebeat.check_kill_and_wait()
+
+        # Check that ttl was reset correctly
+        data = self.get_registry()
+        assert len(data) == 1
+        assert data[0]["ttl"] == -1
+
+    def test_ignore_older_state(self):
+        """
+        Check that state is also persisted for files falling under ignore_older on startup
+        without a previous state
+        """
+
+        self.render_config_template(
+            path=os.path.abspath(self.working_dir) + "/log/*",
+            close_inactive="1s",
+            ignore_older="1s",
+        )
+        os.mkdir(self.working_dir + "/log/")
+
+        testfile1 = self.working_dir + "/log/test.log"
+
+        with open(testfile1, 'w') as file:
+            file.write("Hello World\n")
+
+        time.sleep(1)
+
+        filebeat = self.start_beat()
+
+        # Make sure file falls under ignore_older
+        self.wait_until(
+            lambda: self.log_contains("Ignore file because ignore_older reached"),
+            max_timeout=10)
+
+        # Make sure state is loaded for file
+        self.wait_until(
+            lambda: self.log_contains("Before: 1, After: 1"),
+            max_timeout=10)
+
+        # Make sure state is written
+        self.wait_until(
+            lambda: self.log_contains("Registry file updated. 1 states written."),
+            max_timeout=10)
+
+        filebeat.check_kill_and_wait()
+
+        data = self.get_registry()
+        assert len(data) == 1
+
+        # Check that offset is set to the end of the file
+        assert data[0]["offset"] == os.path.getsize(testfile1)
+
+    def test_ignore_older_state_clean_inactive(self):
+        """
+        Check that state for ignore_older is not persisted when falling under clean_inactive
+        """
+
+        self.render_config_template(
+            path=os.path.abspath(self.working_dir) + "/log/*",
+            close_inactive="1s",
+            clean_inactive="2s",
+            ignore_older="1s",
+        )
+        os.mkdir(self.working_dir + "/log/")
+
+        testfile1 = self.working_dir + "/log/test.log"
+
+        with open(testfile1, 'w') as file:
+            file.write("Hello World\n")
+
+        time.sleep(2)
+
+        filebeat = self.start_beat()
+
+        # Make sure file falls under ignore_older
+        self.wait_until(
+            lambda: self.log_contains("Ignore file because ignore_older reached"),
+            max_timeout=10)
+
+        self.wait_until(
+            lambda: self.log_contains("Do not write state for ignore_older because clean_inactive reached"),
+            max_timeout=10)
+
+        # Make sure state is loaded for file
+        self.wait_until(
+            lambda: self.log_contains("Before: 0, After: 0"),
+            max_timeout=10)
+
+        # Make sure state is written
+        self.wait_until(
+            lambda: self.log_contains("Registry file updated. 0 states written."),
+            max_timeout=10)
+
+        filebeat.check_kill_and_wait()
+
+        data = self.get_registry()
+        assert len(data) == 0

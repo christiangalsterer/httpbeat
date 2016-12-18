@@ -25,6 +25,7 @@ The following topics provide more detail about importing and working with Beats 
 * <<generate-index-pattern>>
 * <<export-dashboards>>
 * <<archive-dashboards>>
+* <<share-beat-dashboards>>
 
 [[import-dashboards]]
 === Importing Existing Beat Dashboards
@@ -58,7 +59,7 @@ Elasticsearch running on localhost for a single Beat (eg. Metricbeat):
 ./scripts/import_dashboards -file metricbeat-dashboards-1.1.zip
 ----------------------------------------------------------------------
 
-- from the official zip archive available under http://artifacts.elastic.co/:
+- from the official zip archive available at {dashboards}:
 +
 [source,shell]
 ----------------------------------------------------------------------
@@ -107,7 +108,7 @@ make
 -----------------------
 
 And then you can import the index pattern and the dashboards together with visualizations and searches for a single
-Beat, by passing the `-beat` option. 
+Beat, by passing the `-beat` option.
 
 For example, to import the Metricbeat dashboards together with visualizations,
 searches, and the Metricbeat index pattern:
@@ -117,7 +118,7 @@ searches, and the Metricbeat index pattern:
 beats/libbeat/dashboards/import_dashboards -beat metricbeat
 -----------------
 
-For this example, you must specify `-beat metricbeat`. If the `-beat` option is not 
+For this example, you must specify `-beat metricbeat`. If the `-beat` option is not
 specified, the script imports the dashboards of all Beats.
 
 NOTE: You can make use of the Makefile from the Beat GitHub repository to import the
@@ -235,7 +236,7 @@ If you would like to build dashboards from scratch for any Elastic Beats, you ca
 
 [source,shell]
 ---------------
-$ scripts/import_dashboards -only-index -beat metricbeat
+$ scripts/import_dashboards -only-index
 ---------------
 
 After creating your own dashboards in Kibana, you can <<export-dashboards,export the Kibana dashboards>> to a local
@@ -341,7 +342,6 @@ repository:
 
 [source,shell]
 --------------
-make package-setup
 make package-dashboards
 --------------
 
@@ -352,6 +352,8 @@ Another option would be to create a repository only with the dashboards, and use
 create a zip archive.
 
 Share the Kibana dashboards archive with the community, so other users can use your cool Kibana visualizations!
+
+
 
 [[share-beat-dashboards]]
 === Sharing Your Beat Dashboards

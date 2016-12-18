@@ -5,7 +5,7 @@
         "norms": false
       },
       "_meta": {
-        "version": "5.0.1"
+        "version": "5.1.1"
       },
       "dynamic_templates": [
         {
@@ -293,6 +293,9 @@
                     "host": {
                       "ignore_above": 1024,
                       "type": "keyword"
+                    },
+                    "port": {
+                      "type": "long"
                     },
                     "schema_change": {
                       "properties": {
@@ -964,6 +967,38 @@
                   "type": "long"
                 },
                 "version": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                }
+              }
+            }
+          }
+        },
+        "meta": {
+          "properties": {
+            "cloud": {
+              "properties": {
+                "availability_zone": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "instance_id": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "machine_type": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "project_id": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "provider": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "region": {
                   "ignore_above": 1024,
                   "type": "keyword"
                 }

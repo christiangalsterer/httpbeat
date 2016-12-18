@@ -90,7 +90,6 @@ func (p *asyncLogPublisher) Start() {
 					publisher.Guaranteed)
 
 				p.active.append(batch)
-
 			case <-ticker.C:
 			}
 			p.collect()

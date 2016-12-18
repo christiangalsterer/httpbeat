@@ -98,6 +98,8 @@ In the previous example, the Elasticsearch nodes are available at `https://10.45
 The gzip compression level. Setting this value to 0 disables compression.
 The compression level must be in the range of 1 (best speed) to 9 (best compression).
 
+Increasing the compression level will reduce the network usage but will increase the cpu usage.
+
 The default value is 0.
 
 ===== worker
@@ -194,10 +196,35 @@ For more information, see <<configuring-ingest-node>>.
 
 ===== pipelines
 
-Array of pipeline selector configurations supporting conditionals, format string
-based field access and name mappings. The first rule matching will be used to
-set the `pipeline` for the event to be published. If `pipelines` is missing or no
-rule matches, the `pipeline` field will be used.
+Similar to the `indices` array, this is an array of pipeline selector
+configurations supporting conditionals, format string based field access
+and name mappings. The first rule matching will be used to set the
+`pipeline` for the event to be published. If `pipelines` is missing or
+no rule matches, the `pipeline` field will be used.
+
+Example elasticsearch output with `pipelines`:
+
+["source","yaml"]
+------------------------------------------------------------------------------
+filebeat.prospectors:
+- paths: ["/var/log/app/normal/*.log"]
+  fields:
+    type: "normal"
+- paths: ["/var/log/app/critical/*.log"]
+  fields:
+    type: "critical"
+
+output.elasticsearch:
+  hosts: ["http://localhost:9200"]
+  index: "filebeat-%{+yyyy.MM.dd}"
+  pipelines:
+    - pipeline: critical_pipeline
+      when.equals:
+        type: "critical"
+    - pipeline: normal_pipeline
+      when.equals:
+        type: "normal"
+------------------------------------------------------------------------------
 
 ===== template
 
@@ -419,6 +446,8 @@ is used as the default port number.
 
 The gzip compression level. Setting this value to 0 disables compression.
 The compression level must be in the range of 1 (best speed) to 9 (best compression).
+
+Increasing the compression level will reduce the network usage but will increase the cpu usage.
 
 The default value is 3.
 
@@ -743,7 +772,7 @@ output.redis:
 
 ==== Compatibility
 
-This output works with Redis 3.2.0.
+This output works with Redis 3.2.4.
 
 ==== Redis Output Options
 

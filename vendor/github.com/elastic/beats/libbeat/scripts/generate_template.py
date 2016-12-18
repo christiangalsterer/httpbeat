@@ -2,7 +2,7 @@
 
 """
 This script generates the ES template file (packetbeat.template.json) from
-the etc/fields.yml file.
+the _meta/fields.yml file.
 
 Example usage:
 
@@ -12,6 +12,7 @@ Example usage:
 import yaml
 import json
 import argparse
+import os
 
 
 def fields_to_es_template(args, input, output, index, version):
@@ -306,11 +307,17 @@ if __name__ == "__main__":
         target += "-es2x"
     target += ".json"
 
-    with open(args.path + "/etc/fields.yml", 'r') as f:
+    fields_yml = args.path + "/_meta/fields.generated.yml"
+
+    # Not all beats have a fields.generated.yml. Fall back to fields.yml
+    if not os.path.isfile(fields_yml):
+        fields_yml = args.path + "/_meta/fields.yml"
+
+    with open(fields_yml, 'r') as f:
         fields = f.read()
 
         # Prepend beat fields from libbeat
-        with open(args.es_beats + "/libbeat/_meta/fields.yml") as f:
+        with open(args.es_beats + "/libbeat/_meta/fields.generated.yml") as f:
             fields = f.read() + fields
 
         with open(args.es_beats + "/dev-tools/packer/version.yml") as file:
