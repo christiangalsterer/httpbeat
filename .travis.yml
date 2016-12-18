@@ -14,7 +14,6 @@ os:
 
 env:
   matrix:
-    - TARGETS=""
     - TARGETS="ci"
     - TARGETS="crosscompile"
 
@@ -25,13 +24,8 @@ env:
 
 matrix:
   exclude:
-    - os: linux
-      env: TARGETS=""
-    - os: osx
-      env: TARGETS="check"
     - os: osx
       env: TARGETS="crosscompile"
-
 
 addons:
   apt:
