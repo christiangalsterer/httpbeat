@@ -156,9 +156,9 @@ func (p *Poller) runOneTime() error {
 	}
 
 	if outputFormat == "string" {
-		responseEvent.Body = body;
+		responseEvent.Body = body
 	} else {
-		if  outputFormat == "json" {
+		if outputFormat == "json" {
 			decoder := json.NewDecoder(strings.NewReader(body))
 			decoder.UseNumber()
 			errs := decoder.Decode(&jsonBody)
@@ -172,7 +172,7 @@ func (p *Poller) runOneTime() error {
 					jsonBody = replaceDots(jsonBody).(map[string]interface{})
 				}
 			}
-			responseEvent.JsonBody = jsonBody;
+			responseEvent.JsonBody = jsonBody
 		}
 	}
 
