@@ -117,7 +117,7 @@ This will fetch and create all images required for the build process. The hole p
 
 # Releases
 
-3.0.0 (2016-12-XX)
+3.0.0 (2016-12-18)
 
 Feature release containing the following changes:
 * [Output format of response body is now defined via output_format parameter](https://github.com/christiangalsterer/httpbeat/issues/8). Default is 'string'
