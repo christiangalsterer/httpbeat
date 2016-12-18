@@ -117,6 +117,15 @@ This will fetch and create all images required for the build process. The hole p
 
 # Releases
 
+3.0.0 (2016-12-XX)
+
+Feature release containing the following changes:
+* [Output format of response body is now defined via output_format parameter](https://github.com/christiangalsterer/httpbeat/issues/8). Default is 'string'
+
+Bugfix release containing the following changes:
+* [Missing es2x template](https://github.com/christiangalsterer/httpbeat/issues/13)
+* [Correct parsing of large numbers in JSON output](https://github.com/christiangalsterer/httpbeat/issues/12)
+
 2.0.0 (2016-11-26)
 
 Feature release containing the following changes:

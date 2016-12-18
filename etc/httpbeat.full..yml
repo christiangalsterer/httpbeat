@@ -76,6 +76,13 @@ httpbeat:
       # in. Default: httpbeat
       document_type:
 
+      # Optional output format for the response body.
+      # Possible options are:
+      # * string
+      # * json
+      # Default output format is 'string'
+      output_format: json
+
       # Optional additional headers to send to the endpoint
       headers:
 

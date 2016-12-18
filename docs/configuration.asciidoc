@@ -95,7 +95,7 @@ httpbeat:
 
 -------------------------------------------------------------------------------------
 
-A complete example can be found in link:../etc/httpbeat.yml[etc/httpbeat.yml]
+A complete example can be found in link:../etc/httpbeat.full.yml[etc/httpbeat.full.yml]
 
 ==== Options
 
@@ -204,6 +204,18 @@ document. The default value is `httpbeat`.
 [source,yaml]
 -------------------------------------------------------------------------------------
 document_type: httpbeat
+-------------------------------------------------------------------------------------
+
+===== output_format
+Optional output format for the response body.
+Possible options are:
+    * string
+    * json
+Default output format is 'string'
+
+[source,yaml]
+-------------------------------------------------------------------------------------
+output_format: string
 -------------------------------------------------------------------------------------
 
 ===== json_dot_mode

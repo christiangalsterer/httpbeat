@@ -35,15 +35,22 @@ httpbeat:
       # in. Default: httpbeat
       document_type: jolokia
 
+      # Optional output format for the response body.
+      # Possible options are:
+      # * string
+      # * json
+      # Default output format is 'string'
+      output_format: json
+
       # Optional additional headers to send to the endpoint
       headers:
         Accept: application/json
-        Foo: bar
+        Number: 121221333347454675
+
       # Optional additional fields. These field can be freely picked
       # to add additional information
-
       fields:
-        host: test
+        test: 1
     -
       # Optional cron expression, defines when to poll the URL endpoint.
       # Default is every 1 minute.
@@ -80,12 +87,11 @@ httpbeat:
       # Optional additional headers to send to the endpoint
       headers:
         Accept: application/json
-        Foo: bar
+
       # Optional additional fields. These field can be freely picked
       # to add additional information
-
       fields:
-        host: test2
+        test: 2
 
 #================================ Outputs =====================================
 

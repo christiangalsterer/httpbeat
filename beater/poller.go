@@ -74,6 +74,18 @@ func (p *Poller) runOneTime() error {
 		return fmt.Errorf("Unsupported HTTP method %g", method)
 	}
 
+	outputFormat := p.config.OutputFormat
+
+	switch outputFormat {
+	case "":
+		outputFormat = config.DefaultOutputFormat
+	case "string":
+	case "json":
+		break
+	default:
+		return fmt.Errorf("Unsupported output format %g", outputFormat)
+	}
+
 	// set timeout
 	if p.config.Timeout != nil {
 		p.request.Timeout(time.Duration(*p.config.Timeout) * time.Second)
@@ -137,21 +149,31 @@ func (p *Poller) runOneTime() error {
 	}
 
 	var jsonBody map[string]interface{}
-	if json.Unmarshal([]byte(body), &jsonBody) != nil {
-		jsonBody = nil
-	} else {
-		if p.config.JsonDotMode == "unflatten" {
-			jsonBody = unflat(jsonBody).(map[string]interface{})
-		} else if p.config.JsonDotMode == "replace" {
-			jsonBody = replaceDots(jsonBody).(map[string]interface{})
-		}
-	}
 
 	responseEvent := Response{
 		StatusCode: resp.StatusCode,
 		Headers:    p.GetResponseHeader(resp),
-		Body:       body,
-		JsonBody:   jsonBody,
+	}
+
+	if outputFormat == "string" {
+		responseEvent.Body = body;
+	} else {
+		if  outputFormat == "json" {
+			decoder := json.NewDecoder(strings.NewReader(body))
+			decoder.UseNumber()
+			errs := decoder.Decode(&jsonBody)
+			if errs != nil {
+				jsonBody = nil
+				logp.Err("An error occurred while marshalling response to JSON: %w", errs)
+			} else {
+				if p.config.JsonDotMode == "unflatten" {
+					jsonBody = unflat(jsonBody).(map[string]interface{})
+				} else if p.config.JsonDotMode == "replace" {
+					jsonBody = replaceDots(jsonBody).(map[string]interface{})
+				}
+			}
+			responseEvent.JsonBody = jsonBody;
+		}
 	}
 
 	event := HttpEvent{

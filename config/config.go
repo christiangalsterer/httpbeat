@@ -10,6 +10,7 @@ const (
 	DefaultCron         string        = "@every 1m"
 	DefaultTimeout      time.Duration = 60 * time.Second
 	DefaultDocumentType string        = "httpbeat"
+	DefaultOutputFormat string        = "string"
 )
 
 type HttpbeatConfig struct {
@@ -28,6 +29,7 @@ type UrlConfig struct {
 	DocumentType string            `config:"document_type"`
 	Fields       map[string]string `config:"fields"`
 	SSL          *outputs.TLSConfig
+	OutputFormat string `config:"output_format"`
 	JsonDotMode  string `config:"json_dot_mode"`
 }
 
