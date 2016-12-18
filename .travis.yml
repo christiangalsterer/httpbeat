@@ -16,6 +16,7 @@ env:
   matrix:
     - TARGETS=""
     - TARGETS="check"
+    - TARGETS="testsuite"
     - TARGETS="crosscompile"
 
   global:
