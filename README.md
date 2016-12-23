@@ -117,6 +117,11 @@ This will fetch and create all images required for the build process. The hole p
 
 # Releases
 
+3.1.0 (2016-12-23)
+
+Feature release containing the following changes:
+* Update to beats v5.1.1
+
 3.0.0 (2016-12-18)
 
 Feature release containing the following changes:
