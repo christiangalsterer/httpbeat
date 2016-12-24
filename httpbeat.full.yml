@@ -1,17 +1,17 @@
 ######################## Httpbeat Configuration Example ########################
 
-#================================ Httpbeat =====================================
+############################## Httpbeat ########################################
 httpbeat:
 
   urls:
-    # Each - URL endpoints to poll. Below are the URL endpoint specific configurations
+    # Each - URL endpoints to call. Below are the URL endpoint specific configurations
     -
       # Optional cron expression, defines when to poll the URL endpoint.
       # Default is every 1 minute.
-      cron:
+      cron: "@every 5s"
 
       # The URL endpoint to call by Httpbeat
-      url: http://httpbin.org/headers
+      url: https://httpbin.org/headers
 
       # HTTP method to use.
       # Possible options are:
@@ -21,60 +21,19 @@ httpbeat:
       # * patch
       # * post
       # * put
-      method:
-
-      # Optional payload information to send to the endpoint, e.g. JSON. Will only be send if one of the following method is used:
-      # * patch
-      # * post
-      # * put
-      #body:
+      method: get
 
       # Optional basic authentication
-      #basic_auth:
+      basic_auth:
         # Basic authentication username
-        #username:
+        username: admin
         # Basic authentication password
-        #password:
-
-      # Optional proxy server URL
-      #proxy_url: http://proxy:3128
-
-      #Optional timeout in seconds. Default is 60 seconds.
-      #timeout
-
-      # Optional tls configuration. By default is off.
-      #tls:
-        # List of root certificates for HTTPS server verifications
-        #certificate_authorities: ["/etc/pki/root/ca.pem"]
-
-        # Certificate for TLS client authentication
-        #certificate: "/etc/pki/client/cert.pem"
-
-        # Client Certificate Key
-        #certificate_key: "/etc/pki/client/cert.key"
-
-        # Controls whether the client verifies server certificates and host name.
-        # If insecure is set to true, all server host names and certificates will be
-        # accepted. In this mode TLS based connections are susceptible to
-        # man-in-the-middle attacks. Use only for testing.
-        #insecure: true
-
-        # Configure cipher suites to be used for TLS connections
-        #cipher_suites: []
-
-        # Configure curve types for ECDHE based cipher suites
-        #curve_types: []
-
-        # Configure minimum TLS version allowed for connection
-        #min_version: "1.0"
-
-        # Configure maximum TLS version allowed for connection
-        #max_version: "1.2"
+        password: admin
 
       # Type to be published in the 'type' field. For Elasticsearch output,
       # the type defines the document type these entries should be stored
       # in. Default: httpbeat
-      document_type:
+      document_type: httpbeat
 
       # Optional output format for the response body.
       # Possible options are:
@@ -85,17 +44,85 @@ httpbeat:
 
       # Optional additional headers to send to the endpoint
       headers:
+        Accept: application/json
 
-      # Optional additional fields. These field can be freely picked
-      # to add additional information
-      fields:
+#================================ General ======================================
 
-#================================ Outputs =====================================
+# The name of the shipper that publishes the network data. It can be used to group
+# all the transactions sent by a single shipper in the web interface.
+# If this options is not defined, the hostname is used.
+#name:
+
+# The tags of the shipper are included in their own field with each
+# transaction published. Tags make it easy to group servers by different
+# logical properties.
+#tags: ["service-X", "web-tier"]
+
+# Optional fields that you can specify to add additional information to the
+# output. Fields can be scalar values, arrays, dictionaries, or any nested
+# combination of these.
+#fields:
+#  env: staging
+
+# If this option is set to true, the custom fields are stored as top-level
+# fields in the output document instead of being grouped under a fields
+# sub-dictionary. Default is false.
+#fields_under_root: false
+
+# Internal queue size for single events in processing pipeline
+#queue_size: 1000
+
+# The internal queue size for bulk events in the processing pipeline.
+# Do not modify this value.
+#bulk_queue_size: 0
+
+# Sets the maximum number of CPUs that can be executing simultaneously. The
+# default is the number of logical CPUs available in the system.
+#max_procs:
+
+#================================ Processors ===================================
+
+# Processors are used to reduce the number of fields in the exported event or to
+# enhance the event with external metadata. This section defines a list of
+# processors that are applied one by one and the first one receives the initial
+# event:
+#
+#   event -> filter1 -> event1 -> filter2 ->event2 ...
+#
+# The supported processors are drop_fields, drop_event, include_fields, and
+# add_cloud_metadata.
+#
+# For example, you can use the following processors to keep the fields that
+# contain CPU load percentages, but remove the fields that contain CPU ticks
+# values:
+#
+#processors:
+#- include_fields:
+#    fields: ["cpu"]
+#- drop_fields:
+#    fields: ["cpu.user", "cpu.system"]
+#
+# The following example drops the events that have the HTTP response code 200:
+#
+#processors:
+#- drop_event:
+#    when:
+#       equals:
+#           http.code: 200
+#
+# The following example enriches each event with metadata from the cloud
+# provider about the host machine. It works on EC2, GCE, and DigitalOcean.
+#
+#processors:
+#- add_cloud_metadata:
+#
+
+#================================ Outputs ======================================
 
 # Configure what outputs to use when sending the data collected by the beat.
 # Multiple outputs may be used.
 
-#-------------------------- Elasticsearch output ------------------------------
+#-------------------------- Elasticsearch output -------------------------------
 output.elasticsearch:
   # Boolean flag to enable or disable the output module.
   #enabled: true
@@ -122,9 +149,9 @@ output.elasticsearch:
   # Number of workers per Elasticsearch host.
   #worker: 1
 
-  # Optional index name. The default is "packetbeat" plus date
-  # and generates [packetbeat-]YYYY.MM.DD keys.
-  #index: "packetbeat-%{+yyyy.MM.dd}"
+  # Optional index name. The default is "httpbeat" plus date
+  # and generates [httpbeat-]YYYY.MM.DD keys.
+  #index: "httpbeat-%{+yyyy.MM.dd}"
 
   # Optional ingest node pipeline. By default no pipeline will be used.
   #pipeline: ""
@@ -159,22 +186,22 @@ output.elasticsearch:
   # Set to false to disable template loading.
   #template.enabled: true
 
-  # Template name. By default the template name is packetbeat.
-  #template.name: "packetbeat"
+  # Template name. By default the template name is httpbeat.
+  #template.name: "httpbeat"
 
   # Path to template file
-  #template.path: "${path.config}/packetbeat.template.json"
+  #template.path: "${path.config}/httpbeat.template.json"
 
   # Overwrite existing template
   #template.overwrite: false
 
-  # If set to true, packetbeat checks the Elasticsearch version at connect time, and if it
+  # If set to true, httpbeat checks the Elasticsearch version at connect time, and if it
   # is 2.x, it loads the file specified by the template.versions.2x.path setting. The
   # default is true.
   #template.versions.2x.enabled: true
 
   # Path to the Elasticsearch 2.x version of the template file.
-  #template.versions.2x.path: "${path.config}/packetbeat.template-es2x.json"
+  #template.versions.2x.path: "${path.config}/httpbeat.template-es2x.json"
 
   # Use SSL settings for HTTPS. Default is true.
   #ssl.enabled: true
@@ -209,7 +236,7 @@ output.elasticsearch:
   #ssl.curve_types: []
 
 
-#----------------------------- Logstash output --------------------------------
+#----------------------------- Logstash output ---------------------------------
 #output.logstash:
   # Boolean flag to enable or disable the output module.
   #enabled: true
@@ -232,7 +259,7 @@ output.elasticsearch:
 
   # Optional index name. The default index name is set to name of the beat
   # in all lowercase.
-  #index: 'packetbeat'
+  #index: 'httpbeat'
 
   # SOCKS5 proxy server URL
   #proxy_url: socks5://user:password@socks5-server:2233
@@ -272,7 +299,7 @@ output.elasticsearch:
   # Configure curve types for ECDHE based cipher suites
   #ssl.curve_types: []
 
-#------------------------------- Kafka output ---------------------------------
+#------------------------------- Kafka output ----------------------------------
 #output.kafka:
   # Boolean flag to enable or disable the output module.
   #enabled: true
@@ -307,7 +334,7 @@ output.elasticsearch:
   #username: ''
   #password: ''
 
-  # Kafka version packetbeat is assumed to run against. Defaults to the oldest
+  # Kafka version httpbeat is assumed to run against. Defaults to the oldest
   # supported stable version (currently version 0.8.2.0)
   #version: 0.8.2
 
@@ -407,7 +434,7 @@ output.elasticsearch:
   # Configure curve types for ECDHE based cipher suites
   #ssl.curve_types: []
 
-#------------------------------- Redis output ---------------------------------
+#------------------------------- Redis output ----------------------------------
 #output.redis:
   # Boolean flag to enable or disable the output module.
   #enabled: true
@@ -422,8 +449,8 @@ output.elasticsearch:
   #port: 6379
 
   # The name of the Redis list or channel the events are published to. The
-  # default is packetbeat.
-  #key: packetbeat
+  # default is httpbeat.
+  #key: httpbeat
 
   # The password to authenticate with. The default is no authentication.
   #password:
@@ -505,21 +532,21 @@ output.elasticsearch:
   #ssl.curve_types: []
 
 
-#------------------------------- File output ----------------------------------
+#------------------------------- File output -----------------------------------
 #output.file:
   # Boolean flag to enable or disable the output module.
   #enabled: true
 
   # Path to the directory where to save the generated files. The option is
   # mandatory.
-  #path: "/tmp/packetbeat"
+  #path: "/tmp/httpbeat"
 
-  # Name of the generated files. The default is `packetbeat` and it generates
-  # files: `packetbeat`, `packetbeat.1`, `packetbeat.2`, etc.
-  #filename: packetbeat
+  # Name of the generated files. The default is `httpbeat` and it generates
+  # files: `httpbeat`, `httpbeat.1`, `httpbeat.2`, etc.
+  #filename: httpbeat
 
   # Maximum size in kilobytes of each file. When this size is reached, and on
-  # every packetbeat restart, the files are rotated. The default value is 10240
+  # every httpbeat restart, the files are rotated. The default value is 10240
   # kB.
   #rotate_every_kb: 10000
 
@@ -537,7 +564,33 @@ output.elasticsearch:
   # Pretty print json event
   #pretty: false
 
-#================================ Logging =====================================
+#================================= Paths ======================================
+
+# The home path for the httpbeat installation. This is the default base path
+# for all other path settings and for miscellaneous files that come with the
+# distribution (for example, the sample dashboards).
+# If not set by a CLI flag or in the configuration file, the default for the
+# home path is the location of the binary.
+#path.home:
+
+# The configuration path for the httpbeat installation. This is the default
+# base path for configuration files, including the main YAML configuration file
+# and the Elasticsearch template file. If not set by a CLI flag or in the
+# configuration file, the default for the configuration path is the home path.
+#path.config: ${path.home}
+
+# The data path for the httpbeat installation. This is the default base path
+# for all the files in which httpbeat needs to store its data. If not set by a
+# CLI flag or in the configuration file, the default for the data path is a data
+# subdirectory inside the home path.
+#path.data: ${path.home}/data
+
+# The logs path for a httpbeat installation. This is the default location for
+# the Beat's log files. If not set by a CLI flag or in the configuration file,
+# the default for the logs path is a logs subdirectory inside the home path.
+#path.logs: ${path.home}/logs
+
+#================================ Logging ======================================
 # There are three options for the log output: syslog, file, stderr.
 # Under Windows systems, the log files are per default sent to the file output,
 # under all other system per default to syslog.
@@ -554,7 +607,7 @@ output.elasticsearch:
 # Send all logging output to syslog. The default is false.
 #logging.to_syslog: true
 
-# If enabled, packetbeat periodically logs its internal metrics that have changed
+# If enabled, httpbeat periodically logs its internal metrics that have changed
 # in the last period. For each metric that changed, the delta from the value at
 # the beginning of the period is logged. Also, the total values for
 # all non-zero internal metrics are logged on shutdown. The default is true.
@@ -569,10 +622,10 @@ logging.to_files: true
 logging.files:
   # Configure the path where the logs are written. The default is the logs directory
   # under the home path (the binary location).
-  #path: /var/log/packetbeat
+  #path: /var/log/httpbeat
 
   # The name of the files where the logs are written to.
-  #name: packetbeat
+  #name: httpbeat
 
   # Configure log file size limit. If limit is reached, log file will be
   # automatically rotated
@@ -580,3 +633,4 @@ logging.files:
 
   # Number of rotated log files to keep. Oldest files will be deleted first.
   #keepfiles: 7
+

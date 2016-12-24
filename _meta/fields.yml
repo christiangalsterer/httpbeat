@@ -1,0 +1,46 @@
+- key: httpbeat
+  title: httpbeat
+  description: Contains http request and response information
+  fields:
+    - name: request
+      type: group
+      fields:
+        - name: url
+          type: keyword
+          description: >
+            URL endpoint called by Httpbeat.
+
+        - name: method
+          type: keyword
+          description: >
+            HTTP method used by Httpbeat to call the URL endpoint.
+
+        - name: headers
+          description: >
+            HTTP headers send to the URL endpoint.
+
+        - name: body
+          type: keyword
+          description: >
+            HTTP request body passed to the URL endpoint.
+
+    - name: response
+      type: group
+      fields:
+        - name: code
+          type: keyword
+          description: >
+            HTTP status code returned by the URL endpoint.
+
+        - name: headers
+          description: >
+            HTTP response headers send by the URL endpoint.
+
+        - name: body
+          type: keyword
+          description: >
+            HTTP response body returned by the URL endpoint.
+
+        - name: jsonBody
+          description: >
+            HTTP response body returned by the URL endpoint in JSON format.

@@ -45,7 +45,6 @@ To run httpbeat with debugging output enabled, run:
 ./httpbeat -c httpbeat.yml -e -d "*"
 ```
 
-
 ### Test
 
 To test httpbeat, run the following command:
@@ -74,13 +73,12 @@ To generate etc/httpbeat.template.json and etc/httpbeat.asciidoc
 make update
 ```
 
-
 ### Cleanup
 
 To clean httpbeat source code, run the following commands:
 
 ```
-make fmt
+make check
 make simplify
 ```
 
@@ -116,6 +114,14 @@ make package
 This will fetch and create all images required for the build process. The hole process to finish can take several minutes.
 
 # Releases
+
+3.1.1 (2016-12-)
+
+Bugfix release containing the following changes:
+* Move files into correct place to allow correct bulding with `make package`
+* Move files into correct place to allow correct bulding with `make update`
+* Cleanup of documentation
+
 
 3.1.0 (2016-12-23)
 

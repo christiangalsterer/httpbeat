@@ -1,4 +1,5 @@
 BEATNAME=httpbeat
+BEAT_DESCRIPTION=Queries arbitrary HTTP endpoints in a regular interval and ships the result to the configured output channel.
 BEAT_DIR=github.com/christiangalsterer/httpbeat
 SYSTEM_TESTS=false
 TEST_ENVIRONMENT=false
@@ -35,4 +36,10 @@ before-build:
 cover:
 	echo 'mode: atomic' > coverage.txt && go list . ./beater | xargs -n1 -I{} sh -c 'go test -covermode=atomic -coverprofile=coverage.tmp {} && tail -n +2 coverage.tmp >> coverage.txt' && rm coverage.tmp
 
+# This is called by the beats packer before building starts
+.PHONY: before-build
+before-build:
+
+# Collects all dependencies and then calls update
 .PHONY: collect
+collect:
