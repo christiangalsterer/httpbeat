@@ -106,7 +106,7 @@ func (p *Poller) runOneTime() error {
 		var tlsConfig *tls.Config
 		var tlsC *transport.TLSConfig
 		//tlsConfig, err = outputs.LoadTLSConfig(p.config.TLS)
-		tlsC, err = outputs.LoadTLSConfig(p.config.SSL)		
+		tlsC, err = outputs.LoadTLSConfig(p.config.SSL)
 		if err != nil {
 			return err
 		}
@@ -243,13 +243,12 @@ func mergeMaps(first map[string]interface{}, second map[string]interface{}, key 
 }
 
 func convertTLSConfig(config *transport.TLSConfig) *tls.Config {
-	var tlsConfig *tls.Config
-	tlsConfig.Certificates = config.Certificates
-	tlsConfig.CipherSuites = config.CipherSuites
-	tlsConfig.RootCAs = config.RootCAs
-	tlsConfig.CurvePreferences = config.CurvePreferences
-	return tlsConfig
-
+	return &tls.Config{
+		Certificates:     config.Certificates,
+		CipherSuites:     config.CipherSuites,
+		RootCAs:          config.RootCAs,
+		CurvePreferences: config.CurvePreferences,
+	}
 }
 
 func (p *Poller) Stop() {
