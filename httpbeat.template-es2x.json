@@ -90,9 +90,7 @@
               "type": "string"
             },
             "headers": {
-              "ignore_above": 1024,
-              "index": "not_analyzed",
-              "type": "string"
+              "properties": {}
             },
             "method": {
               "ignore_above": 1024,
@@ -119,14 +117,10 @@
               "type": "string"
             },
             "headers": {
-              "ignore_above": 1024,
-              "index": "not_analyzed",
-              "type": "string"
+              "properties": {}
             },
             "jsonBody": {
-              "ignore_above": 1024,
-              "index": "not_analyzed",
-              "type": "string"
+              "properties": {}
             }
           }
         },

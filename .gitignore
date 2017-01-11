@@ -37,3 +37,5 @@ build
 .idea
 .DS_Store
 /docs/html_docs
+logs
+

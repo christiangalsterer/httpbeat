@@ -20,7 +20,24 @@ Example use cases are:
 Ensure that this folder is at the following location:
 `${GOPATH}/src/github.com/christiangalsterer`
 
-## Getting Started with Httpbeat
+# Installation
+
+## Download
+Pre-compiled binaries for different operating systems are available for [download](https://github.com/christiangalsterer/httpbeat/releases/tag/3.1.1).
+
+## Installation
+Install the package for your operation system by running the respective package manager or unzipping the package.
+
+## Configuration
+Adjust the `httpbeat.yml` configuration file to your needs. You may take `httpbeat.full.yml` as an example containing all possible configuration values
+
+## Running
+In order to start Httpbeat please use the respective startup script, e.g. `/usr/bin/httpbeat.sh`.
+
+## Starting Httbeat as Service
+Where supported Httpbeat can be started also using the respetive service scripts, e.g. `etc/init.d/httpbeat`.
+
+## Building and Releasing Httpbeat
 
 ### Requirements
 
@@ -43,6 +60,12 @@ To run httpbeat with debugging output enabled, run:
 
 ```
 ./httpbeat -c httpbeat.yml -e -d "*"
+```
+
+To run httpbeat in normal mode, run:
+
+```
+./httpbeat -c httpbeat.yml
 ```
 
 ### Test
@@ -113,15 +136,18 @@ make package
 
 This will fetch and create all images required for the build process. The hole process to finish can take several minutes.
 
-# Releases
+# Releases and Downloads
 
-3.1.1 (2016-12-)
+3.1.1 (2017-01-07)
+
+[Download](https://github.com/christiangalsterer/httpbeat/releases/tag/3.1.1)
+
+Starting with this release pre-compiled binaries for different operating systems are available under the respective tag in the github project. 
 
 Bugfix release containing the following changes:
 * Move files into correct place to allow correct bulding with `make package`
 * Move files into correct place to allow correct bulding with `make update`
 * Cleanup of documentation
-
 
 3.1.0 (2016-12-23)
 
@@ -241,7 +267,7 @@ See [here](docs/fields.asciidoc) for a detailed description of all exported fiel
 
 To apply the Httpbeat template:
 ```
-curl -XPUT 'http://localhost:9200/_template/httpbeat' -d@etc/httpbeat.template.json
+curl -XPUT 'http://localhost:9200/_template/httpbeat' -d@httpbeat.template.json
 ```
     
 # Contribution
