@@ -106,11 +106,11 @@ func (p *Poller) runOneTime() error {
 		var tlsConfig *tls.Config
 		var tlsC *transport.TLSConfig
 		//tlsConfig, err = outputs.LoadTLSConfig(p.config.TLS)
-		tlsC, err = outputs.LoadTLSConfig(p.config.SSL)
-		tlsConfig = convertTLSConfig(tlsC)
+		tlsC, err = outputs.LoadTLSConfig(p.config.SSL)		
 		if err != nil {
 			return err
 		}
+		tlsConfig = convertTLSConfig(tlsC)
 		p.request.TLSClientConfig(tlsConfig)
 	}
 
