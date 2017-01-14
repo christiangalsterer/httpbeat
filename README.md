@@ -140,13 +140,14 @@ This will fetch and create all images required for the build process. The hole p
 
 3.2.0 (2017-01-07)
 
-[Download](https://github.com/christiangalsterer/httpbeat/releases/tag/3.1.1)
+[Download](https://github.com/christiangalsterer/httpbeat/releases/tag/3.2.0)
 
-Feature release containing the following changes:
+Feature and bugfix release containing the following changes:
 * Various documentation improvements
 * Update to beats v5.1.2
 * Update to Go 1.7.4
 * Fix: [Panic when using TLS configuration (Go 1.7.4)](https://github.com/christiangalsterer/httpbeat/pull/15)
+* Fix: [Proper suport for ssl.verification_mode](https://github.com/christiangalsterer/httpbeat/issues/14)
 
 3.1.1 (2017-01-07)
 

@@ -248,6 +248,7 @@ func convertTLSConfig(config *transport.TLSConfig) *tls.Config {
 		CipherSuites:     config.CipherSuites,
 		RootCAs:          config.RootCAs,
 		CurvePreferences: config.CurvePreferences,
+		InsecureSkipVerify: config.Verification != transport.VerifyFull,
 	}
 }
 
