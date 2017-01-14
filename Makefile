@@ -36,10 +36,6 @@ before-build:
 cover:
 	echo 'mode: atomic' > coverage.txt && go list . ./beater | xargs -n1 -I{} sh -c 'go test -covermode=atomic -coverprofile=coverage.tmp {} && tail -n +2 coverage.tmp >> coverage.txt' && rm coverage.tmp
 
-# This is called by the beats packer before building starts
-.PHONY: before-build
-before-build:
-
 # Collects all dependencies and then calls update
 .PHONY: collect
 collect:
