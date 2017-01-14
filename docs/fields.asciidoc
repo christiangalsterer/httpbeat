@@ -147,6 +147,8 @@ HTTP method used by Httpbeat to call the URL endpoint.
 [float]
 === request.headers
 
+type: nested
+
 HTTP headers send to the URL endpoint.
 
 
@@ -170,6 +172,8 @@ HTTP status code returned by the URL endpoint.
 [float]
 === response.headers
 
+type: nested
+
 HTTP response headers send by the URL endpoint.
 
 
@@ -183,6 +187,8 @@ HTTP response body returned by the URL endpoint.
 
 [float]
 === response.jsonBody
+
+type: nested
 
 HTTP response body returned by the URL endpoint in JSON format.
 

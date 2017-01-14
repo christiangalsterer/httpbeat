@@ -16,6 +16,7 @@
             HTTP method used by Httpbeat to call the URL endpoint.
 
         - name: headers
+          type: nested
           description: >
             HTTP headers send to the URL endpoint.
 
@@ -33,6 +34,7 @@
             HTTP status code returned by the URL endpoint.
 
         - name: headers
+          type: nested
           description: >
             HTTP response headers send by the URL endpoint.
 
@@ -42,5 +44,6 @@
             HTTP response body returned by the URL endpoint.
 
         - name: jsonBody
+          type: nested
           description: >
             HTTP response body returned by the URL endpoint in JSON format.

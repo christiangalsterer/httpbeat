@@ -77,7 +77,8 @@
               "type": "keyword"
             },
             "headers": {
-                "properties": {}
+              "properties": {},
+              "type": "nested"
             },
             "method": {
               "ignore_above": 1024,
@@ -100,10 +101,12 @@
               "type": "keyword"
             },
             "headers": {
-                "properties": {}
+              "properties": {},
+              "type": "nested"
             },
             "jsonBody": {
-                "properties": {}
+              "properties": {},
+              "type": "nested"
             }
           }
         },
