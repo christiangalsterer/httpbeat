@@ -95,7 +95,7 @@ httpbeat:
 
 -------------------------------------------------------------------------------------
 
-A complete example can be found in link:../etc/httpbeat.full.yml[etc/httpbeat.full.yml]
+A complete example can be found in link:../httpbeat.full.yml[httpbeat.full.yml]
 
 ==== Options
 

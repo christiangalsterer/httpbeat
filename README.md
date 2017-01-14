@@ -29,7 +29,7 @@ Pre-compiled binaries for different operating systems are available for [downloa
 Install the package for your operation system by running the respective package manager or unzipping the package.
 
 ## Configuration
-Adjust the `httpbeat.yml` configuration file to your needs. You may take `httpbeat.full.yml` as an example containing all possible configuration values
+Adjust the `httpbeat.yml` configuration file to your needs. You may take `httpbeat.full.yml` as an example containing all possible configuration values.
 
 ## Running
 In order to start Httpbeat please use the respective startup script, e.g. `/usr/bin/httpbeat.sh`.
@@ -41,7 +41,7 @@ Where supported Httpbeat can be started also using the respetive service scripts
 
 ### Requirements
 
-* [Golang](https://golang.org/dl/) 1.7.1
+* [Golang](https://golang.org/dl/) 1.7.4
 * [Glide](https://github.com/Masterminds/glide) >= 0.11.0
 
 ### Build
@@ -137,6 +137,15 @@ make package
 This will fetch and create all images required for the build process. The hole process to finish can take several minutes.
 
 # Releases and Downloads
+
+3.2.0 (2017-01-07)
+
+[Download](https://github.com/christiangalsterer/httpbeat/releases/tag/3.1.1)
+
+Feature release containing the following changes:
+* Various documentation improvements
+* Update to Go 1.7.4
+* Fix: [Panic when using TLS configuration (Go 1.7.4)](https://github.com/christiangalsterer/httpbeat/pull/15)
 
 3.1.1 (2017-01-07)
 
