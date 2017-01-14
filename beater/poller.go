@@ -244,10 +244,10 @@ func mergeMaps(first map[string]interface{}, second map[string]interface{}, key 
 
 func convertTLSConfig(config *transport.TLSConfig) *tls.Config {
 	return &tls.Config{
-		Certificates:     config.Certificates,
-		CipherSuites:     config.CipherSuites,
-		RootCAs:          config.RootCAs,
-		CurvePreferences: config.CurvePreferences,
+		Certificates:       config.Certificates,
+		CipherSuites:       config.CipherSuites,
+		RootCAs:            config.RootCAs,
+		CurvePreferences:   config.CurvePreferences,
 		InsecureSkipVerify: config.Verification != transport.VerifyFull,
 	}
 }
