@@ -16,6 +16,7 @@ Example use cases are:
 * Monitor [Apache Stats](https://httpd.apache.org/docs/2.4/mod/mod_status.html)
 * Monitor Java application with [Jolokia](https://jolokia.org)
 * Monitor [Spring Boot Actuators](http://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#production-ready)
+* Monitor [Docker Remote API](https://docs.docker.com/engine/reference/api/docker_remote_api/)
 
 Ensure that this folder is at the following location:
 `${GOPATH}/src/github.com/christiangalsterer`
@@ -138,7 +139,7 @@ This will fetch and create all images required for the build process. The hole p
 
 # Releases and Downloads
 
-3.2.0 (2017-01-07)
+3.2.0 (2017-01-14)
 
 [Download](https://github.com/christiangalsterer/httpbeat/releases/tag/3.2.0)
 
@@ -147,7 +148,7 @@ Feature and bugfix release containing the following changes:
 * Update to beats v5.1.2
 * Update to Go 1.7.4
 * Fix: [Panic when using TLS configuration (Go 1.7.4)](https://github.com/christiangalsterer/httpbeat/pull/15)
-* Fix: [Proper suport for ssl.verification_mode](https://github.com/christiangalsterer/httpbeat/issues/14)
+* Fix: [Proper support for ssl.verification_mode](https://github.com/christiangalsterer/httpbeat/issues/14)
 
 3.1.1 (2017-01-07)
 
