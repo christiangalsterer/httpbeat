@@ -6,7 +6,7 @@ import (
 	"os"
 )
 
-var version = "3.1.1"
+var version = "3.2.0-SNAPSHOT"
 var name = "httpbeat"
 
 func main() {

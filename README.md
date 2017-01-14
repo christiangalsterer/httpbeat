@@ -144,6 +144,7 @@ This will fetch and create all images required for the build process. The hole p
 
 Feature release containing the following changes:
 * Various documentation improvements
+* Update to beats v5.1.2
 * Update to Go 1.7.4
 * Fix: [Panic when using TLS configuration (Go 1.7.4)](https://github.com/christiangalsterer/httpbeat/pull/15)
 
