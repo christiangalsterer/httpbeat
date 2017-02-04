@@ -173,7 +173,7 @@ func (p *Poller) runOneTime() error {
 				if p.config.JsonDotMode == "unflatten" {
 					jsonBody = unflat(jsonBody).(map[string]interface{})
 				} else if p.config.JsonDotMode == "replace" {
-					jsonBody = replaceDots(jsonBody).(map[string]interface{})
+					jsonBody = replaceDots(jsonBody, jsonDotModeCharacter).(map[string]interface{})
 				}
 			}
 			responseEvent.JsonBody = jsonBody
@@ -193,12 +193,12 @@ func (p *Poller) runOneTime() error {
 	return nil
 }
 
-func replaceDots(data interface{}) interface{} {
+func replaceDots(data interface{}, jsonDotModeCharacter string) interface{} {
 	switch data.(type) {
 	case map[string]interface{}:
 		result := map[string]interface{}{}
 		for key, value := range data.(map[string]interface{}) {
-			result[strings.Replace(key, ".", "_", -1)] = replaceDots(value)
+			result[strings.Replace(key, ".", jsonDotModeCharacter, -1)] = replaceDots(value, jsonDotModeCharacter)
 		}
 		return result
 	default:

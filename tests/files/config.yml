@@ -36,4 +36,4 @@ httpbeat:
       url: http://example.org/2
       method: post
       json_dot_mode: replace
-      json_dot_mode_character: -
+      json_dot_mode_character: "-"

@@ -44,6 +44,7 @@ func TestReadConfig(t *testing.T) {
 	assert.Equal(t, transport.TLSVersionSSL30, urls[0].SSL.Versions[0])
 	assert.Equal(t, "unflatten", urls[0].JsonDotMode)
 
+
 	assert.Equal(t, "http://example.org/2", urls[1].Url)
 	assert.Equal(t, "post", urls[1].Method)
 	assert.Equal(t, "@every 2m", urls[1].Cron)
@@ -54,7 +55,7 @@ func TestReadConfig(t *testing.T) {
 	assert.Equal(t, 0, len(urls[1].Fields))
 	assert.Equal(t, "", urls[1].DocumentType)
 	assert.Equal(t, "replace", urls[1].JsonDotMode)
-	assert.Equal(t, "_", urls[1].JsonDotModeCharacter)
+	assert.Equal(t, "", urls[1].JsonDotModeCharacter)
 
 	assert.Equal(t, "http://example.org/2", urls[2].Url)
 	assert.Equal(t, "post", urls[2].Method)
@@ -67,5 +68,4 @@ func TestReadConfig(t *testing.T) {
 	assert.Equal(t, "", urls[2].DocumentType)
 	assert.Equal(t, "replace", urls[2].JsonDotMode)
 	assert.Equal(t, "-", urls[2].JsonDotModeCharacter)
-
 }
