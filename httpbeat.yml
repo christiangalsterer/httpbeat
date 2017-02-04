@@ -23,6 +23,10 @@ httpbeat:
       # * put
       method: get
 
+      # Optional additional headers to send to the endpoint
+      #headers:
+        #Accept: application/json
+
       # Optional basic authentication
       #basic_auth:
         # Basic authentication username
@@ -41,6 +45,12 @@ httpbeat:
       # * json
       # Default output format is 'string'
       #output_format:
+
+      # Optional convertion of dots in keys in JSON response body. By default is off.
+      # Possible options are:
+      # * replace - replaces dots with a different character. The default value is `_`.
+      # * unflatten - converts {"foo.bar":false} to {"foo":{"bar":false}}
+      #json_dot_mode: replace
 
       # Optional additional headers to send to the endpoint
       #headers:

@@ -89,9 +89,9 @@ httpbeat:
 
       # Optional convertion of dots in keys in JSON response body. By default is off.
       # Possible options are:
+      # * replace - replaces dots with a different character. The default value is `_`.
       # * unflatten - converts {"foo.bar":false} to {"foo":{"bar":false}}
-      # * replace - replaces dots with underscores
-      #json_dot_mode: unflatten
+      #json_dot_mode: replace
 
 -------------------------------------------------------------------------------------
 
@@ -221,10 +221,10 @@ output_format: string
 ===== json_dot_mode
 
 Optional convertion of dots in keys in JSON response body. By default is off. Possible options are:
-    * unflatten - converts {"foo.bar":false} to {"foo":{"bar":false}}
     * replace - replaces dots with underscores
+    * unflatten - converts {"foo.bar":false} to {"foo":{"bar":false}}
 
 [source,yaml]
 -------------------------------------------------------------------------------------
-json_dot_mode: unflatten
+json_dot_mode: replace
 -------------------------------------------------------------------------------------

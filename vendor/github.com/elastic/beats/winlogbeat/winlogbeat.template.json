@@ -5,7 +5,7 @@
         "norms": false
       },
       "_meta": {
-        "version": "5.1.2"
+        "version": "5.2.0"
       },
       "dynamic_templates": [
         {
@@ -171,6 +171,7 @@
   },
   "order": 0,
   "settings": {
+    "index.mapping.total_fields.limit": 10000,
     "index.refresh_interval": "5s"
   },
   "template": "winlogbeat-*"

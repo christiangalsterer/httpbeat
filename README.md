@@ -1,6 +1,8 @@
 [![Build Status](https://travis-ci.org/christiangalsterer/httpbeat.svg?branch=master)](https://travis-ci.org/christiangalsterer/httpbeat)
 [![codecov.io](http://codecov.io/github/christiangalsterer/httpbeat/coverage.svg?branch=master)](http://codecov.io/github/christiangalsterer/httpbeat?branch=master)
 [![Go Report Card](https://goreportcard.com/badge/github.com/christiangalsterer/httpbeat)](https://goreportcard.com/report/github.com/christiangalsterer/httpbeat)
+![Elastic Beats 5.1.2](https://img.shields.io/badge/Elastic%20Beats-v5.1.2-blue.svg)
+![Golang 1.7.4](https://img.shields.io/badge/Golang-v1.7.4-blue.svg)
 
 # Httpbeat
 
@@ -139,9 +141,13 @@ This will fetch and create all images required for the build process. The hole p
 
 # Releases and Downloads
 
-3.2.0 (2017-01-14)
+3.3.0 (WiP) [Download](https://github.com/christiangalsterer/httpbeat/releases/tag/3.3.0)
 
-[Download](https://github.com/christiangalsterer/httpbeat/releases/tag/3.2.0)
+Feature release containing the following changes:
+* Update to beats v5.2.0
+* Allow to specify the replacement character for `json_dot_mode : replace`, default replacement character is `_`
+
+3.2.0 (2017-01-14) [Download](https://github.com/christiangalsterer/httpbeat/releases/tag/3.2.0)
 
 Feature and bugfix release containing the following changes:
 * Various documentation improvements
@@ -150,9 +156,7 @@ Feature and bugfix release containing the following changes:
 * Fix: [Panic when using TLS configuration (Go 1.7.4)](https://github.com/christiangalsterer/httpbeat/pull/15)
 * Fix: [Proper support for ssl.verification_mode](https://github.com/christiangalsterer/httpbeat/issues/14)
 
-3.1.1 (2017-01-07)
-
-[Download](https://github.com/christiangalsterer/httpbeat/releases/tag/3.1.1)
+3.1.1 (2017-01-07) [Download](https://github.com/christiangalsterer/httpbeat/releases/tag/3.1.1)
 
 Starting with this release pre-compiled binaries for different operating systems are available under the respective tag in the github project. 
 

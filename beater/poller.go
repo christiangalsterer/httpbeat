@@ -56,7 +56,6 @@ func (p *Poller) runOneTime() error {
 
 	url := p.config.Url
 	method := p.config.Method
-
 	switch method {
 	case "get":
 		p.request.Get(url)
@@ -75,7 +74,6 @@ func (p *Poller) runOneTime() error {
 	}
 
 	outputFormat := p.config.OutputFormat
-
 	switch outputFormat {
 	case "":
 		outputFormat = config.DefaultOutputFormat
@@ -84,6 +82,12 @@ func (p *Poller) runOneTime() error {
 		break
 	default:
 		return fmt.Errorf("Unsupported output format %g", outputFormat)
+	}
+
+	jsonDotModeCharacter := p.config.JsonDotModeCharacter
+	switch jsonDotModeCharacter {
+	case "":
+		jsonDotModeCharacter = config.DefaultJsonDotModeCharacter
 	}
 
 	// set timeout

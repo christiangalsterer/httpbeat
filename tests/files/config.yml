@@ -30,3 +30,10 @@ httpbeat:
       cron: "@every 2m"
       url: http://example.org/2
       method: post
+      json_dot_mode: replace
+    -
+      cron: "@every 2m"
+      url: http://example.org/2
+      method: post
+      json_dot_mode: replace
+      json_dot_mode_character: -

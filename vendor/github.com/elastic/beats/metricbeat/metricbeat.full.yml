@@ -39,6 +39,9 @@ metricbeat.modules:
 
     # Per process stats
     - process
+
+    # Sockets and connection info (linux only)
+    #- socket
   enabled: true
   period: 10s
   processes: ['.*']
@@ -48,6 +51,11 @@ metricbeat.modules:
 
   # EXPERIMENTAL: cgroups can be enabled for the process metricset.
   #cgroups: false
+
+  # Configure reverse DNS lookup on remote IP addresses in the socket metricset.
+  #socket.reverse_lookup.enabled: false
+  #socket.reverse_lookup.success_ttl: 60s
+  #socket.reverse_lookup.failure_ttl: 60s
 
 #------------------------------- Apache Module -------------------------------
 #- module: apache
@@ -67,6 +75,13 @@ metricbeat.modules:
   # Password of hosts. Empty by default
   #password: test123
 
+#------------------------------ couchbase Module -----------------------------
+#- module: couchbase
+  #metricsets: ["cluster", "node", "bucket"]
+  #enabled: true
+  #period: 10s
+  #hosts: ["localhost:8091"]
+
 #------------------------------- Docker Module -------------------------------
 #- module: docker
   #metricsets: ["cpu", "info", "memory", "network", "diskio", "container"]
@@ -80,7 +95,7 @@ metricbeat.modules:
     #certificate:           "/etc/pki/client/cert.pem"
     #key:                   "/etc/pki/client/cert.key"
 
-#------------------------------- haproxy Module ------------------------------
+#------------------------------- HAProxy Module ------------------------------
 #- module: haproxy
   #metricsets: ["info", "stat"]
   #enabled: true
@@ -195,6 +210,15 @@ metricbeat.modules:
   #password: pass
 
 
+#----------------------------- Prometheus Module -----------------------------
+#- module: prometheus
+  #metricsets: ["stats"]
+  #enabled: true
+  #period: 10s
+  #hosts: ["localhost:9090"]
+  #metrics_path: /metrics
+  #namespace: example
+
 #-------------------------------- Redis Module -------------------------------
 #- module: redis
   #metricsets: ["info", "keyspace"]
@@ -203,9 +227,6 @@ metricbeat.modules:
 
   # Redis hosts
   #hosts: ["127.0.0.1:6379"]
-
-  # Enabled defines if the module is enabled. Default: true
-  #enabled: true
 
   # Timeout after which time a metricset should return an error
   # Timeout is by default defined as period, as a fetch of a metricset

@@ -21,6 +21,8 @@ var (
 )
 
 type Prospector struct {
+	// harvesterCount MUST be first field in struct. See https://github.com/golang/go/issues/599
+	harvesterCounter uint64         // Must be 8-byte aligned. Ensured if first field in struct
 	cfg              *common.Config // Raw config
 	config           prospectorConfig
 	prospectorer     Prospectorer
@@ -30,7 +32,6 @@ type Prospector struct {
 	states           *file.States
 	wg               sync.WaitGroup
 	channelWg        sync.WaitGroup // Separate waitgroup for channels as not stopped on completion
-	harvesterCounter uint64
 }
 
 type Prospectorer interface {
@@ -156,6 +157,11 @@ func (p *Prospector) Run(once bool) {
 			p.prospectorer.Run()
 		}
 	}
+}
+
+// IsEnabled returns true if the prospector is eanbled
+func (p *Prospector) IsEnabled() bool {
+	return p.config.Enabled
 }
 
 // updateState updates the prospector state and forwards the event to the spooler

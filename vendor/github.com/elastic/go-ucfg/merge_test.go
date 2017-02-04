@@ -542,12 +542,16 @@ func TestMergeSpliced(t *testing.T) {
 		"who":   "brown fox",
 		"l":     "lazy",
 		"sub": node{
-			"b":     "${t}${r}${u}${e}",
-			"i":     "${four}${two}",
-			"u":     "${two}${three}",
-			"f":     "${three}.${one}${four}",
-			"s":     "${s}ing",
-			"story": "the quick ${who} jumps over the ${l} dog",
+			"b":       "${t}${r}${u}${e}",
+			"i":       "${four}${two}",
+			"u":       "${two}${three}",
+			"f":       "${three}.${one}${four}",
+			"s":       "${s}ing",
+			"story":   "the quick ${who} jumps over the ${l} dog",
+			"arr":     "[${one},${two}]",
+			"obj":     "{f1: ${one}, f2: ${two}}",
+			"strings": "${l},${s}",
+			"empty":   "",
 		},
 	}
 
@@ -572,12 +576,36 @@ func TestMergeSpliced(t *testing.T) {
 	story, err := c.String("sub.story", -1, PathSep("."))
 	assert.NoError(t, err)
 
+	a0, err := c.Int("sub.arr", 0, PathSep("."))
+	assert.NoError(t, err)
+
+	a1, err := c.Int("sub.arr", 1, PathSep("."))
+	assert.NoError(t, err)
+
+	o, err := c.Int("sub.obj.f1", -1, PathSep("."))
+	assert.NoError(t, err)
+
+	s0, err := c.String("sub.strings", 0, PathSep("."))
+	assert.NoError(t, err)
+
+	s1, err := c.String("sub.strings", 1, PathSep("."))
+	assert.NoError(t, err)
+
+	e, err := c.String("sub.empty", -1, PathSep("."))
+	assert.NoError(t, err)
+
 	assert.Equal(t, true, b)
 	assert.Equal(t, 42, int(i))
 	assert.Equal(t, 23, int(u))
 	assert.Equal(t, 3.14, f)
 	assert.Equal(t, "string", s)
 	assert.Equal(t, "the quick brown fox jumps over the lazy dog", story)
+	assert.Equal(t, 1, int(a0))
+	assert.Equal(t, 2, int(a1))
+	assert.Equal(t, 1, int(o))
+	assert.Equal(t, "lazy", s0)
+	assert.Equal(t, "str", s1)
+	assert.Equal(t, "", e)
 }
 
 func TestMergeVarExp(t *testing.T) {
@@ -690,5 +718,104 @@ func TestMergeRegex(t *testing.T) {
 		}
 
 		assert.Equal(t, regex, check.Regex)
+	}
+}
+
+func TestMergeNil(t *testing.T) {
+	tests := []struct {
+		name        string
+		nilCfg, cfg interface{}
+		path        string
+	}{
+		{
+			"key",
+			map[string]interface{}{
+				"c": nil,
+			},
+			map[string]interface{}{
+				"c": map[string]int{"i": 42},
+			},
+			"c.i",
+		},
+		{
+			"Nested key 1",
+			map[string]interface{}{
+				"c": nil,
+			},
+			map[string]interface{}{
+				"c.x": map[string]int{"i": 42},
+			},
+			"c.x.i",
+		},
+		{
+			"Nil Array",
+			map[string]interface{}{
+				"a": nil,
+			},
+			map[string]interface{}{
+				"a": []interface{}{
+					map[string]interface{}{
+						"i": 42,
+					},
+				},
+			},
+			"a.0.i",
+		},
+		{
+			"Empty Array",
+			map[string]interface{}{
+				"a": []interface{}{},
+			},
+			map[string]interface{}{
+				"a": []interface{}{
+					map[string]interface{}{
+						"i": 42,
+					},
+				},
+			},
+			"a.0.i",
+		},
+		{
+			"Array with nil element",
+			map[string]interface{}{
+				"a": []interface{}{nil},
+			},
+			map[string]interface{}{
+				"a": []interface{}{
+					map[string]interface{}{
+						"i": 42,
+					},
+				},
+			},
+			"a.0.i",
+		},
+	}
+
+	opts := []Option{PathSep(".")}
+	for i, test := range tests {
+		t.Logf("run test (%v): %v", i, test.name)
+		cfg, err := NewFrom(test.nilCfg, opts...)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		_, err = cfg.Int(test.path, -1, opts...)
+		if err == nil {
+			t.Errorf("Failed: nil value '%v' accessessible", test.path)
+			continue
+		}
+
+		err = cfg.Merge(test.cfg, opts...)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		i, err := cfg.Int(test.path, -1, opts...)
+		if err != nil {
+			t.Error(err)
+			continue
+		}
+
+		assert.Equal(t, 42, int(i))
 	}
 }

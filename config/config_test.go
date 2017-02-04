@@ -21,7 +21,7 @@ func TestReadConfig(t *testing.T) {
 	assert.Nil(t, err)
 
 	urls := config.Httpbeat.Urls
-	assert.Equal(t, 2, len(urls))
+	assert.Equal(t, 3, len(urls))
 
 	assert.Equal(t, "http://example.org/1", urls[0].Url)
 	assert.Equal(t, "get", urls[0].Method)
@@ -53,4 +53,19 @@ func TestReadConfig(t *testing.T) {
 	assert.Equal(t, 0, len(urls[1].Headers))
 	assert.Equal(t, 0, len(urls[1].Fields))
 	assert.Equal(t, "", urls[1].DocumentType)
+	assert.Equal(t, "replace", urls[1].JsonDotMode)
+	assert.Equal(t, "_", urls[1].JsonDotModeCharacter)
+
+	assert.Equal(t, "http://example.org/2", urls[2].Url)
+	assert.Equal(t, "post", urls[2].Method)
+	assert.Equal(t, "@every 2m", urls[2].Cron)
+	assert.Equal(t, "", urls[2].BasicAuth.Username)
+	assert.Equal(t, "", urls[2].BasicAuth.Password)
+	assert.Equal(t, "", urls[2].ProxyUrl)
+	assert.Equal(t, 0, len(urls[2].Headers))
+	assert.Equal(t, 0, len(urls[2].Fields))
+	assert.Equal(t, "", urls[2].DocumentType)
+	assert.Equal(t, "replace", urls[2].JsonDotMode)
+	assert.Equal(t, "-", urls[2].JsonDotModeCharacter)
+
 }

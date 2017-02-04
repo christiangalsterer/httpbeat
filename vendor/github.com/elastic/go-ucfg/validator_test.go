@@ -14,7 +14,7 @@ type myNonzeroInt int
 type structValidator struct{ I int }
 type ptrStructValidator struct{ I int }
 
-var testErrZero = errors.New("value must not be 0")
+var errZeroTest = errors.New("value must not be 0")
 
 func (m myNonzeroInt) Validate() error {
 	return testZeroErr(int(m))
@@ -30,7 +30,7 @@ func (p *ptrStructValidator) Validate() error {
 
 func testZeroErr(i int) error {
 	if i == 0 {
-		return testErrZero
+		return errZeroTest
 	}
 	return nil
 }

@@ -1,5 +1,5 @@
-hash: 109c806aeb54faf4c315370b2b546c3d1848c3425ffd53cc62d78d198fe81b58
-updated: 2017-01-14T07:23:08.287535106+01:00
+hash: 048e1359a0682eaa0c5e0e684f5344b316d14cecef7e33582cd9133b1712725c
+updated: 2017-02-03T17:35:10.875871503+01:00
 imports:
 - name: github.com/davecgh/go-spew
   version: 5215b55f46b2b919f50a1df0eaa5886afe4e3b3d
@@ -14,7 +14,7 @@ imports:
 - name: github.com/eapache/queue
   version: ded5959c0d4e360646dc9e9908cff48666781367
 - name: github.com/elastic/beats
-  version: b1ff93b4ae3aa5d8032f3b8d22e4e7746aebb0f4
+  version: 7575a21e63d5aa70b4e2f6f31963cd40ffebc530
   subpackages:
   - libbeat/beat
   - libbeat/cfgfile
@@ -56,11 +56,12 @@ imports:
   - server/v2
   - protocol/v2
 - name: github.com/elastic/go-ucfg
-  version: 6baf3ba6c380865e8176e9418551444b25cbf8f2
+  version: b42667b880b6190864107f2cc6d95c070a0ca580
   subpackages:
   - cfgutil
   - flag
   - yaml
+  - internal/parse
   - json
 - name: github.com/garyburd/redigo
   version: 8873b2f1995f59d4bcdd2b0dc9858e2cb9bf0c13
@@ -86,6 +87,12 @@ imports:
   version: c78e8bd2dd3599feb21fd30886043979e82fe948
 - name: github.com/parnurzeal/gorequest
   version: 2aea80ce763523ecc6452e61c3727ae9595a5809
+- name: github.com/pierrec/lz4
+  version: 5c9560bfa9ace2bf86080bf40d46b34ae44604df
+- name: github.com/pierrec/xxHash
+  version: 5a004441f897722c627870a981d02b29924215fa
+  subpackages:
+  - xxHash32
 - name: github.com/pkg/errors
   version: 01fa4104b9c248c8945d14d9f128454d5b28d595
 - name: github.com/rcrowley/go-metrics
@@ -97,7 +104,7 @@ imports:
 - name: github.com/satori/go.uuid
   version: 879c5887cd475cd7864858769793b2ceb0d44feb
 - name: github.com/Shopify/sarama
-  version: 2091c0107077425080ce59da480912ed2c4be6c8
+  version: f0996189c86dc27338468f2a9b10077c6d572b34
   repo: https://github.com/urso/sarama
 - name: golang.org/x/net
   version: d58ca6618b994150e624f6888d871f4709db51a0
@@ -121,6 +128,6 @@ testImports:
   subpackages:
   - difflib
 - name: github.com/stretchr/testify
-  version: 2402e8e7a02fc811447d11f881aa9746cdc57983
+  version: 4d4bfba8f1d1027c4fdbe371823030df51419987
   subpackages:
   - assert
