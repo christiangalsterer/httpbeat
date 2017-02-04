@@ -1,7 +1,7 @@
 [![Build Status](https://travis-ci.org/christiangalsterer/httpbeat.svg?branch=master)](https://travis-ci.org/christiangalsterer/httpbeat)
 [![codecov.io](http://codecov.io/github/christiangalsterer/httpbeat/coverage.svg?branch=master)](http://codecov.io/github/christiangalsterer/httpbeat?branch=master)
 [![Go Report Card](https://goreportcard.com/badge/github.com/christiangalsterer/httpbeat)](https://goreportcard.com/report/github.com/christiangalsterer/httpbeat)
-![Elastic Beats 5.1.2](https://img.shields.io/badge/Elastic%20Beats-v5.1.2-blue.svg)
+![Elastic Beats 5.2.0](https://img.shields.io/badge/Elastic%20Beats-v5.2.0-blue.svg)
 ![Golang 1.7.4](https://img.shields.io/badge/Golang-v1.7.4-blue.svg)
 
 # Httpbeat
@@ -141,7 +141,7 @@ This will fetch and create all images required for the build process. The hole p
 
 # Releases and Downloads
 
-3.3.0 (WiP) [Download](https://github.com/christiangalsterer/httpbeat/releases/tag/3.3.0)
+3.3.0 (2017-02-04) [Download](https://github.com/christiangalsterer/httpbeat/releases/tag/3.3.0)
 
 Feature release containing the following changes:
 * Update to beats v5.2.0
