@@ -36,7 +36,7 @@ func (h *Httpbeat) Run(b *beat.Beat) error {
 	logp.Info("httpbeat is running! Hit CTRL-C to stop it.")
 	h.client = b.Publisher.Connect()
 
-	for i, urlConfig := range h.HbConfig.Httpbeat.Urls {
+	for i, urlConfig := range h.HbConfig.Httpbeat.Hosts {
 		logp.Debug("httpbeat", "Creating poller #%v with URL: %v", i, urlConfig.Url)
 		poller = NewPooler(h, urlConfig)
 		go poller.Run()

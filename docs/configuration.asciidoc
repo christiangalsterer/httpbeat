@@ -20,12 +20,12 @@ Here is a sample configuration:
 -------------------------------------------------------------------------------------
 httpbeat:
 
-  urls:
-    # Each - URL endpoints to poll. Below are the URL endpoint specific configurations
+  hosts:
+    # Each - Host endpoints to call. Below are the host endpoint specific configurations
     -
-      # Optional cron expression, defines when to poll the URL endpoint.
+      # Optional cron expression, defines when to poll the host endpoint.
       # Default is every 1 minute.
-      cron:
+      schedule:
 
       # The URL endpoint to call by Httpbeat
       url: http://httpbin.org/headers
@@ -99,13 +99,13 @@ A complete example can be found in link:../httpbeat.full.yml[httpbeat.full.yml]
 
 ==== Options
 
-===== cron
+===== schedule
 
 Optional cron expression, defines when to poll the endpoint. Default is every 1 minute.
 
 [source,yaml]
 -------------------------------------------------------------------------------------
-cron: @every 1m
+schedule: @every 1m
 -------------------------------------------------------------------------------------
 
 ===== method

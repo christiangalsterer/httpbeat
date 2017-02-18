@@ -3,12 +3,12 @@
 ############################## Httpbeat ########################################
 httpbeat:
 
-  urls:
-    # Each - URL endpoints to call. Below are the URL endpoint specific configurations
+  hosts:
+    # Each - Host endpoints to call. Below are the host endpoint specific configurations
     -
-      # Optional cron expression, defines when to poll the URL endpoint.
+      # Optional cron expression, defines when to poll the host endpoint.
       # Default is every 1 minute.
-      #cron:
+      #schedule:
 
       # The URL endpoint to call by Httpbeat
       url: https://httpbin.org/headers

@@ -16,12 +16,12 @@ import (
 
 type Poller struct {
 	httpbeat *Httpbeat
-	config   config.UrlConfig
-	cron     string
+	config   config.HostConfig
+	schedule string
 	request  *gorequest.SuperAgent
 }
 
-func NewPooler(httpbeat *Httpbeat, config config.UrlConfig) *Poller {
+func NewPooler(httpbeat *Httpbeat, config config.HostConfig) *Poller {
 	poller := &Poller{
 		httpbeat: httpbeat,
 		config:   config,
@@ -38,14 +38,14 @@ func (p *Poller) Run() {
 	}
 
 	//init the cron schedule
-	if p.config.Cron != "" {
-		p.cron = p.config.Cron
+	if p.config.Schedule != "" {
+		p.schedule = p.config.Schedule
 	} else {
-		p.cron = config.DefaultCron
+		p.schedule = config.DefaultSchedule
 	}
 
 	cron := cron.New()
-	cron.AddFunc(p.config.Cron, func() { p.runOneTime() })
+	cron.AddFunc(p.config.Schedule, func() { p.runOneTime() })
 	cron.Start()
 }
 

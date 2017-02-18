@@ -7,7 +7,7 @@ import (
 
 // Defaults for config variables which are not set
 const (
-	DefaultCron                 string        = "@every 1m"
+	DefaultSchedule             string        = "@every 1m"
 	DefaultTimeout              time.Duration = 60 * time.Second
 	DefaultDocumentType         string        = "httpbeat"
 	DefaultOutputFormat         string        = "string"
@@ -15,11 +15,11 @@ const (
 )
 
 type HttpbeatConfig struct {
-	Urls []UrlConfig
+	Hosts []HostConfig
 }
 
-type UrlConfig struct {
-	Cron                 string
+type HostConfig struct {
+	Schedule             string
 	Url                  string
 	BasicAuth            BasicAuthenticationConfig `config:"basic_auth"`
 	Method               string
