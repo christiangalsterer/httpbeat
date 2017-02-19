@@ -1,7 +1,7 @@
 [![Build Status](https://travis-ci.org/christiangalsterer/httpbeat.svg?branch=master)](https://travis-ci.org/christiangalsterer/httpbeat)
 [![codecov.io](http://codecov.io/github/christiangalsterer/httpbeat/coverage.svg?branch=master)](http://codecov.io/github/christiangalsterer/httpbeat?branch=master)
 [![Go Report Card](https://goreportcard.com/badge/github.com/christiangalsterer/httpbeat)](https://goreportcard.com/report/github.com/christiangalsterer/httpbeat)
-![Elastic Beats 5.2.0](https://img.shields.io/badge/Elastic%20Beats-v5.2.0-blue.svg)
+![Elastic Beats 5.2.1](https://img.shields.io/badge/Elastic%20Beats-v5.2.1-blue.svg)
 ![Golang 1.7.4](https://img.shields.io/badge/Golang-v1.7.4-blue.svg)
 
 # Httpbeat
