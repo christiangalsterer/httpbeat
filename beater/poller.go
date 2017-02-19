@@ -18,6 +18,10 @@ type Poller struct {
 	httpbeat *Httpbeat
 	config   config.HostConfig
 	schedule string
+	documentType string
+	jsonDotModeCharacter string
+	outputFormat string
+	timeout string
 	request  *gorequest.SuperAgent
 }
 
@@ -32,20 +36,37 @@ func NewPooler(httpbeat *Httpbeat, config config.HostConfig) *Poller {
 
 func (p *Poller) Run() {
 
-	// Setup DocumentType
-	if p.config.DocumentType == "" {
-		p.config.DocumentType = config.DefaultDocumentType
+	// setup default config
+	p.schedule = config.DefaultSchedule
+	p.documentType = config.DefaultDocumentType
+	p.jsonDotModeCharacter = config.DefaultJsonDotModeCharacter
+	p.outputFormat = config.DefaultOutputFormat
+	p.timeout = config.DefaultTimeout
+
+	// setup DocumentType
+	if p.config.DocumentType != "" {
+		p.documentType = p.config.DocumentType
 	}
 
-	//init the cron schedule
+	// setuo cron schedule
 	if p.config.Schedule != "" {
+		logp.Debug("Httpbeat", "Use schedule: [%w]", p.config.Schedule)
 		p.schedule = p.config.Schedule
-	} else {
-		p.schedule = config.DefaultSchedule
+	}
+
+	// setup jsonDotModeCharacter
+	if p.config.JsonDotModeCharacter != "" {
+		p.jsonDotModeCharacter = p.config.JsonDotModeCharacter
+
+	}
+
+	// setup timeout
+	if p.config.Timeout != nil {
+		p.request.Timeout(time.Duration(*p.config.Timeout) * time.Second)
 	}
 
 	cron := cron.New()
-	cron.AddFunc(p.config.Schedule, func() { p.runOneTime() })
+	cron.AddFunc(p.schedule, func() { p.runOneTime() })
 	cron.Start()
 }
 
@@ -82,19 +103,6 @@ func (p *Poller) runOneTime() error {
 		break
 	default:
 		return fmt.Errorf("Unsupported output format %g", outputFormat)
-	}
-
-	jsonDotModeCharacter := p.config.JsonDotModeCharacter
-	switch jsonDotModeCharacter {
-	case "":
-		jsonDotModeCharacter = config.DefaultJsonDotModeCharacter
-	}
-
-	// set timeout
-	if p.config.Timeout != nil {
-		p.request.Timeout(time.Duration(*p.config.Timeout) * time.Second)
-	} else {
-		p.request.Timeout(config.DefaultTimeout)
 	}
 
 	// set authentication
@@ -173,7 +181,7 @@ func (p *Poller) runOneTime() error {
 				if p.config.JsonDotMode == "unflatten" {
 					jsonBody = unflat(jsonBody).(map[string]interface{})
 				} else if p.config.JsonDotMode == "replace" {
-					jsonBody = replaceDots(jsonBody, jsonDotModeCharacter).(map[string]interface{})
+					jsonBody = replaceDots(jsonBody, p.jsonDotModeCharacter).(map[string]interface{})
 				}
 			}
 			responseEvent.JsonBody = jsonBody
@@ -182,7 +190,7 @@ func (p *Poller) runOneTime() error {
 
 	event := HttpEvent{
 		ReadTime:     now,
-		DocumentType: p.config.DocumentType,
+		DocumentType: p.documentType,
 		Fields:       p.config.Fields,
 		Request:      requestEvent,
 		Response:     responseEvent,

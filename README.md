@@ -143,10 +143,11 @@ This will fetch and create all images required for the build process. The hole p
 
 4.0.0 (WiP) [Download](https://github.com/christiangalsterer/httpbeat/releases/tag/4.0.0)
 
-Feature release containing the following **breaking** changes:
+Feature and bugfix release containing the following **breaking** changes:
 * Renamed configuration parameter `urls`to `hosts`. Please update your configuration accordingly.
 * Renamed configuration parameter `cron`to `schedule`. Please update your configuration accordingly.
 * Update to beats v5.2.1
+* Fix: Default schedule not working
 
 3.3.0 (2017-02-04) [Download](https://github.com/christiangalsterer/httpbeat/releases/tag/3.3.0)
 
