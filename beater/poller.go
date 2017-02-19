@@ -21,7 +21,7 @@ type Poller struct {
 	documentType string
 	jsonDotModeCharacter string
 	outputFormat string
-	timeout string
+	timeout time.Duration
 	request  *gorequest.SuperAgent
 }
 
