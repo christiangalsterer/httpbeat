@@ -15,14 +15,14 @@ import (
 )
 
 type Poller struct {
-	httpbeat *Httpbeat
-	config   config.HostConfig
-	schedule string
-	documentType string
+	httpbeat             *Httpbeat
+	config               config.HostConfig
+	schedule             string
+	documentType         string
 	jsonDotModeCharacter string
-	outputFormat string
-	timeout time.Duration
-	request  *gorequest.SuperAgent
+	outputFormat         string
+	timeout              time.Duration
+	request              *gorequest.SuperAgent
 }
 
 func NewPooler(httpbeat *Httpbeat, config config.HostConfig) *Poller {
