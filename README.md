@@ -1,6 +1,9 @@
 [![Build Status](https://travis-ci.org/christiangalsterer/httpbeat.svg?branch=master)](https://travis-ci.org/christiangalsterer/httpbeat)
 [![codecov.io](http://codecov.io/github/christiangalsterer/httpbeat/coverage.svg?branch=master)](http://codecov.io/github/christiangalsterer/httpbeat?branch=master)
 [![Go Report Card](https://goreportcard.com/badge/github.com/christiangalsterer/httpbeat)](https://goreportcard.com/report/github.com/christiangalsterer/httpbeat)
+[![license](https://img.shields.io/github/license/christiangalsterer/httpbeat.svg)](https://github.com/christiangalsterer/httpbeat)
+[![Github All Releases](https://img.shields.io/github/downloads/christiangalsterer/httpbeat/total.svg)](https://github.com/christiangalsterer/httpbeat)
+
 ![Elastic Beats 5.2.1](https://img.shields.io/badge/Elastic%20Beats-v5.2.1-blue.svg)
 ![Golang 1.7.4](https://img.shields.io/badge/Golang-v1.7.4-blue.svg)
 
@@ -55,7 +58,6 @@ in the same directory with the name httpbeat.
 ```
 make clean && make
 ```
-
 
 ### Run
 
@@ -141,7 +143,14 @@ This will fetch and create all images required for the build process. The hole p
 
 # Releases and Downloads
 
-4.0.0 (2017-02-19) [Download](https://github.com/christiangalsterer/httpbeat/releases/tag/4.0.0)
+## 4.0.1 (WiP) [Download](https://github.com/christiangalsterer/httpbeat/releases/tag/4.0.1)
+[![Github Releases (by Release)](https://img.shields.io/github/downloads/christiangalsterer/httpbeat/3.3.0/total.svg)](https://github.com/christiangalsterer/httpbeat/releases/tag/4.0.1)
+
+Bugfix release containing the following changes:
+* Set correct version in package names and package metadata
+
+## 4.0.0 (2017-02-19) [Download](https://github.com/christiangalsterer/httpbeat/releases/tag/4.0.0)
+[![Github Releases (by Release)](https://img.shields.io/github/downloads/christiangalsterer/httpbeat/3.3.0/total.svg)](https://github.com/christiangalsterer/httpbeat/releases/tag/4.0.0)
 
 Feature and bugfix release containing the following **breaking** changes:
 * Renamed configuration parameter `urls` to `hosts`. Please update your configuration accordingly.
@@ -149,13 +158,17 @@ Feature and bugfix release containing the following **breaking** changes:
 * Update to beats v5.2.1
 * Fix: Default schedule not working
 
-3.3.0 (2017-02-04) [Download](https://github.com/christiangalsterer/httpbeat/releases/tag/3.3.0)
+## 3.3.0 (2017-02-04) [Download](https://github.com/christiangalsterer/httpbeat/releases/tag/3.3.0)
+[![Github Releases (by Release)](https://img.shields.io/github/downloads/christiangalsterer/httpbeat/3.3.0/total.svg)](https://github.com/christiangalsterer/httpbeat/releases/tag/3.3.0)
+
 
 Feature release containing the following changes:
 * Update to beats v5.2.0
 * Allow to specify the replacement character for `json_dot_mode : replace`, default replacement character is `_`
 
-3.2.0 (2017-01-14) [Download](https://github.com/christiangalsterer/httpbeat/releases/tag/3.2.0)
+## 3.2.0 (2017-01-14) [Download](https://github.com/christiangalsterer/httpbeat/releases/tag/3.2.0)
+[![Github Releases (by Release)](https://img.shields.io/github/downloads/christiangalsterer/httpbeat/3.3.0/total.svg)](https://github.com/christiangalsterer/httpbeat/releases/tag/3.2.0)
+
 
 Feature and bugfix release containing the following changes:
 * Various documentation improvements
@@ -164,7 +177,8 @@ Feature and bugfix release containing the following changes:
 * Fix: [Panic when using TLS configuration (Go 1.7.4)](https://github.com/christiangalsterer/httpbeat/pull/15)
 * Fix: [Proper support for ssl.verification_mode](https://github.com/christiangalsterer/httpbeat/issues/14)
 
-3.1.1 (2017-01-07) [Download](https://github.com/christiangalsterer/httpbeat/releases/tag/3.1.1)
+## 3.1.1 (2017-01-07) [Download](https://github.com/christiangalsterer/httpbeat/releases/tag/3.1.1)
+[![Github Releases (by Release)](https://img.shields.io/github/downloads/christiangalsterer/httpbeat/3.3.0/total.svg)](https://github.com/christiangalsterer/httpbeat/releases/tag/3.1.1)
 
 Starting with this release pre-compiled binaries for different operating systems are available under the respective tag in the github project. 
 
@@ -173,12 +187,12 @@ Bugfix release containing the following changes:
 * Move files into correct place to allow correct bulding with `make update`
 * Cleanup of documentation
 
-3.1.0 (2016-12-23)
+## 3.1.0 (2016-12-23)
 
 Feature release containing the following changes:
 * Update to beats v5.1.1
 
-3.0.0 (2016-12-18)
+## 3.0.0 (2016-12-18)
 
 Feature release containing the following changes:
 * [Output format of response body is now defined via output_format parameter](https://github.com/christiangalsterer/httpbeat/issues/8). Default is 'string'
@@ -187,7 +201,7 @@ Bugfix release containing the following changes:
 * [Missing es2x template](https://github.com/christiangalsterer/httpbeat/issues/13)
 * [Correct parsing of large numbers in JSON output](https://github.com/christiangalsterer/httpbeat/issues/12)
 
-2.0.0 (2016-11-26)
+## 2.0.0 (2016-11-26)
 
 Feature release containing the following changes:
 * Update to beats v5.0.1
@@ -199,25 +213,25 @@ Please note that this release contains the following breaking changes introduced
     * replace tls.insecure with ssl.verification_mode setting.
     * replace tls.min/max_version with ssl.supported_protocols setting requiring full protocol name
 
-1.2.0 (2016-07-19)
+## 1.2.0 (2016-07-19)
 
 Feature release containing the following changes:
 * Update to Go 1.6
 * Update to libbeat 1.2.3
 * Use [Glide](https://github.com/Masterminds/glide) for dependency management
 
-1.1.0 (2016-04-06)
+## 1.1.0 (2016-04-06)
 
 Feature release containing the following changes:
 * [Provide output directly as JSON](https://github.com/christiangalsterer/httpbeat/issues/2)
 
-1.0.1 (2016-02-17)
+## 1.0.1 (2016-02-17)
 
 Bugfix release containing the following changes:
 * Fix: [Infinite loop when using logstash output](https://github.com/christiangalsterer/httpbeat/issues/4)
 * Fix: [Hanging during shutdown](https://github.com/christiangalsterer/httpbeat/issues/5)
 
-1.0.0 (2015-12-29)
+## 1.0.0 (2015-12-29)
 * Initial release
 
 # Configuration

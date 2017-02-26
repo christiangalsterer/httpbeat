@@ -3,6 +3,7 @@ BEAT_DESCRIPTION=Queries arbitrary HTTP endpoints in a regular interval and ship
 BEAT_DIR=github.com/christiangalsterer/httpbeat
 SYSTEM_TESTS=false
 TEST_ENVIRONMENT=false
+SNAPSHOT=no
 ES_BEATS?=./vendor/github.com/elastic/beats
 # GOPACKAGES=$(shell glide novendor)
 GOPACKAGES=$(shell go list ${BEAT_DIR}/... | grep -v /vendor/)
