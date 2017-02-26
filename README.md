@@ -144,13 +144,13 @@ This will fetch and create all images required for the build process. The hole p
 # Releases and Downloads
 
 ## 4.0.1 (WiP) [Download](https://github.com/christiangalsterer/httpbeat/releases/tag/4.0.1)
-[![Github Releases (by Release)](https://img.shields.io/github/downloads/christiangalsterer/httpbeat/3.3.0/total.svg)](https://github.com/christiangalsterer/httpbeat/releases/tag/4.0.1)
+[![Github Releases (by Release)](https://img.shields.io/github/downloads/christiangalsterer/httpbeat/4.0.1/total.svg)](https://github.com/christiangalsterer/httpbeat/releases/tag/4.0.1)
 
 Bugfix release containing the following changes:
 * Set correct version in package names and package metadata
 
 ## 4.0.0 (2017-02-19) [Download](https://github.com/christiangalsterer/httpbeat/releases/tag/4.0.0)
-[![Github Releases (by Release)](https://img.shields.io/github/downloads/christiangalsterer/httpbeat/3.3.0/total.svg)](https://github.com/christiangalsterer/httpbeat/releases/tag/4.0.0)
+[![Github Releases (by Release)](https://img.shields.io/github/downloads/christiangalsterer/httpbeat/4.0.0/total.svg)](https://github.com/christiangalsterer/httpbeat/releases/tag/4.0.0)
 
 Feature and bugfix release containing the following **breaking** changes:
 * Renamed configuration parameter `urls` to `hosts`. Please update your configuration accordingly.
@@ -167,7 +167,7 @@ Feature release containing the following changes:
 * Allow to specify the replacement character for `json_dot_mode : replace`, default replacement character is `_`
 
 ## 3.2.0 (2017-01-14) [Download](https://github.com/christiangalsterer/httpbeat/releases/tag/3.2.0)
-[![Github Releases (by Release)](https://img.shields.io/github/downloads/christiangalsterer/httpbeat/3.3.0/total.svg)](https://github.com/christiangalsterer/httpbeat/releases/tag/3.2.0)
+[![Github Releases (by Release)](https://img.shields.io/github/downloads/christiangalsterer/httpbeat/3.2.0/total.svg)](https://github.com/christiangalsterer/httpbeat/releases/tag/3.2.0)
 
 
 Feature and bugfix release containing the following changes:
@@ -178,7 +178,7 @@ Feature and bugfix release containing the following changes:
 * Fix: [Proper support for ssl.verification_mode](https://github.com/christiangalsterer/httpbeat/issues/14)
 
 ## 3.1.1 (2017-01-07) [Download](https://github.com/christiangalsterer/httpbeat/releases/tag/3.1.1)
-[![Github Releases (by Release)](https://img.shields.io/github/downloads/christiangalsterer/httpbeat/3.3.0/total.svg)](https://github.com/christiangalsterer/httpbeat/releases/tag/3.1.1)
+[![Github Releases (by Release)](https://img.shields.io/github/downloads/christiangalsterer/httpbeat/3.1.1/total.svg)](https://github.com/christiangalsterer/httpbeat/releases/tag/3.1.1)
 
 Starting with this release pre-compiled binaries for different operating systems are available under the respective tag in the github project. 
 
