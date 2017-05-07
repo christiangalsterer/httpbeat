@@ -29,7 +29,7 @@ Ensure that this folder is at the following location:
 # Installation
 
 ## Download
-Pre-compiled binaries for different operating systems are available for [download](https://github.com/christiangalsterer/httpbeat/releases/tag/3.2.0).
+Pre-compiled binaries for different operating systems are available for [download](https://github.com/christiangalsterer/httpbeat/releases/tag/4.0.0).
 
 ## Installation
 Install the package for your operation system by running the respective package manager or unzipping the package.
