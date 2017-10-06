@@ -4,12 +4,14 @@ include::../../libbeat/docs/version.asciidoc[]
 
 :libbeat: http://www.elastic.co/guide/en/beats/libbeat/{doc-branch}
 :filebeat: http://www.elastic.co/guide/en/beats/filebeat/{doc-branch}
+:logstashdoc: https://www.elastic.co/guide/en/logstash/{doc-branch}
 :elasticsearch: https://www.elastic.co/guide/en/elasticsearch/reference/{doc-branch}
 :securitydoc: https://www.elastic.co/guide/en/x-pack/5.2
 :version: {stack-version}
 :beatname_lc: metricbeat
 :beatname_uc: Metricbeat
 :security: X-Pack Security
+:dockerimage: docker.elastic.co/beats/{beatname_lc}:{version}
 
 include::./overview.asciidoc[]
 
@@ -19,11 +21,13 @@ include::./command-line.asciidoc[]
 
 include::../../libbeat/docs/shared-directory-layout.asciidoc[]
 
+include::../../libbeat/docs/repositories.asciidoc[]
+
+include::./running-on-docker.asciidoc[]
+
 include::./upgrading.asciidoc[]
 
 include::./how-metricbeat-works.asciidoc[]
-
-include::./metricbeat-in-a-container.asciidoc[]
 
 include::./configuring-howto.asciidoc[]
 
@@ -33,8 +37,10 @@ include::../../libbeat/docs/shared-config-ingest.asciidoc[]
 
 include::./configuring-logstash.asciidoc[]
 
+:standalone:
 include::../../libbeat/docs/shared-env-vars.asciidoc[]
 
+:standalone:
 :allplatforms:
 include::../../libbeat/docs/yaml.asciidoc[]
 

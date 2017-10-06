@@ -7,6 +7,7 @@ include::../../libbeat/docs/version.asciidoc[]
 :metricbeat: http://www.elastic.co/guide/en/beats/metricbeat/{doc-branch}
 :filebeat: http://www.elastic.co/guide/en/beats/filebeat/{doc-branch}
 :winlogbeat: http://www.elastic.co/guide/en/beats/winlogbeat/{doc-branch}
+:logstashdoc: https://www.elastic.co/guide/en/logstash/{doc-branch}
 :elasticsearch: https://www.elastic.co/guide/en/elasticsearch/reference/{doc-branch}
 :securitydoc: https://www.elastic.co/guide/en/x-pack/5.2
 :downloads: https://artifacts.elastic.co/downloads/beats
@@ -14,6 +15,7 @@ include::../../libbeat/docs/version.asciidoc[]
 :beatname_lc: heartbeat
 :beatname_uc: Heartbeat
 :security: X-Pack Security
+:dockerimage: docker.elastic.co/beats/{beatname_lc}:{version}
 
 include::./overview.asciidoc[]
 
@@ -22,6 +24,10 @@ include::./getting-started.asciidoc[]
 include::./command-line.asciidoc[]
 
 include::../../libbeat/docs/shared-directory-layout.asciidoc[]
+
+include::../../libbeat/docs/repositories.asciidoc[]
+
+include::./running-on-docker.asciidoc[]
 
 //
 //include::./upgrading.asciidoc[]
@@ -38,8 +44,10 @@ include::../../libbeat/docs/shared-config-ingest.asciidoc[]
 //points to shared topic because configuring-logstash.asciidoc is just a wrapper
 include::./configuring-logstash.asciidoc[]
 
+:standalone:
 include::../../libbeat/docs/shared-env-vars.asciidoc[]
 
+:standalone:
 :allplatforms:
 include::../../libbeat/docs/yaml.asciidoc[]
 
@@ -53,5 +61,5 @@ include::./troubleshooting.asciidoc[]
 
 include::./faq.asciidoc[]
 
-// 
+//
 //include::./heartbeat-devguide.asciidoc[]

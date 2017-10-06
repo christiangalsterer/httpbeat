@@ -1,5 +1,5 @@
 [[configuration-heartbeat-options]]
-=== Heartbeat Configuration
+=== Heartbeat
 
 The `heartbeat` section of the +heartbeat.yml+ config file specifies the
 list of `monitors` that Heartbeat uses to check your remote hosts to
@@ -451,6 +451,8 @@ include::../../../../libbeat/docs/generalconfig.asciidoc[]
 include::../../../../libbeat/docs/outputconfig.asciidoc[]
 
 include::../../../../libbeat/docs/shared-path-config.asciidoc[]
+
+include::../../../../libbeat/docs/dashboardsconfig.asciidoc[]
 
 include::../../../../libbeat/docs/loggingconfig.asciidoc[]
 

@@ -374,23 +374,23 @@ func TestMergeChildArray(t *testing.T) {
 }
 
 func TestMergeSquash(t *testing.T) {
-	type subType struct{ B bool }
-	type subInterface struct{ B interface{} }
+	type SubType struct{ B bool }
+	type SubInterface struct{ B interface{} }
 
 	tests := []interface{}{
 		&struct {
-			C subType `config:",squash"`
-		}{subType{true}},
+			C SubType `config:",squash"`
+		}{SubType{true}},
 		&struct {
-			subType `config:",squash"`
-		}{subType{true}},
+			SubType `config:",squash"`
+		}{SubType{true}},
 
 		&struct {
-			C subInterface `config:",squash"`
-		}{subInterface{true}},
+			C SubInterface `config:",squash"`
+		}{SubInterface{true}},
 		&struct {
-			subInterface `config:",squash"`
-		}{subInterface{true}},
+			SubInterface `config:",squash"`
+		}{SubInterface{true}},
 
 		&struct {
 			C map[string]bool `config:",squash"`
@@ -402,9 +402,6 @@ func TestMergeSquash(t *testing.T) {
 
 		&struct {
 			C node `config:",squash"`
-		}{node{"b": true}},
-		&struct {
-			node `config:",squash"`
 		}{node{"b": true}},
 	}
 
@@ -722,6 +719,23 @@ func TestMergeRegex(t *testing.T) {
 }
 
 func TestMergeNil(t *testing.T) {
+	load := func(v interface{}) *Config {
+		if v == nil {
+			return nil
+		}
+
+		cfg, err := NewFrom(v, PathSep("."))
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		return cfg
+	}
+
+	loadC := func(v interface{}) *C {
+		return fromConfig(load(v))
+	}
+
 	tests := []struct {
 		name        string
 		nilCfg, cfg interface{}
@@ -789,12 +803,112 @@ func TestMergeNil(t *testing.T) {
 			},
 			"a.0.i",
 		},
+
+		{
+			"Struct and map with nil sub-config",
+			&struct {
+				Cfg *Config `config:"cfg"`
+			}{load(nil)},
+			map[string]interface{}{
+				"cfg": map[string]interface{}{
+					"i": 42,
+				},
+			},
+			"cfg.i",
+		},
+		{
+			"Struct and map with empty sub-config",
+			&struct {
+				Cfg *Config `config:"cfg"`
+			}{New()},
+			map[string]interface{}{
+				"cfg": map[string]interface{}{
+					"i": 42,
+				},
+			},
+			"cfg.i",
+		},
+		{
+			"struct and struct with nil sub-config",
+			&struct {
+				Cfg *Config `config:"cfg"`
+			}{nil},
+			&struct {
+				Cfg *Config `config:"cfg"`
+			}{load(map[string]interface{}{
+				"i": 42,
+			})},
+			"cfg.i",
+		},
+		{
+			"struct and struct with empty sub-config",
+			&struct {
+				Cfg *Config `config:"cfg"`
+			}{New()},
+			&struct {
+				Cfg *Config `config:"cfg"`
+			}{load(map[string]interface{}{
+				"i": 42,
+			})},
+			"cfg.i",
+		},
+
+		{
+			"Struct and map with nil sub-config (custom config)",
+			&struct {
+				Cfg *C `config:"cfg"`
+			}{nil},
+			map[string]interface{}{
+				"cfg": map[string]interface{}{
+					"i": 42,
+				},
+			},
+			"cfg.i",
+		},
+		{
+			"Struct and map with empty sub-config (custom config)",
+			&struct {
+				Cfg *C `config:"cfg"`
+			}{newC()},
+			map[string]interface{}{
+				"cfg": map[string]interface{}{
+					"i": 42,
+				},
+			},
+			"cfg.i",
+		},
+		{
+			"struct and struct with nil sub-config (custom config)",
+			&struct {
+				Cfg *C `config:"cfg"`
+			}{nil},
+			&struct {
+				Cfg *C `config:"cfg"`
+			}{loadC(map[string]interface{}{
+				"i": 42,
+			})},
+			"cfg.i",
+		},
+		{
+			"struct and struct with empty sub-config (custom config)",
+			&struct {
+				Cfg *C `config:"cfg"`
+			}{newC()},
+			&struct {
+				Cfg *C `config:"cfg"`
+			}{loadC(map[string]interface{}{
+				"i": 42,
+			})},
+			"cfg.i",
+		},
 	}
 
 	opts := []Option{PathSep(".")}
 	for i, test := range tests {
+		cfg := New()
+
 		t.Logf("run test (%v): %v", i, test.name)
-		cfg, err := NewFrom(test.nilCfg, opts...)
+		err := cfg.Merge(test.nilCfg, opts...)
 		if err != nil {
 			t.Fatal(err)
 		}

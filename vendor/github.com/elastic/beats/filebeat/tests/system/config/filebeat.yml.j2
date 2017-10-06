@@ -28,6 +28,7 @@ filebeat.prospectors:
   clean_removed: {{clean_removed}}
   harvester_limit: {{harvester_limit | default(0) }}
   symlinks: {{symlinks}}
+  pipeline: {{pipeline}}
 
   {% if fields %}
   fields:
@@ -69,6 +70,9 @@ filebeat.prospectors:
     max_lines: {{ max_lines|default(500) }}
   {% endif %}
 {% endif %}
+{% if prospector_raw %}
+{{prospector_raw}}
+{% endif %}
 
 filebeat.spool_size:
 filebeat.shutdown_timeout: {{ shutdown_timeout|default(0) }}
@@ -78,6 +82,15 @@ filebeat.registry_file: {{ beat.working_dir + '/' }}{{ registryFile|default("reg
 {%endif%}
 filebeat.publish_async: {{publish_async}}
 
+{% if reload or reload_path -%}
+filebeat.config.prospectors:
+  enabled: true
+  path: {{ reload_path }}
+  {% if reload  -%}
+  reload.period: 1s
+  reload.enabled: true
+  {% endif -%}
+{% endif -%}
 
 #================================ General =====================================
 
@@ -132,11 +145,18 @@ processors:
 # Configure what outputs to use when sending the data collected by the beat.
 # Multiple outputs may be used.
 
-#------------------------------- File output ----------------------------------
-{%- if logstash %}
+{%- if elasticsearch %}
+#------------------------------- Elasticsearch output ----------------------------
+output.elasticsearch:
+  hosts: ["{{ elasticsearch.host }}"]
+  pipeline: {{elasticsearch.pipeline}}
+  index: {{elasticsearch.index}}
+{%- elif logstash %}
+#------------------------------- Logstash output ---------------------------------
 output.logstash:
   hosts: ["{{ logstash.host }}"]
 {%- else %}
+#------------------------------- File output ----------------------------------
 output.file:
   path: {{ output_file_path|default(beat.working_dir + "/output") }}
   filename: "{{ output_file_filename|default("filebeat") }}"

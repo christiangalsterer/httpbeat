@@ -124,6 +124,71 @@ func TestStructMergeUnpackTyped(t *testing.T) {
 	}
 }
 
+func TestIgnoreStructFields(t *testing.T) {
+	tests := []struct {
+		name   string
+		config interface{}
+	}{
+		{
+			"ignore private field",
+			&struct {
+				OK     string `config:"ok"`
+				ignore string
+			}{
+				ignore: "should not be present",
+			},
+		},
+		{
+			"honor ignore option",
+			&struct {
+				OK     string `config:"ok"`
+				Ignore string `config:",ignore"`
+			}{
+				Ignore: "should not be present",
+			},
+		},
+	}
+
+	for i, test := range tests {
+		t.Logf("run test (%v): %v", i, test.name)
+
+		testConfig, err := NewFrom(map[string]interface{}{
+			"ignored": "test",
+			"ok":      "ok",
+		})
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		err = testConfig.Unpack(test.config)
+		if err != nil {
+			t.Error(err)
+			continue
+		}
+
+		t.Logf("after unpack: %#v", test.config)
+
+		tmp, err := NewFrom(test.config)
+		if err != nil {
+			t.Error(err)
+			continue
+		}
+
+		actual := map[string]interface{}{}
+		if err := tmp.Unpack(&actual); err != nil {
+			t.Error(err)
+			continue
+		}
+
+		t.Logf("reconstructed: %v", actual)
+
+		assert.Equal(t, "ok", actual["ok"])
+		result, exists := actual["ignore"]
+		assert.Equal(t, nil, result)
+		assert.False(t, exists)
+	}
+}
+
 func resolveTestEnv(e testEnv) Option {
 	fail := func(name string) (string, error) {
 		return "", fmt.Errorf("empty environment variable %v", name)

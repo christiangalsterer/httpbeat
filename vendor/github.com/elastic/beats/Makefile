@@ -11,7 +11,7 @@ SNAPSHOT?=yes
 .PHONY: testsuite
 testsuite:
 	$(foreach var,$(PROJECTS),$(MAKE) -C $(var) testsuite || exit 1;)
-	#$(MAKE) -C generate test
+	#$(MAKE) -C generator test
 
 stop-environments:
 	$(foreach var,$(PROJECTS_ENV),$(MAKE) -C $(var) stop-environment || exit 0;)
@@ -40,25 +40,24 @@ coverage-report:
 
 .PHONY: update
 update:
-	$(MAKE) -C libbeat collect
-	$(foreach var,$(BEATS),$(MAKE) -C $(var) update || exit 1;)
+	$(foreach var,$(PROJECTS),$(MAKE) -C $(var) update || exit 1;)
 
 .PHONY: clean
 clean:
 	rm -rf build
 	$(foreach var,$(PROJECTS),$(MAKE) -C $(var) clean || exit 1;)
-	$(MAKE) -C generate clean
+	$(MAKE) -C generator clean
 
 # Cleans up the vendor directory from unnecessary files
 # This should always be run after updating the dependencies
 .PHONY: clean-vendor
 clean-vendor:
-	sh scripts/clean_vendor.sh
+	sh script/clean_vendor.sh
 
 .PHONY: check
 check:
 	$(foreach var,$(PROJECTS),$(MAKE) -C $(var) check || exit 1;)
-	# Validate that all updates were commited
+	# Validate that all updates were committed
 	$(MAKE) update
 	git update-index --refresh
 	git diff-index --exit-code HEAD --
@@ -96,6 +95,8 @@ package: update beats-dashboards
 	mkdir -p build/upload/
 	$(foreach var,$(BEATS),cp -r $(var)/build/upload/ build/upload/$(var)  || exit 1;)
 	cp -r build/dashboards-upload build/upload/dashboards
+	# Run tests on the generated packages.
+	go test ./dev-tools/package_test.go -files "${shell pwd}/build/upload/*/*"
 
 # Upload nightly builds to S3
 .PHONY: upload-nightlies-s3
@@ -115,7 +116,5 @@ upload-release:
 	aws s3 cp --recursive --acl public-read build/upload s3://download.elasticsearch.org/beats/
 
 .PHONY: notice
-notice: 
+notice:
 	python dev-tools/generate_notice.py .
-
-

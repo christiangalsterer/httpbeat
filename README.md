@@ -4,10 +4,17 @@
 [![license](https://img.shields.io/github/license/christiangalsterer/httpbeat.svg)](https://github.com/christiangalsterer/httpbeat)
 [![Github All Releases](https://img.shields.io/github/downloads/christiangalsterer/httpbeat/total.svg)](https://github.com/christiangalsterer/httpbeat)
 
-![Elastic Beats 5.2.1](https://img.shields.io/badge/Elastic%20Beats-v5.2.1-blue.svg)
-![Golang 1.7.4](https://img.shields.io/badge/Golang-v1.7.4-blue.svg)
+![Elastic Beats 5.6.2](https://img.shields.io/badge/Elastic%20Beats-v5.6.2-blue.svg)
+![Golang 1.9](https://img.shields.io/badge/Golang-v1.9-blue.svg)
 
 # Httpbeat
+
+> I'm happy to announce that Httpbeat will become a core feature of the Beats framework 6.0 with the introduction of the [Http module](https://www.elastic.co/guide/en/beats/metricbeat/master/metricbeat-module-http.html) of [Metricbeat](https://www.elastic.co/guide/en/beats/metricbeat/master/index.html).
+
+> I would like to give special thanks to [Nicolas Ruflin](https://github.com/ruflin) for his support during the migration of the Httpbeat into the new [Http module](https://www.elastic.co/guide/en/beats/metricbeat/master/metricbeat-module-http.html).
+
+> I will continue the support for Httpbeat for Beats 5.x, but all users of Beats 6.0 and newer versions are encouraged to migrate to the [Http module](https://www.elastic.co/guide/en/beats/metricbeat/master/metricbeat-module-http.html) of [Metricbeat](https://www.elastic.co/guide/en/beats/metricbeat/master/index.html).
+
 
 Welcome to Httpbeat.
 
@@ -47,8 +54,8 @@ Where supported Httpbeat can be started also using the respetive service scripts
 
 ### Requirements
 
-* [Golang](https://golang.org/dl/) 1.7.4
-* [Glide](https://github.com/Masterminds/glide) >= 0.11.0
+* [Golang](https://golang.org/dl/) 1.9
+* [Glide](https://github.com/Masterminds/glide) >= 0.13.0
 
 ### Build
 
@@ -143,10 +150,11 @@ This will fetch and create all images required for the build process. The hole p
 
 # Releases and Downloads
 
-## 4.0.1 (WiP) [Download](https://github.com/christiangalsterer/httpbeat/releases/tag/4.0.1)
-[![Github Releases (by Release)](https://img.shields.io/github/downloads/christiangalsterer/httpbeat/4.0.1/total.svg)](https://github.com/christiangalsterer/httpbeat/releases/tag/4.0.1)
+## 4.1.0 (WiP) [Download](https://github.com/christiangalsterer/httpbeat/releases/tag/4.1.0)
+[![Github Releases (by Release)](https://img.shields.io/github/downloads/christiangalsterer/httpbeat/4.1.0/total.svg)](https://github.com/christiangalsterer/httpbeat/releases/tag/4.1.0)
 
-Bugfix release containing the following changes:
+Feature and Bugfix release containing the following changes:
+* Update to beats v5.6.2
 * Set correct version in package names and package metadata
 
 ## 4.0.0 (2017-02-19) [Download](https://github.com/christiangalsterer/httpbeat/releases/tag/4.0.0)
@@ -180,7 +188,7 @@ Feature and bugfix release containing the following changes:
 ## 3.1.1 (2017-01-07) [Download](https://github.com/christiangalsterer/httpbeat/releases/tag/3.1.1)
 [![Github Releases (by Release)](https://img.shields.io/github/downloads/christiangalsterer/httpbeat/3.1.1/total.svg)](https://github.com/christiangalsterer/httpbeat/releases/tag/3.1.1)
 
-Starting with this release pre-compiled binaries for different operating systems are available under the respective tag in the github project. 
+Starting with this release pre-compiled binaries for different operating systems are available under the respective tag in the github project.
 
 Bugfix release containing the following changes:
 * Move files into correct place to allow correct bulding with `make package`
@@ -307,6 +315,6 @@ To apply the Httpbeat template:
 ```
 curl -XPUT 'http://localhost:9200/_template/httpbeat' -d@httpbeat.template.json
 ```
-    
+
 # Contribution
 All sorts of contributions are welcome. Please create a pull request and/or issue.

@@ -8,6 +8,7 @@ import unittest
 Tests that Filebeat shuts down cleanly.
 """
 
+
 class Test(BaseTest):
 
     def test_shutdown(self):
@@ -21,7 +22,7 @@ class Test(BaseTest):
             path=os.path.abspath(self.working_dir) + "/log/*",
             ignore_older="1h"
         )
-        for i in range(1,5):
+        for i in range(1, 5):
             proc = self.start_beat(logging_args=["-e", "-v"])
             time.sleep(.5)
             proc.check_kill_and_wait()
@@ -113,7 +114,7 @@ class Test(BaseTest):
 
         iterations = 100
         for n in range(0, iterations):
-            file.write("entry " + str(n+1))
+            file.write("entry " + str(n + 1))
             file.write("\n")
 
         file.close()
@@ -145,3 +146,27 @@ class Test(BaseTest):
         self.copy_files(["logs/nasa-50k.log"],
                         source_dir="../files",
                         target_dir="log")
+
+    def test_stopping_empty_path(self):
+        """
+        Test filebeat stops properly when 1 prospector has an invalid config.
+        """
+
+        prospector_raw = """
+- input_type: log
+  paths: []
+"""
+
+        self.render_config_template(
+            path=os.path.abspath(self.working_dir) + "/log/*",
+            prospector_raw=prospector_raw,
+        )
+        filebeat = self.start_beat()
+        time.sleep(2)
+
+        # Wait until first flush
+        self.wait_until(
+            lambda: self.log_contains_count("No paths were defined for prospector") >= 1,
+            max_timeout=5)
+
+        filebeat.check_wait(exit_code=1)

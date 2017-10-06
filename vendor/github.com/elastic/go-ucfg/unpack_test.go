@@ -14,12 +14,13 @@ type stUnpackable struct {
 type primUnpackable int
 
 type (
-	unpackBool   struct{ b bool }
-	unpackInt    struct{ i int }
-	unpackUint   struct{ u int }
-	unpackFloat  struct{ f float64 }
-	unpackString struct{ s string }
-	unpackConfig struct{ c *Config }
+	unpackBool    struct{ b bool }
+	unpackInt     struct{ i int }
+	unpackUint    struct{ u int }
+	unpackFloat   struct{ f float64 }
+	unpackString  struct{ s string }
+	unpackConfig  struct{ c *Config }
+	unpackRebrand struct{ c *Config }
 )
 
 func (u *unpackBool) Unpack(b bool) error      { u.b = b; return nil }
@@ -28,6 +29,7 @@ func (u *unpackUint) Unpack(v uint64) error    { u.u = int(v); return nil }
 func (u *unpackFloat) Unpack(f float64) error  { u.f = f; return nil }
 func (u *unpackString) Unpack(s string) error  { u.s = s; return nil }
 func (u *unpackConfig) Unpack(c *Config) error { u.c = c; return nil }
+func (u *unpackRebrand) Unpack(c *C) error     { u.c = c.asConfig(); return nil }
 
 func (s *stUnpackable) Unpack(v interface{}) error {
 	i, err := unpackI(v)
@@ -107,9 +109,15 @@ func TestReifyUnpackers(t *testing.T) {
 		F unpackFloat
 		S unpackString
 		C unpackConfig
+		R unpackRebrand
 	}{}
 
 	sub, _ := NewFrom(map[string]interface{}{"v": 1})
+	expectedSub := map[string]interface{}{}
+	if err := sub.Unpack(&expectedSub); err != nil {
+		t.Fatal(err)
+	}
+
 	configs := []map[string]interface{}{
 		{"b": true},
 		{"i": -42},
@@ -117,6 +125,7 @@ func TestReifyUnpackers(t *testing.T) {
 		{"f": 3.14},
 		{"s": "string"},
 		{"c": sub},
+		{"r": sub},
 	}
 
 	// apply configurations
@@ -137,7 +146,17 @@ func TestReifyUnpackers(t *testing.T) {
 	assert.Equal(t, 23, to.U.u)
 	assert.Equal(t, 3.14, to.F.f)
 	assert.Equal(t, "string", to.S.s)
-	assert.Equal(t, sub, to.C.c)
+
+	assertSubConfig := func(c *Config) {
+		actual := map[string]interface{}{}
+		if err := sub.Unpack(&actual); err != nil {
+			t.Error(err)
+			return
+		}
+		assert.Equal(t, expectedSub, actual)
+	}
+	assertSubConfig(to.C.c)
+	assertSubConfig(to.R.c)
 }
 
 func TestReifyUnpackersPtr(t *testing.T) {
@@ -148,9 +167,15 @@ func TestReifyUnpackersPtr(t *testing.T) {
 		F *unpackFloat
 		S *unpackString
 		C *unpackConfig
+		R *unpackRebrand
 	}{}
 
 	sub, _ := NewFrom(map[string]interface{}{"v": 1})
+	expectedSub := map[string]interface{}{}
+	if err := sub.Unpack(&expectedSub); err != nil {
+		t.Fatal(err)
+	}
+
 	configs := []map[string]interface{}{
 		{"b": true},
 		{"i": -42},
@@ -158,6 +183,7 @@ func TestReifyUnpackersPtr(t *testing.T) {
 		{"f": 3.14},
 		{"s": "string"},
 		{"c": sub},
+		{"r": sub},
 	}
 
 	// apply configurations
@@ -178,5 +204,15 @@ func TestReifyUnpackersPtr(t *testing.T) {
 	assert.Equal(t, 23, to.U.u)
 	assert.Equal(t, 3.14, to.F.f)
 	assert.Equal(t, "string", to.S.s)
-	assert.Equal(t, sub, to.C.c)
+
+	assertSubConfig := func(c *Config) {
+		actual := map[string]interface{}{}
+		if err := sub.Unpack(&actual); err != nil {
+			t.Error(err)
+			return
+		}
+		assert.Equal(t, expectedSub, actual)
+	}
+	assertSubConfig(to.C.c)
+	assertSubConfig(to.R.c)
 }

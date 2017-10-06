@@ -44,8 +44,10 @@ import (
 
 	"github.com/elastic/beats/libbeat/cfgfile"
 	"github.com/elastic/beats/libbeat/common"
+	"github.com/elastic/beats/libbeat/dashboards/dashboards"
 	"github.com/elastic/beats/libbeat/logp"
 	"github.com/elastic/beats/libbeat/paths"
+	"github.com/elastic/beats/libbeat/plugin"
 	"github.com/elastic/beats/libbeat/processors"
 	"github.com/elastic/beats/libbeat/publisher"
 	svc "github.com/elastic/beats/libbeat/service"
@@ -81,6 +83,10 @@ type Beater interface {
 // the beat its run-loop.
 type Creator func(*Beat, *common.Config) (Beater, error)
 
+// SetupMLCallback can be used by the Beat to register MachineLearning configurations
+// for the enabled modules.
+type SetupMLCallback func(*Beat) error
+
 // Beat contains the basic beat data and the publisher client used to publish
 // events.
 type Beat struct {
@@ -90,6 +96,9 @@ type Beat struct {
 	RawConfig *common.Config      // Raw config that can be unpacked to get Beat specific config data.
 	Config    BeatConfig          // Common Beat configuration data.
 	Publisher publisher.Publisher // Publisher
+
+	SetupMLCallback SetupMLCallback // setup callback for ML job configs
+	InSetupCmd      bool            // this is set to true when the `setup` command is called
 }
 
 // BeatConfig struct contains the basic configuration of every beat
@@ -99,10 +108,12 @@ type BeatConfig struct {
 	Logging    logp.Logging              `config:"logging"`
 	Processors processors.PluginConfig   `config:"processors"`
 	Path       paths.Path                `config:"path"`
+	Dashboards *common.Config            `config:"dashboards"`
 }
 
 var (
 	printVersion = flag.Bool("version", false, "Print the version and exit")
+	setup        = flag.Bool("setup", false, "Load the sample Kibana dashboards")
 )
 
 var debugf = logp.MakeDebug("beat")
@@ -155,6 +166,10 @@ func (b *Beat) launch(bt Creator) error {
 		return err
 	}
 
+	if err := plugin.Initialize(); err != nil {
+		return err
+	}
+
 	svc.BeforeRun()
 	defer svc.Cleanup()
 
@@ -204,6 +219,17 @@ func (b *Beat) launch(bt Creator) error {
 
 	svc.HandleSignals(beater.Stop)
 
+	err = b.loadDashboards()
+	if err != nil {
+		return err
+	}
+	if b.SetupMLCallback != nil && *setup {
+		err = b.SetupMLCallback(b)
+		if err != nil {
+			return err
+		}
+	}
+
 	logp.Info("%s start running.", b.Name)
 	defer logp.Info("%s stopped.", b.Name)
 	defer logp.LogTotalExpvars(&b.Config.Logging)
@@ -228,9 +254,13 @@ func (b *Beat) handleFlags() error {
 		return GracefulExit
 	}
 
+	if err := logp.HandleFlags(b.Name); err != nil {
+		return err
+	}
 	if err := cfgfile.HandleFlags(); err != nil {
 		return err
 	}
+
 	return handleFlags(b)
 }
 
@@ -271,6 +301,34 @@ func (b *Beat) configure() error {
 		if maxProcs > 0 {
 			runtime.GOMAXPROCS(maxProcs)
 		}
+	}
+
+	return nil
+}
+
+func (b *Beat) loadDashboards() error {
+	if *setup {
+		// -setup implies dashboards.enabled=true
+		if b.Config.Dashboards == nil {
+			b.Config.Dashboards = common.NewConfig()
+		}
+		err := b.Config.Dashboards.SetBool("enabled", -1, true)
+		if err != nil {
+			return fmt.Errorf("Error setting dashboard.enabled=true: %v", err)
+		}
+	}
+
+	if b.Config.Dashboards != nil && b.Config.Dashboards.Enabled() {
+		esConfig := b.Config.Output["elasticsearch"]
+		if esConfig == nil || !esConfig.Enabled() {
+			return fmt.Errorf("Dashboard loading requested but the Elasticsearch output is not configured/enabled")
+		}
+
+		err := dashboards.ImportDashboards(b.Name, b.Version, nil, esConfig, b.Config.Dashboards)
+		if err != nil {
+			return fmt.Errorf("Error importing Kibana dashboards: %v", err)
+		}
+		logp.Info("Kibana dashboards successfully loaded.")
 	}
 
 	return nil

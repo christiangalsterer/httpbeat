@@ -1,4 +1,4 @@
-FROM golang:1.7.4
+FROM golang:1.7.6
 MAINTAINER Nicolas Ruflin <ruflin@elastic.co>
 
 RUN set -x && \
@@ -12,3 +12,6 @@ ENV METRICBEAT_PATH /go/src/github.com/elastic/beats/metricbeat
 
 RUN mkdir -p $METRICBEAT_PATH/build/coverage
 WORKDIR $METRICBEAT_PATH
+
+# Add healthcheck for docker/healthcheck metricset to check during testing
+HEALTHCHECK CMD exit 0

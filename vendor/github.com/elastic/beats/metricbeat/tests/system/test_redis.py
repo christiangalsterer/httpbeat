@@ -19,6 +19,7 @@ CLIENTS_FIELDS = ["blocked", "biggest_input_buf",
 
 
 class Test(metricbeat.BaseTest):
+
     @unittest.skipUnless(metricbeat.INTEGRATION_TESTS, "integration test")
     @attr('integration')
     def test_info(self):
@@ -34,10 +35,7 @@ class Test(metricbeat.BaseTest):
         proc = self.start_beat()
         self.wait_until(lambda: self.output_lines() > 0)
         proc.check_kill_and_wait()
-
-        # Ensure no errors or warnings exist in the log.
-        log = self.get_log()
-        self.assertNotRegexpMatches(log, "ERR|WARN")
+        self.assert_no_logged_warnings()
 
         output = self.read_output_json()
         self.assertEqual(len(output), 1)
@@ -70,10 +68,7 @@ class Test(metricbeat.BaseTest):
         proc = self.start_beat()
         self.wait_until(lambda: self.output_lines() > 0)
         proc.check_kill_and_wait()
-
-        # Ensure no errors or warnings exist in the log.
-        log = self.get_log()
-        self.assertNotRegexpMatches(log, "ERR|WARN")
+        self.assert_no_logged_warnings()
 
         output = self.read_output_json()
         self.assertEqual(len(output), 1)
@@ -103,10 +98,7 @@ class Test(metricbeat.BaseTest):
         proc = self.start_beat()
         self.wait_until(lambda: self.output_lines() > 0)
         proc.check_kill_and_wait()
-
-        # Ensure no errors or warnings exist in the log.
-        log = self.get_log()
-        self.assertNotRegexpMatches(log, "ERR|WARN")
+        self.assert_no_logged_warnings()
 
         output = self.read_output_json()
         self.assertEqual(len(output), 1)
@@ -114,7 +106,7 @@ class Test(metricbeat.BaseTest):
 
         self.assertItemsEqual(self.de_dot(REDIS_FIELDS), evt.keys())
         redis_info = evt["redis"]["info"]
-        print redis_info
+        print(redis_info)
         self.assertItemsEqual(fields, redis_info.keys())
         self.assertItemsEqual(self.de_dot(CLIENTS_FIELDS), redis_info["clients"].keys())
         self.assertItemsEqual(self.de_dot(CPU_FIELDS), redis_info["cpu"].keys())
@@ -122,4 +114,3 @@ class Test(metricbeat.BaseTest):
     def get_hosts(self):
         return [os.getenv('REDIS_HOST', 'localhost') + ':' +
                 os.getenv('REDIS_PORT', '6379')]
-

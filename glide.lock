@@ -1,5 +1,5 @@
-hash: f300d7ce19d2387595347c5b7ec8169092a982f1f4f3ecf153b8618b5247a714
-updated: 2017-02-18T09:49:02.982245946+01:00
+hash: ebf7447bd48e113d3d7bef2d8d8ab7e52ce030cecf1155cedaecedd5d907feb5
+updated: 2017-10-01T10:32:13.154851725+02:00
 imports:
 - name: github.com/davecgh/go-spew
   version: 5215b55f46b2b919f50a1df0eaa5886afe4e3b3d
@@ -14,60 +14,69 @@ imports:
 - name: github.com/eapache/queue
   version: ded5959c0d4e360646dc9e9908cff48666781367
 - name: github.com/elastic/beats
-  version: e669c2080d02af8dce9e9ae5918c320fef6b8540
+  version: 3e0b7a36227e7dc359b1f999676100c3c42d3898
   subpackages:
   - libbeat/beat
   - libbeat/cfgfile
-  - libbeat/logp
-  - libbeat/publisher
   - libbeat/common
-  - libbeat/outputs
-  - libbeat/outputs/transport
-  - libbeat/paths
-  - libbeat/processors
-  - libbeat/processors/actions
-  - libbeat/processors/add_cloud_metadata
-  - libbeat/service
+  - libbeat/common/dtfmt
+  - libbeat/common/file
+  - libbeat/common/fmtstr
+  - libbeat/common/jsontransform
+  - libbeat/common/match
   - libbeat/common/op
+  - libbeat/common/streambuf
+  - libbeat/dashboards/dashboards
+  - libbeat/logp
+  - libbeat/monitoring
+  - libbeat/monitoring/adapter
+  - libbeat/outputs
+  - libbeat/outputs/codecs/format
+  - libbeat/outputs/codecs/json
   - libbeat/outputs/console
   - libbeat/outputs/elasticsearch
   - libbeat/outputs/fileout
   - libbeat/outputs/kafka
   - libbeat/outputs/logstash
+  - libbeat/outputs/mode
+  - libbeat/outputs/mode/lb
+  - libbeat/outputs/mode/modeutil
+  - libbeat/outputs/mode/single
+  - libbeat/outputs/outil
   - libbeat/outputs/redis
-  - libbeat/common/jsontransform
+  - libbeat/outputs/transport
+  - libbeat/paths
+  - libbeat/plugin
+  - libbeat/processors
+  - libbeat/processors/actions
+  - libbeat/processors/add_cloud_metadata
+  - libbeat/publisher
+  - libbeat/service
+  - libbeat/setup/kibana
   - metricbeat/schema
   - metricbeat/schema/mapstriface
-  - libbeat/common/streambuf
-  - libbeat/outputs/mode
-  - libbeat/outputs/mode/modeutil
-  - libbeat/outputs/outil
-  - libbeat/common/fmtstr
-  - libbeat/outputs/mode/lb
-  - libbeat/outputs/mode/single
-  - libbeat/common/dtfmt
 - name: github.com/elastic/go-lumber
   version: 616041e345fc33c97bc0eb0fa6b388aa07bca3e1
   subpackages:
+  - client/v2
   - lj
   - log
-  - client/v2
+  - protocol/v2
   - server/internal
   - server/v2
-  - protocol/v2
 - name: github.com/elastic/go-ucfg
-  version: b42667b880b6190864107f2cc6d95c070a0ca580
+  version: ec8488a52542c0c51e42e8ea204dcaff400bc644
   subpackages:
   - cfgutil
   - flag
-  - yaml
   - internal/parse
   - json
+  - yaml
 - name: github.com/garyburd/redigo
   version: 8873b2f1995f59d4bcdd2b0dc9858e2cb9bf0c13
   subpackages:
-  - redis
   - internal
+  - redis
 - name: github.com/golang/snappy
   version: d9eb7a3d35ec988b8585d4a0068e462c27d28380
 - name: github.com/joeshaw/multierror
@@ -75,14 +84,16 @@ imports:
 - name: github.com/klauspost/compress
   version: 006acde2c5d283d2f8b8aa03d8f0cd2891c680cf
   subpackages:
-  - zlib
   - flate
+  - zlib
 - name: github.com/klauspost/cpuid
   version: 09cded8978dc9e80714c4d85b0322337b0a1e5e0
 - name: github.com/klauspost/crc32
   version: 19b0b332c9e4516a6370a0456e6182c3b5036720
+- name: github.com/mitchellh/hashstructure
+  version: b098c52ef6beab8cd82bc4a32422cf54b890e8fa
 - name: github.com/moul/http2curl
-  version: 4e24498b31dba4683efb9d35c1c8a91e2eda28c8
+  version: 9ac6cf4d929b2fa8fd2d2e6dec5bb0feb4f4911d
 - name: github.com/nranchev/go-libGeoIP
   version: c78e8bd2dd3599feb21fd30886043979e82fe948
 - name: github.com/parnurzeal/gorequest
@@ -109,17 +120,17 @@ imports:
 - name: golang.org/x/net
   version: d58ca6618b994150e624f6888d871f4709db51a0
   subpackages:
-  - proxy
-  - publicsuffix
   - icmp
   - ipv4
   - ipv6
+  - proxy
+  - publicsuffix
 - name: golang.org/x/sys
   version: 62bee037599929a6e9146f29d10dd5208c43507d
   subpackages:
+  - windows
   - windows/svc
   - windows/svc/debug
-  - windows
 - name: gopkg.in/yaml.v2
   version: a83829b6f1293c91addabc89d0571c246397bbf4
 testImports:
@@ -128,6 +139,6 @@ testImports:
   subpackages:
   - difflib
 - name: github.com/stretchr/testify
-  version: 4d4bfba8f1d1027c4fdbe371823030df51419987
+  version: f390dcf405f7b83c997eac1b06768bb9f44dec18
   subpackages:
   - assert

@@ -1,6 +1,6 @@
-BEATNAME=httpbeat
+BEAT_NAME=httpbeat
 BEAT_DESCRIPTION=Queries arbitrary HTTP endpoints in a regular interval and ships the result to the configured output channel.
-BEAT_DIR=github.com/christiangalsterer/httpbeat
+BEAT_PATH=github.com/christiangalsterer/httpbeat
 SYSTEM_TESTS=false
 TEST_ENVIRONMENT=false
 SNAPSHOT=no
@@ -15,7 +15,7 @@ PREFIX?=.
 # Update dependencies
 .PHONY: getdeps
 getdeps:
-	glide up --strip-vcs --update-vendored
+	glide up
 
 # Initial beat setup
 .PHONY: setup

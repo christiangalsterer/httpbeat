@@ -3,13 +3,17 @@
 package filesystem
 
 import (
+	"path/filepath"
 	"time"
 
 	"github.com/elastic/beats/libbeat/common"
-	"github.com/elastic/beats/libbeat/logp"
 	"github.com/elastic/beats/metricbeat/module/system"
 	sigar "github.com/elastic/gosigar"
 )
+
+type Config struct {
+	IgnoreTypes []string `config:"filesystem.ignore_types"`
+}
 
 type FileSystemStat struct {
 	sigar.FileSystemUsage
@@ -20,12 +24,22 @@ type FileSystemStat struct {
 }
 
 func GetFileSystemList() ([]sigar.FileSystem, error) {
-
 	fss := sigar.FileSystemList{}
-	err := fss.Get()
-	if err != nil {
+	if err := fss.Get(); err != nil {
 		return nil, err
 	}
+
+	// Ignore relative mount points, which are present for example
+	// in /proc/mounts on Linux with network namespaces.
+	filtered := fss.List[:0]
+	for _, fs := range fss.List {
+		if filepath.IsAbs(fs.DirName) {
+			filtered = append(filtered, fs)
+			continue
+		}
+		debugf("Filtering filesystem with relative mountpoint %+v", fs)
+	}
+	fss.List = filtered
 
 	return fss.List, nil
 }
@@ -54,26 +68,6 @@ func AddFileSystemUsedPercentage(f *FileSystemStat) {
 	f.UsedPercent = system.Round(perc, .5, 4)
 }
 
-func CollectFileSystemStats(fss []sigar.FileSystem) []common.MapStr {
-	events := make([]common.MapStr, 0, len(fss))
-	for _, fs := range fss {
-		fsStat, err := GetFileSystemStat(fs)
-		if err != nil {
-			logp.Debug("system", "Skip filesystem %d: %v", fsStat, err)
-			continue
-		}
-		AddFileSystemUsedPercentage(fsStat)
-
-		event := common.MapStr{
-			"@timestamp": common.Time(time.Now()),
-			"type":       "filesystem",
-			"fs":         GetFilesystemEvent(fsStat),
-		}
-		events = append(events, event)
-	}
-	return events
-}
-
 func GetFilesystemEvent(fsStat *FileSystemStat) common.MapStr {
 	return common.MapStr{
 		"device_name": fsStat.DevName,
@@ -90,12 +84,34 @@ func GetFilesystemEvent(fsStat *FileSystemStat) common.MapStr {
 	}
 }
 
-func GetFileSystemStats() ([]common.MapStr, error) {
-	fss, err := GetFileSystemList()
-	if err != nil {
-		logp.Warn("Getting filesystem list: %v", err)
-		return nil, err
-	}
+// Predicate is a function predicate for use with filesystems. It returns true
+// if the argument matches the predicate.
+type Predicate func(*sigar.FileSystem) bool
 
-	return CollectFileSystemStats(fss), nil
+// Filter returns a filtered list of filesystems. The in parameter
+// is used as the backing storage for the returned slice and is therefore
+// modified in this operation.
+func Filter(in []sigar.FileSystem, p Predicate) []sigar.FileSystem {
+	out := in[:0]
+	for _, fs := range in {
+		if p(&fs) {
+			out = append(out, fs)
+		}
+	}
+	return out
+}
+
+// BuildTypeFilter returns a predicate that returns false if the given
+// filesystem has a type that matches one of the ignoreType values.
+func BuildTypeFilter(ignoreType ...string) Predicate {
+	return func(fs *sigar.FileSystem) bool {
+		for _, fsType := range ignoreType {
+			// XXX (andrewkroh): SysTypeName appears to be used for non-Windows
+			// and TypeName is used exclusively for Windows.
+			if fs.SysTypeName == fsType || fs.TypeName == fsType {
+				return false
+			}
+		}
+		return true
+	}
 }

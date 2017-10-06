@@ -2,12 +2,13 @@ package harvester
 
 import (
 	"fmt"
-	"regexp"
+	"sync"
 	"time"
 
 	cfg "github.com/elastic/beats/filebeat/config"
 	"github.com/elastic/beats/filebeat/harvester/reader"
 	"github.com/elastic/beats/libbeat/common"
+	"github.com/elastic/beats/libbeat/common/match"
 
 	"github.com/dustin/go-humanize"
 	"github.com/elastic/beats/libbeat/logp"
@@ -47,12 +48,17 @@ type harvesterConfig struct {
 	CloseEOF             bool                    `config:"close_eof"`
 	CloseTimeout         time.Duration           `config:"close_timeout" validate:"min=0"`
 	ForceCloseFiles      bool                    `config:"force_close_files"`
-	ExcludeLines         []*regexp.Regexp        `config:"exclude_lines"`
-	IncludeLines         []*regexp.Regexp        `config:"include_lines"`
+	ExcludeLines         []match.Matcher         `config:"exclude_lines"`
+	IncludeLines         []match.Matcher         `config:"include_lines"`
 	MaxBytes             int                     `config:"max_bytes" validate:"min=0,nonzero"`
 	Multiline            *reader.MultilineConfig `config:"multiline"`
 	JSON                 *reader.JSONConfig      `config:"json"`
+	Pipeline             string                  `config:"pipeline"`
+	Module               string                  `config:"_module_name"`  // hidden option to set the module name
+	Fileset              string                  `config:"_fileset_name"` // hidden option to set the fileset name
 }
+
+var onceCheck sync.Once
 
 func (config *harvesterConfig) Validate() error {
 
@@ -84,5 +90,10 @@ func (config *harvesterConfig) Validate() error {
 		return fmt.Errorf("When using the JSON decoder and line filtering together, you need to specify a message_key value")
 	}
 
+	if config.DocumentType != "log" {
+		onceCheck.Do(func() {
+			logp.Warn("DEPRECATED: document_type is deprecated. Use fields instead.")
+		})
+	}
 	return nil
 }

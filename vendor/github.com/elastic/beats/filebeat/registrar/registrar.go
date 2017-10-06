@@ -30,7 +30,7 @@ type Registrar struct {
 var (
 	statesUpdate   = expvar.NewInt("registrar.states.update")
 	statesCleanup  = expvar.NewInt("registrar.states.cleanup")
-	statesCurrent  = expvar.NewInt("registar.states.current")
+	statesCurrent  = expvar.NewInt("registrar.states.current")
 	registryWrites = expvar.NewInt("registrar.writes")
 )
 
@@ -57,7 +57,7 @@ func (r *Registrar) Init() error {
 
 	// Create directory if it does not already exist.
 	registryPath := filepath.Dir(r.registryFile)
-	err := os.MkdirAll(registryPath, 0755)
+	err := os.MkdirAll(registryPath, 0750)
 	if err != nil {
 		return fmt.Errorf("Failed to created registry file dir %s: %v", registryPath, err)
 	}
@@ -88,8 +88,8 @@ func (r *Registrar) Init() error {
 }
 
 // GetStates return the registrar states
-func (r *Registrar) GetStates() file.States {
-	return *r.states
+func (r *Registrar) GetStates() []file.State {
+	return r.states.GetStates()
 }
 
 // loadStates fetches the previous reading state from the configure RegistryFile file
@@ -298,7 +298,7 @@ func (r *Registrar) writeRegistry() error {
 	logp.Debug("registrar", "Write registry file: %s", r.registryFile)
 
 	tempfile := r.registryFile + ".new"
-	f, err := os.Create(tempfile)
+	f, err := os.OpenFile(tempfile, os.O_RDWR|os.O_CREATE|os.O_TRUNC|os.O_SYNC, 0600)
 	if err != nil {
 		logp.Err("Failed to create tempfile (%s) for writing: %s", tempfile, err)
 		return err

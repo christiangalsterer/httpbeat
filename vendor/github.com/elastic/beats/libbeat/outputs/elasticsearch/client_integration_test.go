@@ -41,13 +41,15 @@ func TestLoadTemplate(t *testing.T) {
 	assert.Nil(t, err)
 
 	// Load template
-	absPath, err := filepath.Abs("../../tests/files/")
+	absPath, err := filepath.Abs("../../")
 	assert.NotNil(t, absPath)
 	assert.Nil(t, err)
 
-	templatePath := absPath + "/template.json"
+	templatePath := absPath + "/libbeat.template.json"
 	if strings.HasPrefix(client.Connection.version, "2.") {
-		templatePath = absPath + "/template-es2x.json"
+		templatePath = absPath + "/libbeat.template-es2x.json"
+	} else if strings.HasPrefix(client.Connection.version, "6.") {
+		templatePath = absPath + "/libbeat.template-es6x.json"
 	}
 	content, err := readTemplate(templatePath)
 	assert.Nil(t, err)
@@ -62,7 +64,7 @@ func TestLoadTemplate(t *testing.T) {
 	assert.True(t, client.CheckTemplate(templateName))
 
 	// Delete template again to clean up
-	client.request("DELETE", "/_template/"+templateName, "", nil, nil)
+	client.Request("DELETE", "/_template/"+templateName, "", nil, nil)
 
 	// Make sure it was removed
 	assert.False(t, client.CheckTemplate(templateName))
@@ -96,6 +98,8 @@ func TestLoadBeatsTemplate(t *testing.T) {
 
 	beats := []string{
 		"filebeat",
+		"heartbeat",
+		"libbeat",
 		"packetbeat",
 		"metricbeat",
 		"winlogbeat",
@@ -114,6 +118,8 @@ func TestLoadBeatsTemplate(t *testing.T) {
 
 		if strings.HasPrefix(client.Connection.version, "2.") {
 			templatePath = absPath + "/" + beat + ".template-es2x.json"
+		} else if strings.HasPrefix(client.Connection.version, "6.") {
+			templatePath = absPath + "/" + beat + ".template-es6x.json"
 		}
 
 		content, err := readTemplate(templatePath)
@@ -132,7 +138,7 @@ func TestLoadBeatsTemplate(t *testing.T) {
 		assert.True(t, client.CheckTemplate(templateName))
 
 		// Delete template again to clean up
-		client.request("DELETE", "/_template/"+templateName, "", nil, nil)
+		client.Request("DELETE", "/_template/"+templateName, "", nil, nil)
 
 		// Make sure it was removed
 		assert.False(t, client.CheckTemplate(templateName))
@@ -150,15 +156,17 @@ func TestOutputLoadTemplate(t *testing.T) {
 	}
 
 	// delete template if it exists
-	client.request("DELETE", "/_template/libbeat", "", nil, nil)
+	client.Request("DELETE", "/_template/libbeat", "", nil, nil)
 
 	// Make sure template is not yet there
 	assert.False(t, client.CheckTemplate("libbeat"))
 
-	templatePath := "../../../packetbeat/packetbeat.template.json"
+	templatePath := "../../libbeat.template.json"
 
 	if strings.HasPrefix(client.Connection.version, "2.") {
-		templatePath = "../../../packetbeat/packetbeat.template-es2x.json"
+		templatePath = "../../libbeat.template-es2x.json"
+	} else if strings.HasPrefix(client.Connection.version, "6.") {
+		templatePath = "../../libbeat.template-es6x.json"
 	}
 
 	tPath, err := filepath.Abs(templatePath)
@@ -171,6 +179,7 @@ func TestOutputLoadTemplate(t *testing.T) {
 			"name":                "libbeat",
 			"path":                tPath,
 			"versions.2x.enabled": false,
+			"versions.6x.enabled": false,
 		},
 	}
 

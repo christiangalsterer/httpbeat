@@ -2,10 +2,9 @@ package prospector
 
 import (
 	"expvar"
+	"fmt"
 	"os"
 	"path/filepath"
-	"runtime"
-	"strings"
 	"time"
 
 	"github.com/elastic/beats/filebeat/harvester"
@@ -31,19 +30,28 @@ func NewProspectorLog(p *Prospector) (*ProspectorLog, error) {
 		config:     p.config,
 	}
 
+	if len(p.config.Paths) == 0 {
+		return nil, fmt.Errorf("each prospector must have at least one path defined")
+	}
+
 	return prospectorer, nil
 }
 
-// Init sets up the prospector
+// LoadStates loads states into prospector
 // It goes through all states coming from the registry. Only the states which match the glob patterns of
 // the prospector will be loaded and updated. All other states will not be touched.
-func (p *ProspectorLog) Init(states file.States) error {
+func (p *ProspectorLog) LoadStates(states []file.State) error {
 	logp.Debug("prospector", "exclude_files: %s", p.config.ExcludeFiles)
 
-	for _, state := range states.GetStates() {
+	for _, state := range states {
 		// Check if state source belongs to this prospector. If yes, update the state.
 		if p.matchesFile(state.Source) {
 			state.TTL = -1
+
+			// In case a prospector is tried to be started with an unfinished state matching the glob pattern
+			if !state.Finished {
+				return fmt.Errorf("Can only start a prospector when all related states are finished: %+v", state)
+			}
 
 			// Update prospector states and send new states to registry
 			err := p.Prospector.updateState(input.NewEvent(state))
@@ -174,13 +182,14 @@ func (p *ProspectorLog) getFiles() map[string]os.FileInfo {
 
 // matchesFile returns true in case the given filePath is part of this prospector, means matches its glob patterns
 func (p *ProspectorLog) matchesFile(filePath string) bool {
+
+	// Path is cleaned to ensure we always compare clean paths
+	filePath = filepath.Clean(filePath)
+
 	for _, glob := range p.config.Paths {
 
-		if runtime.GOOS == "windows" {
-			// Windows allows / slashes which makes glob patterns with / work
-			// But for match we need paths with \ as only file names are compared and no lookup happens
-			glob = strings.Replace(glob, "/", "\\", -1)
-		}
+		// Glob is cleaned to ensure we always compare clean paths
+		glob = filepath.Clean(glob)
 
 		// Evaluate if glob matches filePath
 		match, err := filepath.Match(glob, filePath)
@@ -203,12 +212,17 @@ func (p *ProspectorLog) scan() {
 	for path, info := range p.getFiles() {
 
 		select {
-		case <-p.Prospector.done:
+		case <-p.Prospector.runDone:
 			logp.Info("Scan aborted because prospector stopped.")
 			return
 		default:
 		}
 
+		var err error
+		path, err = filepath.Abs(path)
+		if err != nil {
+			logp.Err("could not fetch abs path for file %s: %s", path, err)
+		}
 		logp.Debug("prospector", "Check file for harvesting: %s", path)
 
 		// Create new state for comparison
@@ -336,7 +350,7 @@ func (p *ProspectorLog) handleIgnoreOlder(lastState, newState file.State) error 
 // isFileExcluded checks if the given path should be excluded
 func (p *ProspectorLog) isFileExcluded(file string) bool {
 	patterns := p.config.ExcludeFiles
-	return len(patterns) > 0 && harvester.MatchAnyRegexps(patterns, file)
+	return len(patterns) > 0 && harvester.MatchAny(patterns, file)
 }
 
 // isIgnoreOlder checks if the given state reached ignore_older
