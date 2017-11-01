@@ -4,7 +4,7 @@
 [![license](https://img.shields.io/github/license/christiangalsterer/httpbeat.svg)](https://github.com/christiangalsterer/httpbeat)
 [![Github All Releases](https://img.shields.io/github/downloads/christiangalsterer/httpbeat/total.svg)](https://github.com/christiangalsterer/httpbeat)
 
-![Elastic Beats 5.6.2](https://img.shields.io/badge/Elastic%20Beats-v5.6.2-blue.svg)
+![Elastic Beats 5.6.3](https://img.shields.io/badge/Elastic%20Beats-v5.6.3-blue.svg)
 ![Golang 1.9](https://img.shields.io/badge/Golang-v1.9-blue.svg)
 
 # Httpbeat
