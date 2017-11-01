@@ -163,8 +163,9 @@ func (p *Poller) runOneTime() error {
 	var jsonBody map[string]interface{}
 
 	responseEvent := Response{
-		StatusCode: resp.StatusCode,
-		Headers:    p.GetResponseHeader(resp),
+		StatusCode:   resp.StatusCode,
+		StatusPhrase: resp.Status[4:len(resp.Status)],
+		Headers:      p.GetResponseHeader(resp),
 	}
 
 	if outputFormat == "string" {

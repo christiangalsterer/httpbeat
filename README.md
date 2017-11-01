@@ -150,12 +150,15 @@ This will fetch and create all images required for the build process. The hole p
 
 # Releases and Downloads
 
-## 4.1.0 (WiP) [Download](https://github.com/christiangalsterer/httpbeat/releases/tag/4.1.0)
+## 4.1.0 (2017-11-01) [Download](https://github.com/christiangalsterer/httpbeat/releases/tag/4.1.0)
 [![Github Releases (by Release)](https://img.shields.io/github/downloads/christiangalsterer/httpbeat/4.1.0/total.svg)](https://github.com/christiangalsterer/httpbeat/releases/tag/4.1.0)
 
 Feature and Bugfix release containing the following changes:
-* Update to beats v5.6.2
-* Set correct version in package names and package metadata
+* Update to beats v5.6.3
+* [Support returning HTTP status phrase](https://github.com/christiangalsterer/httpbeat/issues/27)
+* Fix: Set correct version in package names and package metadata
+* Fix: [HTTP Status code in event doesn't match documentation](https://github.com/christiangalsterer/httpbeat/issues/26)
+* Fix: [Making the template work for kibana - Use `object` instead of `nested`](https://github.com/christiangalsterer/httpbeat/issues/25)
 
 ## 4.0.0 (2017-02-19) [Download](https://github.com/christiangalsterer/httpbeat/releases/tag/4.0.0)
 [![Github Releases (by Release)](https://img.shields.io/github/downloads/christiangalsterer/httpbeat/4.0.0/total.svg)](https://github.com/christiangalsterer/httpbeat/releases/tag/4.0.0)

@@ -7,7 +7,7 @@
         }
       },
       "_meta": {
-        "version": "5.6.2"
+        "version": "5.6.3"
       },
       "date_detection": false,
       "dynamic_templates": [
@@ -92,7 +92,7 @@
             },
             "headers": {
               "properties": {},
-              "type": "nested"
+              "type": "replace"
             },
             "method": {
               "ignore_above": 1024,
@@ -120,11 +120,16 @@
             },
             "headers": {
               "properties": {},
-              "type": "nested"
+              "type": "replace"
             },
             "jsonBody": {
               "properties": {},
-              "type": "nested"
+              "type": "replace"
+            },
+            "phrase": {
+              "ignore_above": 1024,
+              "index": "not_analyzed",
+              "type": "string"
             }
           }
         },

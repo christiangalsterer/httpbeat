@@ -1,5 +1,5 @@
-hash: ebf7447bd48e113d3d7bef2d8d8ab7e52ce030cecf1155cedaecedd5d907feb5
-updated: 2017-10-01T10:32:13.154851725+02:00
+hash: 9fb1cdf9715828125c6d837c6ab90a643aa3fdaf94eb2ae08d3690d127aa3853
+updated: 2017-10-28T13:36:41.440352783+02:00
 imports:
 - name: github.com/davecgh/go-spew
   version: 5215b55f46b2b919f50a1df0eaa5886afe4e3b3d
@@ -14,7 +14,7 @@ imports:
 - name: github.com/eapache/queue
   version: ded5959c0d4e360646dc9e9908cff48666781367
 - name: github.com/elastic/beats
-  version: 3e0b7a36227e7dc359b1f999676100c3c42d3898
+  version: c34337071a05d7ae4f7397725319e0573c4a3e65
   subpackages:
   - libbeat/beat
   - libbeat/cfgfile

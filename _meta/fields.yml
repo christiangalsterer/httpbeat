@@ -12,11 +12,12 @@
 
         - name: method
           type: keyword
+          example: get
           description: >
             HTTP method used by Httpbeat to call the URL endpoint.
 
         - name: headers
-          type: nested
+          type: object
           description: >
             HTTP headers send to the URL endpoint.
 
@@ -30,11 +31,18 @@
       fields:
         - name: code
           type: keyword
+          example: 404
           description: >
             HTTP status code returned by the URL endpoint.
 
+        - name: phrase
+          type: keyword
+          example: Not found
+          description: >
+            HTTP status phrase (without the HTTP status code) returned by the URL endpoint.
+
         - name: headers
-          type: nested
+          type: object
           description: >
             HTTP response headers send by the URL endpoint.
 
@@ -44,6 +52,6 @@
             HTTP response body returned by the URL endpoint.
 
         - name: jsonBody
-          type: nested
+          type: object
           description: >
             HTTP response body returned by the URL endpoint in JSON format.

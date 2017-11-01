@@ -141,13 +141,15 @@ URL endpoint called by Httpbeat.
 
 type: keyword
 
+example: get
+
 HTTP method used by Httpbeat to call the URL endpoint.
 
 
 [float]
 === request.headers
 
-type: nested
+type: object
 
 HTTP headers send to the URL endpoint.
 
@@ -166,13 +168,25 @@ HTTP request body passed to the URL endpoint.
 
 type: keyword
 
+example: 404
+
 HTTP status code returned by the URL endpoint.
+
+
+[float]
+=== response.phrase
+
+type: keyword
+
+example: Not found
+
+HTTP status phrase (without the HTTP status code) returned by the URL endpoint.
 
 
 [float]
 === response.headers
 
-type: nested
+type: object
 
 HTTP response headers send by the URL endpoint.
 
@@ -188,7 +202,7 @@ HTTP response body returned by the URL endpoint.
 [float]
 === response.jsonBody
 
-type: nested
+type: object
 
 HTTP response body returned by the URL endpoint in JSON format.
 
