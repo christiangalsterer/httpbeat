@@ -92,7 +92,7 @@
             },
             "headers": {
               "properties": {},
-              "type": "replace"
+              "type": "object"
             },
             "method": {
               "ignore_above": 1024,
@@ -120,11 +120,11 @@
             },
             "headers": {
               "properties": {},
-              "type": "replace"
+              "type": "object"
             },
             "jsonBody": {
               "properties": {},
-              "type": "replace"
+              "type": "object"
             },
             "phrase": {
               "ignore_above": 1024,
